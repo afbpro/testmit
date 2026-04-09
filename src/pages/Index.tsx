@@ -150,7 +150,7 @@ export default function Index() {
           <p className="text-sm text-muted-foreground">Sesión activa: {session?.email ?? "usuario"}</p>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
+        <div className="grid gap-2 sm:grid-cols-[1fr_1fr_1fr_1fr_auto]">
           <Button
             variant={activeView === "colega" ? "default" : "outline"}
             onClick={() => setActiveView("colega")}
@@ -165,6 +165,9 @@ export default function Index() {
           </Button>
           <Button variant="outline" onClick={openExternalJira}>
             Abrir Jira real
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/crm")}>
+            CRM
           </Button>
           <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
             <LogOut className="h-4 w-4" />

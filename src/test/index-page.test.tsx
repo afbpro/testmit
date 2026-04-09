@@ -33,14 +33,11 @@ describe("Index login flow", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
-    expect(await screen.findByText(/panel jira y link de colega/i)).toBeInTheDocument();
+    expect(await screen.findByText(/crm de clientes/i)).toBeInTheDocument();
     expect(screen.getByText(/sesión activa: demo@cupertino.com/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /link de colega/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /formulario jira/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /abrir jira real/i })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: /formulario jira/i }));
-    expect(screen.getByRole("button", { name: /ingresar lead/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /guardar cliente/i })).toBeInTheDocument();
+    expect(screen.getByText(/no hay clientes cargados todavía/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/interesado/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/historial/i)).not.toBeInTheDocument();
   });
 });

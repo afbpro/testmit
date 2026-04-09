@@ -21,10 +21,11 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   if (session) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/crm" replace />;
   }
 
-  const redirectTo = (location.state as LocationState | null)?.from || "/jira";
+  const requestedPath = (location.state as LocationState | null)?.from;
+  const redirectTo = requestedPath && requestedPath !== "/" ? requestedPath : "/crm";
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
