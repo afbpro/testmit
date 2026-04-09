@@ -1,7 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Loader2, LogOut, RefreshCw, Users } from "lucide-react";
+import {
+  Building2,
+  CircleDollarSign,
+  Loader2,
+  LogOut,
+  RefreshCw,
+  Search,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,8 +25,14 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import logo from "@/assets/logo.png";
-import { getSession, signOut } from "@/lib/auth";
-import { clientStages, defaultClientStage, type ClientRecord, type ClientStage } from "@/lib/crm";
+import { getStoredSession, signOut } from "@/lib/auth";
+import {
+  clientStages,
+  defaultClientStage,
+  getStageBadgeClass,
+  type ClientRecord,
+  type ClientStage,
+} from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
 
 const initialClientForm = {
@@ -34,12 +49,14 @@ const initialClientForm = {
 
 export default function CRM() {
   const navigate = useNavigate();
-  const session = getSession();
+  const session = getStoredSession();
   const supabaseReady = Boolean(supabase);
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [stageFilter, setStageFilter] = useState("all");
   const [form, setForm] = useState(initialClientForm);
 
   const loadClients = useCallback(async () => {
@@ -74,9 +91,43 @@ export default function CRM() {
     void loadClients();
   }, [loadClients]);
 
-  const handleLogout = () => {
-    signOut();
-    toast("Sesión cerrada");
+  const stageCounts = useMemo(() => {
+    return clientStages.reduce<Record<string, number>>((counts, stage) => {
+      counts[stage] = clients.filter((client) => client.stage === stage).length;
+      return counts;
+    }, {});
+  }, [clients]);
+
+  const pipelineCount = useMemo(() => {
+    return clients.filter((client) =>
+      ["Interesado", "Visita agendada", "Negociando"].includes(client.stage)
+    ).length;
+  }, [clients]);
+
+  const filteredClients = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    return clients.filter((client) => {
+      const matchesStage = stageFilter === "all" || client.stage === stageFilter;
+      const matchesQuery =
+        !normalizedQuery ||
+        [client.name, client.email, client.phone, client.zone, client.property_type]
+          .filter(Boolean)
+          .some((value) => value?.toLowerCase().includes(normalizedQuery));
+
+      return matchesStage && matchesQuery;
+    });
+  }, [clients, searchQuery, stageFilter]);
+
+  const handleLogout = async () => {
+    const result = await signOut();
+
+    if (!result.ok) {
+      toast.error(result.message);
+    } else {
+      toast("Sesión cerrada");
+    }
+
     navigate("/login", { replace: true });
   };
 
@@ -158,57 +209,111 @@ export default function CRM() {
     toast.success("Etapa actualizada");
   };
 
+  const metricCards = [
+    {
+      title: "Total clientes",
+      value: clients.length,
+      helper: `${stageCounts["Interesado"] ?? 0} interesados hoy`,
+      icon: Users,
+    },
+    {
+      title: "En seguimiento",
+      value: pipelineCount,
+      helper: "Clientes que siguen activos",
+      icon: UserPlus,
+    },
+    {
+      title: "Cerrados",
+      value: stageCounts.Cerrado ?? 0,
+      helper: "Operaciones finalizadas",
+      icon: CircleDollarSign,
+    },
+    {
+      title: "Descartados",
+      value: stageCounts.Descartado ?? 0,
+      helper: "Sin continuidad",
+      icon: Building2,
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-zinc-800 bg-black py-4 md:py-5 shadow-sm">
-        <div className="mx-auto flex max-w-2xl justify-center px-4">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
+      <header className="border-b border-white/10 bg-black/75 py-5 md:py-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-2 px-4 text-center">
           <img
             src={logo}
             alt="Cupertino Negocios Inmobiliarios"
-            className="h-20 md:h-24 w-auto max-w-full object-contain"
+            className="h-20 md:h-24 w-auto max-w-full object-contain drop-shadow-[0_10px_30px_rgba(255,255,255,0.05)]"
           />
+          <p className="text-[10px] uppercase tracking-[0.34em] text-zinc-500">Negocios Inmobiliarios</p>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:py-7 space-y-5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">CRM de clientes</h1>
-            <p className="text-sm text-muted-foreground">
-              Sesión activa: {session?.email ?? "usuario"}
-            </p>
-          </div>
+      <main className="mx-auto max-w-7xl px-4 py-6 md:py-7 space-y-5">
+        <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+          <CardContent className="p-6 md:p-7">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+              <div className="space-y-3">
+                <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
+                  Cupertino CRM
+                </Badge>
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM de clientes</h1>
+                  <p className="mt-1 text-sm text-zinc-300">
+                    Gestioná leads, seguimiento comercial y oportunidades desde un solo lugar.
+                  </p>
+                </div>
+                <p className="text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
+              </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => navigate("/jira")}>
-              Ir a Jira
-            </Button>
-            <Button variant="outline" onClick={() => void loadClients()} className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Recargar
-            </Button>
-            <Button variant="outline" onClick={handleLogout} className="gap-2">
-              <LogOut className="h-4 w-4" />
-              Cerrar sesión
-            </Button>
-          </div>
-        </div>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" onClick={() => navigate("/jira")}>Ir a Jira</Button>
+                <Button variant="secondary" onClick={() => void loadClients()} className="gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Recargar
+                </Button>
+                <Button variant="secondary" onClick={handleLogout} className="gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Cerrar sesión
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {errorMessage && (
-          <Card className="border-amber-500/40 bg-amber-50">
-            <CardContent className="p-4 text-sm text-amber-900">
-              {errorMessage}
-            </CardContent>
+          <Card className="border-amber-500/40 bg-amber-50 shadow-sm">
+            <CardContent className="p-4 text-sm text-amber-900">{errorMessage}</CardContent>
           </Card>
         )}
 
-        <div className="grid gap-5 lg:grid-cols-[380px_1fr]">
-          <Card>
+        <div className="premium-fade-up-delay-1 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {metricCards.map(({ title, value, helper, icon: Icon }) => (
+            <Card key={title} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-400">{title}</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+                    <p className="mt-1 text-sm text-zinc-300">{helper}</p>
+                  </div>
+                  <div className="rounded-full bg-white/5 p-2.5 text-zinc-300">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="premium-fade-up-delay-2 grid gap-5 xl:grid-cols-[390px_1fr]">
+          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl xl:sticky xl:top-6">
             <CardContent className="p-6 space-y-5">
               <div className="space-y-1">
-                <h2 className="text-lg font-semibold text-foreground">Agregar cliente</h2>
-                <p className="text-sm text-muted-foreground">
-                  Cargá un lead nuevo y definí su etapa comercial.
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-400">Paso 1</p>
+                <h2 className="text-lg font-semibold text-white">Agregar cliente</h2>
+                <p className="text-sm text-zinc-300">
+                  Completá los datos básicos de la persona y guardala para empezar el seguimiento.
                 </p>
               </div>
 
@@ -257,16 +362,16 @@ export default function CRM() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="client-property-type">Tipo de propiedad</Label>
+                    <Label htmlFor="client-property-type">Qué busca</Label>
                     <Input
                       id="client-property-type"
-                      placeholder="Apartamento, casa..."
+                      placeholder="Apartamento, casa, terreno..."
                       value={form.property_type}
                       onChange={handleChange("property_type")}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="client-budget">Presupuesto</Label>
+                    <Label htmlFor="client-budget">Presupuesto aproximado</Label>
                     <Input
                       id="client-budget"
                       placeholder="USD 200.000"
@@ -277,7 +382,7 @@ export default function CRM() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="client-zone">Zona</Label>
+                  <Label htmlFor="client-zone">Zona de interés</Label>
                   <Input
                     id="client-zone"
                     placeholder="Punta del Este, Maldonado..."
@@ -287,7 +392,7 @@ export default function CRM() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Etapa</Label>
+                  <Label>Estado actual</Label>
                   <Select value={form.stage} onValueChange={handleStageChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccioná una etapa" />
@@ -303,55 +408,123 @@ export default function CRM() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="client-notes">Notas</Label>
+                  <Label htmlFor="client-notes">Notas útiles</Label>
                   <Textarea
                     id="client-notes"
-                    placeholder="Necesidades, comentarios y seguimiento comercial"
+                    placeholder="Ej: busca 2 dormitorios, quiere visitar el fin de semana, prefiere Pocitos"
                     value={form.notes}
                     onChange={handleChange("notes")}
                     className="min-h-24"
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={saving || !supabaseReady}>
+                <Button
+                  type="submit"
+                  className="w-full bg-white text-black hover:bg-zinc-200"
+                  disabled={saving || !supabaseReady}
+                >
                   {saving ? "Guardando..." : "Guardar cliente"}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
             <CardContent className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-muted-foreground" />
-                <h2 className="text-lg font-semibold text-foreground">Clientes</h2>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-zinc-400" />
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Clientes</h2>
+                    <p className="text-sm text-zinc-300">
+                      Buscá una persona, cambiá su estado o abrí su ficha completa.
+                    </p>
+                  </div>
+                </div>
+                <Badge variant="secondary">{filteredClients.length} visibles</Badge>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Buscar por nombre, zona, email o teléfono"
+                    className="border-white/10 bg-black/30 pl-9 text-white placeholder:text-zinc-500"
+                  />
+                </div>
+
+                <Select value={stageFilter} onValueChange={setStageFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todas las etapas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las etapas</SelectItem>
+                    {clientStages.map((stage) => (
+                      <SelectItem key={stage} value={stage}>
+                        {stage}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {loading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 rounded-lg border border-dashed border-white/10 bg-black/20 px-4 py-8 text-sm text-zinc-300">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Cargando clientes...
                 </div>
               ) : clients.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No hay clientes cargados todavía.</p>
+                <div className="rounded-xl border border-dashed border-white/10 bg-black/25 px-6 py-10 text-center">
+                  <Users className="mx-auto mb-3 h-8 w-8 text-zinc-400" />
+                  <p className="font-medium text-white">No hay clientes cargados todavía.</p>
+                  <p className="mt-1 text-sm text-zinc-300">
+                    Completá el formulario de la izquierda y hacé clic en <strong>Guardar cliente</strong>.
+                  </p>
+                </div>
+              ) : filteredClients.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-white/10 bg-black/25 px-6 py-10 text-center">
+                  <Search className="mx-auto mb-3 h-8 w-8 text-zinc-400" />
+                  <p className="font-medium text-white">No encontramos coincidencias.</p>
+                  <p className="mt-1 text-sm text-zinc-300">
+                    Probá con otro nombre, otra zona o cambiá el filtro de estado.
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-3">
-                  {clients.map((client) => (
-                    <div key={client.id} className="rounded-lg border border-border p-4 space-y-3">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <p className="font-medium text-foreground">{client.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {client.email || client.phone || "Sin contacto principal"}
-                          </p>
+                  {filteredClients.map((client) => (
+                    <div
+                      key={client.id}
+                      className="rounded-2xl border border-white/10 bg-black/30 p-4 shadow-sm transition-colors hover:border-white/20 hover:bg-white/[0.03]"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="space-y-2 min-w-0">
+                          <div>
+                            <p className="font-semibold text-white">{client.name}</p>
+                            <p className="text-sm text-zinc-300">
+                              {client.email || client.phone || "Sin contacto principal"}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 text-xs text-zinc-300">
+                            {client.zone && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone}</span>}
+                            {client.property_type && (
+                              <span className="rounded-full bg-white/5 px-2.5 py-1">{client.property_type}</span>
+                            )}
+                            {client.budget && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.budget}</span>}
+                          </div>
                         </div>
-                        <Badge variant="secondary">{client.stage}</Badge>
+
+                        <Badge variant="outline" className={`border ${getStageBadgeClass(client.stage)}`}>
+                          {client.stage}
+                        </Badge>
                       </div>
 
-                      <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
+                      <div className="grid gap-3 pt-3 md:grid-cols-[1fr_auto] md:items-center">
                         <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Etapa" />
+                            <SelectValue placeholder="Estado actual" />
                           </SelectTrigger>
                           <SelectContent>
                             {clientStages.map((stage) => (
@@ -363,7 +536,7 @@ export default function CRM() {
                         </Select>
 
                         <Button variant="outline" onClick={() => navigate(`/crm/client/${client.id}`)}>
-                          Ver detalle
+                          Abrir ficha
                         </Button>
                       </div>
                     </div>

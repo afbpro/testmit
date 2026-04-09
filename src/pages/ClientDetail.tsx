@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, ExternalLink, Loader2, LogOut } from "lucide-react";
+import {
+  ArrowLeft,
+  CircleDollarSign,
+  ExternalLink,
+  Loader2,
+  LogOut,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,10 +25,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import logo from "@/assets/logo.png";
-import { getSession, signOut } from "@/lib/auth";
+import { getStoredSession, signOut } from "@/lib/auth";
 import {
   clientStages,
   defaultClientStage,
+  getStageBadgeClass,
   type ClientRecord,
   type PropertyLinkRecord,
 } from "@/lib/crm";
@@ -27,7 +38,7 @@ import { supabase } from "@/lib/supabaseClient";
 export default function ClientDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const session = getSession();
+  const session = getStoredSession();
   const [client, setClient] = useState<ClientRecord | null>(null);
   const [propertyLinks, setPropertyLinks] = useState<PropertyLinkRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,9 +88,15 @@ export default function ClientDetail() {
     void loadClient();
   }, [loadClient]);
 
-  const handleLogout = () => {
-    signOut();
-    toast("Sesión cerrada");
+  const handleLogout = async () => {
+    const result = await signOut();
+
+    if (!result.ok) {
+      toast.error(result.message);
+    } else {
+      toast("Sesión cerrada");
+    }
+
     navigate("/login", { replace: true });
   };
 
@@ -103,154 +120,237 @@ export default function ClientDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-zinc-800 bg-black py-4 md:py-5 shadow-sm">
-        <div className="mx-auto flex max-w-2xl justify-center px-4">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
+      <header className="border-b border-white/10 bg-black/75 py-5 md:py-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-2 px-4 text-center">
           <img
             src={logo}
             alt="Cupertino Negocios Inmobiliarios"
-            className="h-20 md:h-24 w-auto max-w-full object-contain"
+            className="h-20 md:h-24 w-auto max-w-full object-contain drop-shadow-[0_10px_30px_rgba(255,255,255,0.05)]"
           />
+          <p className="text-[10px] uppercase tracking-[0.34em] text-zinc-500">Negocios Inmobiliarios</p>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6 md:py-7 space-y-5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Detalle de cliente</h1>
-            <p className="text-sm text-muted-foreground">Sesión activa: {session?.email ?? "usuario"}</p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" asChild>
-              <Link to="/crm" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Volver al CRM
-              </Link>
-            </Button>
-            <Button variant="outline" onClick={() => navigate("/jira")}>Ir a Jira</Button>
-            <Button variant="outline" onClick={handleLogout} className="gap-2">
-              <LogOut className="h-4 w-4" />
-              Cerrar sesión
-            </Button>
-          </div>
-        </div>
-
+      <main className="mx-auto max-w-6xl px-4 py-6 md:py-7 space-y-5">
         {loading ? (
-          <Card>
-            <CardContent className="p-6 flex items-center gap-2 text-sm text-muted-foreground">
+          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+            <CardContent className="p-6 flex items-center gap-2 text-sm text-zinc-300">
               <Loader2 className="h-4 w-4 animate-spin" />
               Cargando detalle del cliente...
             </CardContent>
           </Card>
         ) : errorMessage ? (
-          <Card className="border-amber-500/40 bg-amber-50">
+          <Card className="border-amber-500/40 bg-amber-50 shadow-sm">
             <CardContent className="p-4 text-sm text-amber-900">{errorMessage}</CardContent>
           </Card>
         ) : client ? (
-          <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-            <Card>
-              <CardContent className="p-6 space-y-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-xl font-semibold text-foreground">{client.name}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Creado: {new Date(client.created_at).toLocaleString("es-UY")}
+          <>
+            <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+              <CardContent className="p-6 md:p-7 space-y-5">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="space-y-3">
+                    <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
+                      Cliente CRM
+                    </Badge>
+                    <div>
+                      <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{client.name}</h1>
+                      <p className="mt-1 text-sm text-zinc-300">
+                        Acá podés ver sus datos, registrar avances y abrir sus links guardados.
+                      </p>
+                    </div>
+                    <p className="text-xs text-zinc-400">
+                      Sesión activa: {session?.email ?? "usuario"} · Creado: {new Date(client.created_at).toLocaleString("es-UY")}
                     </p>
                   </div>
-                  <Badge variant="secondary">{client.stage}</Badge>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="secondary" asChild>
+                      <Link to="/crm" className="gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Volver al CRM
+                      </Link>
+                    </Button>
+                    <Button variant="secondary" onClick={() => navigate("/jira")}>Ir a Jira</Button>
+                    <Button variant="secondary" onClick={handleLogout} className="gap-2">
+                      <LogOut className="h-4 w-4" />
+                      Cerrar sesión
+                    </Button>
+                  </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Teléfono</p>
-                    <p className="text-sm text-foreground">{client.phone || "-"}</p>
+                <div className="flex flex-wrap gap-2">
+                  {client.phone && (
+                    <Button variant="secondary" asChild>
+                      <a href={`tel:${client.phone}`} className="gap-2">
+                        <Phone className="h-4 w-4" />
+                        Llamar
+                      </a>
+                    </Button>
+                  )}
+                  {client.whatsapp && (
+                    <Button variant="secondary" asChild>
+                      <a
+                        href={`https://wa.me/${client.whatsapp.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="gap-2"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        WhatsApp
+                      </a>
+                    </Button>
+                  )}
+                  {client.email && (
+                    <Button variant="secondary" asChild>
+                      <a href={`mailto:${client.email}`} className="gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email
+                      </a>
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Etapa</p>
+                    <Badge variant="outline" className={`mt-2 ${getStageBadgeClass(client.stage)}`}>
+                      {client.stage}
+                    </Badge>
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">WhatsApp</p>
-                    <p className="text-sm text-foreground">{client.whatsapp || "-"}</p>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Tipo</p>
+                    <p className="mt-2 text-sm font-medium text-white">{client.property_type || "No definido"}</p>
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Email</p>
-                    <p className="text-sm text-foreground">{client.email || "-"}</p>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Zona</p>
+                    <p className="mt-2 text-sm font-medium text-white">{client.zone || "No definida"}</p>
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Tipo de propiedad</p>
-                    <p className="text-sm text-foreground">{client.property_type || "-"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Presupuesto</p>
-                    <p className="text-sm text-foreground">{client.budget || "-"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Zona</p>
-                    <p className="text-sm text-foreground">{client.zone || "-"}</p>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Presupuesto</p>
+                    <p className="mt-2 text-sm font-medium text-white">{client.budget || "Sin dato"}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <div className="premium-fade-up-delay-1 grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+              <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+                <CardContent className="p-6 space-y-4">
+                  <div className="space-y-1">
+                    <h2 className="text-lg font-semibold text-white">Información del cliente</h2>
+                    <p className="text-sm text-zinc-300">
+                      Datos de contacto y preferencias cargadas en el CRM.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+                      <div className="mb-2 flex items-center gap-2 text-zinc-400">
+                        <Phone className="h-4 w-4" />
+                        <p className="text-xs uppercase tracking-[0.18em]">Teléfono</p>
+                      </div>
+                      <p className="text-sm font-medium text-white">{client.phone || "-"}</p>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+                      <div className="mb-2 flex items-center gap-2 text-zinc-400">
+                        <Phone className="h-4 w-4" />
+                        <p className="text-xs uppercase tracking-[0.18em]">WhatsApp</p>
+                      </div>
+                      <p className="text-sm font-medium text-white">{client.whatsapp || "-"}</p>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+                      <div className="mb-2 flex items-center gap-2 text-zinc-400">
+                        <Mail className="h-4 w-4" />
+                        <p className="text-xs uppercase tracking-[0.18em]">Email</p>
+                      </div>
+                      <p className="text-sm font-medium text-white break-all">{client.email || "-"}</p>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+                      <div className="mb-2 flex items-center gap-2 text-zinc-400">
+                        <MapPin className="h-4 w-4" />
+                        <p className="text-xs uppercase tracking-[0.18em]">Zona</p>
+                      </div>
+                      <p className="text-sm font-medium text-white">{client.zone || "-"}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+                <CardContent className="p-6 space-y-4">
+                  <div className="space-y-1">
+                    <h2 className="text-lg font-semibold text-white">Seguimiento</h2>
+                    <p className="text-sm text-zinc-300">
+                      Elegí el estado actual y anotá cualquier comentario importante.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Estado actual</Label>
+                    <Select value={stage} onValueChange={(value) => setStage(value as typeof defaultClientStage)}>
+                      <SelectTrigger className="border-white/10 bg-black/30 text-white">
+                        <SelectValue placeholder="Seleccioná una etapa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clientStages.map((item) => (
+                          <SelectItem key={item} value={item}>
+                            {item}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="client-notes">Notas</Label>
+                    <Textarea
+                      id="client-notes"
+                      className="min-h-32 border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
+                      value={notes}
+                      onChange={(event) => setNotes(event.target.value)}
+                    />
+                  </div>
+
+                  <Button onClick={handleSave} className="w-full bg-white text-black hover:bg-zinc-200" disabled={saving}>
+                    {saving ? "Guardando..." : "Guardar cambios"}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="premium-fade-up-delay-2 border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-1">
-                  <h2 className="text-lg font-semibold text-foreground">Seguimiento comercial</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Actualizá la etapa y notas del cliente.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Etapa</Label>
-                  <Select value={stage} onValueChange={(value) => setStage(value as typeof defaultClientStage)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccioná una etapa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clientStages.map((item) => (
-                        <SelectItem key={item} value={item}>
-                          {item}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="client-notes">Notas</Label>
-                  <Textarea
-                    id="client-notes"
-                    className="min-h-32"
-                    value={notes}
-                    onChange={(event) => setNotes(event.target.value)}
-                  />
-                </div>
-
-                <Button onClick={handleSave} className="w-full" disabled={saving}>
-                  {saving ? "Guardando..." : "Guardar cambios"}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <CardContent className="p-6 space-y-4">
-                <div className="space-y-1">
-                  <h2 className="text-lg font-semibold text-foreground">Links asociados</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Historial de links guardados en la tabla `property_links`.
+                  <h2 className="text-lg font-semibold text-white">Links guardados</h2>
+                  <p className="text-sm text-zinc-300">
+                    Acá aparecen los links relacionados con este cliente para abrirlos rápido.
                   </p>
                 </div>
 
                 {propertyLinks.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Este cliente todavía no tiene links asociados.</p>
+                  <div className="rounded-xl border border-dashed border-white/10 bg-black/25 px-6 py-10 text-center">
+                    <CircleDollarSign className="mx-auto mb-3 h-8 w-8 text-zinc-400" />
+                    <p className="font-medium text-white">Este cliente todavía no tiene links asociados.</p>
+                    <p className="mt-1 text-sm text-zinc-300">
+                      Cuando generes y guardes links para este cliente aparecerán listados acá.
+                    </p>
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     {propertyLinks.map((link) => (
-                      <div key={link.id} className="rounded-lg border border-border p-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                      <div
+                        key={link.id}
+                        className="rounded-xl border border-white/10 bg-black/25 p-4 shadow-sm flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+                      >
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground">
+                          <p className="text-sm font-medium text-white">
                             {link.property_type || "Propiedad"} · {link.colleague_agency || "Agencia colega"}
                           </p>
-                          <p className="text-xs text-muted-foreground break-all">{link.generated_url}</p>
+                          <p className="mt-1 text-xs text-zinc-300 break-all">{link.generated_url}</p>
                         </div>
                         {link.generated_url && (
                           <Button variant="outline" asChild>
@@ -266,7 +366,7 @@ export default function ClientDetail() {
                 )}
               </CardContent>
             </Card>
-          </div>
+          </>
         ) : null}
       </main>
     </div>
