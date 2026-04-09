@@ -55,17 +55,17 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card py-8 md:py-10">
-        <div className="mx-auto flex max-w-xl justify-center px-4">
+      <header className="border-b border-border bg-card py-4 md:py-5">
+        <div className="mx-auto flex max-w-lg justify-center px-4">
           <img
             src={logo}
             alt="Cupertino Negocios Inmobiliarios"
-            className="h-28 md:h-32 object-contain"
+            className="h-20 md:h-24 object-contain"
           />
         </div>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-8 space-y-6">
+      <main className="mx-auto max-w-lg px-4 py-6 md:py-7 space-y-5">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold text-foreground tracking-tight">Iniciar sesión</h1>
           <p className="text-sm text-muted-foreground">
