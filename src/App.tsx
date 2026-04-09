@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import CRM from "./pages/CRM.tsx";
+import ClientDetail from "./pages/ClientDetail.tsx";
 import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -13,6 +15,12 @@ const queryClient = new QueryClient();
 const protectedDashboard = (
   <ProtectedRoute>
     <Index />
+  </ProtectedRoute>
+);
+
+const protectedCRM = (
+  <ProtectedRoute>
+    <CRM />
   </ProtectedRoute>
 );
 
@@ -26,6 +34,15 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/" element={protectedDashboard} />
           <Route path="/jira" element={protectedDashboard} />
+          <Route path="/crm" element={protectedCRM} />
+          <Route
+            path="/crm/client/:id"
+            element={(
+              <ProtectedRoute>
+                <ClientDetail />
+              </ProtectedRoute>
+            )}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
