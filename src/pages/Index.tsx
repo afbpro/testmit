@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Copy, ExternalLink, HelpCircle } from "lucide-react";
+import { Copy, ExternalLink, HelpCircle, History, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,12 +22,36 @@ import {
 import { agencies } from "@/data/agencies";
 import logo from "@/assets/logo.png";
 
+interface HistoryEntry {
+  url: string;
+  agencyName: string;
+  type: string;
+  propertyId: string;
+  timestamp: number;
+}
+
+const HISTORY_KEY = "cupertino-link-history";
+const MAX_HISTORY = 20;
+
+function loadHistory(): HistoryEntry[] {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(entries: HistoryEntry[]) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, MAX_HISTORY)));
+}
+
 export default function Index() {
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(null);
   const [propertyType, setPropertyType] = useState<"Apartamentos" | "Casas">("Apartamentos");
   const [propertyId, setPropertyId] = useState("");
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [open, setOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>(loadHistory);
 
   const selectedAgency = useMemo(
     () => agencies.find((a) => a.id === selectedAgencyId),
@@ -47,11 +71,28 @@ export default function Index() {
     const calculatedId = pid * selectedAgencyId + 9876;
     const url = `https://www.inmobiliaria.link/c/inmobiliaria_${selectedAgencyId}/${propertyType}/${calculatedId}`;
     setGeneratedUrl(url);
+
+    const entry: HistoryEntry = {
+      url,
+      agencyName: selectedAgency?.name || `ID ${selectedAgencyId}`,
+      type: propertyType,
+      propertyId: propertyId,
+      timestamp: Date.now(),
+    };
+    const updated = [entry, ...history.filter((h) => h.url !== url)].slice(0, MAX_HISTORY);
+    setHistory(updated);
+    saveHistory(updated);
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(generatedUrl);
+  const handleCopy = async (url: string) => {
+    await navigator.clipboard.writeText(url);
     toast.success("¡Link copiado!");
+  };
+
+  const handleClearHistory = () => {
+    setHistory([]);
+    saveHistory([]);
+    toast("Historial borrado");
   };
 
   return (
@@ -156,7 +197,7 @@ export default function Index() {
                 {generatedUrl}
               </div>
               <div className="flex gap-3">
-                <Button onClick={handleCopy} className="flex-1 gap-2">
+                <Button onClick={() => handleCopy(generatedUrl)} className="flex-1 gap-2">
                   <Copy className="h-4 w-4" />
                   Copiar link
                 </Button>
@@ -165,6 +206,46 @@ export default function Index() {
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* History */}
+        {history.length > 0 && (
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <History className="h-4 w-4 text-muted-foreground" />
+                  <Label className="text-muted-foreground text-xs uppercase tracking-wider">Historial</Label>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleClearHistory} className="text-muted-foreground h-7 px-2">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {history.map((entry) => (
+                  <div
+                    key={entry.timestamp}
+                    className="flex items-center gap-2 rounded-lg bg-secondary p-3 group"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground truncate">
+                        {entry.agencyName} · {entry.type} · ID {entry.propertyId}
+                      </p>
+                      <p className="text-sm font-mono text-foreground truncate">{entry.url}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 h-8 w-8"
+                      onClick={() => handleCopy(entry.url)}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
