@@ -69,7 +69,7 @@ export default function Index() {
       return;
     }
     const calculatedId = pid * selectedAgencyId + 9876;
-    const url = `https://www.inmobiliaria.link/c/inmobiliaria_${selectedAgencyId}/${propertyType}/${calculatedId}`;
+    const url = `https://www.inmobiliaria.link/c/inmobiliaria_584/${propertyType}/${calculatedId}`;
     setGeneratedUrl(url);
 
     const entry: HistoryEntry = {
