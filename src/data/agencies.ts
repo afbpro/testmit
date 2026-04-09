@@ -73,6 +73,7 @@ export const agencies: Agency[] = [
   { id: 301, name: "Cruz del Sur" },
   { id: 279, name: "Cuadrado Propiedades" },
   { id: 337, name: "Cukier Bienes Raices" },
+  { id: 584, name: "Cupertino Negocios Inmobiliarios" },
   { id: 386, name: "de Leon Propiedades" },
   { id: 307, name: "Demasoli NI" },
   { id: 265, name: "Destino Punta" },
