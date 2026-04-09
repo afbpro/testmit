@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { Copy, ExternalLink, HelpCircle, History, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,8 @@ interface HistoryEntry {
 
 const HISTORY_KEY = "cupertino-link-history";
 const MAX_HISTORY = 20;
+const propertyTypes = ["Apartamentos", "Casas", "Terrenos", "Chacras", "Campos", "Locales"] as const;
+type PropertyType = (typeof propertyTypes)[number];
 
 function loadHistory(): HistoryEntry[] {
   try {
@@ -47,7 +49,7 @@ function saveHistory(entries: HistoryEntry[]) {
 
 export default function Index() {
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(null);
-  const [propertyType, setPropertyType] = useState<"Apartamentos" | "Casas">("Apartamentos");
+  const [propertyType, setPropertyType] = useState<PropertyType>("Apartamentos");
   const [propertyId, setPropertyId] = useState("");
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [open, setOpen] = useState(false);
@@ -157,17 +159,19 @@ export default function Index() {
               <Label className="text-muted-foreground text-xs uppercase tracking-wider">Tipo de propiedad</Label>
               <RadioGroup
                 value={propertyType}
-                onValueChange={(v) => setPropertyType(v as "Apartamentos" | "Casas")}
-                className="flex gap-6"
+                onValueChange={(v) => setPropertyType(v as PropertyType)}
+                className="grid grid-cols-2 gap-3"
               >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="Apartamentos" id="apt" />
-                  <Label htmlFor="apt" className="cursor-pointer">Apartamentos</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="Casas" id="casas" />
-                  <Label htmlFor="casas" className="cursor-pointer">Casas</Label>
-                </div>
+                {propertyTypes.map((type) => {
+                  const id = type.toLowerCase();
+
+                  return (
+                    <div key={type} className="flex items-center gap-2 rounded-md border border-border px-3 py-2">
+                      <RadioGroupItem value={type} id={id} />
+                      <Label htmlFor={id} className="cursor-pointer">{type}</Label>
+                    </div>
+                  );
+                })}
               </RadioGroup>
             </div>
 
