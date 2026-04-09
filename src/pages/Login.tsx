@@ -65,17 +65,18 @@ export default function Login() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-4 py-4 md:py-6 space-y-5 -mt-4 md:-mt-2">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">Iniciar sesión</h1>
-          <p className="text-sm text-muted-foreground">
-            Accedé con tu mail y contraseña para usar Jira y el generador de links.
-          </p>
-        </div>
+      <main className="flex flex-1 items-center justify-center px-4 py-6 md:py-8">
+        <div className="w-full max-w-lg space-y-5">
+          <div className="space-y-2 text-center">
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Iniciar sesión</h1>
+            <p className="text-sm text-muted-foreground">
+              Accedé con tu mail y contraseña para usar Jira y el generador de links.
+            </p>
+          </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
+          <Card>
+            <CardContent className="p-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-muted-foreground text-xs uppercase tracking-wider">
                   Email
@@ -104,22 +105,23 @@ export default function Login() {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
-                Ingresar
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <Button type="submit" className="w-full">
+                  Ingresar
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
 
-        <Card className="border-border/50">
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">
-              Demo local: <span className="font-mono">demo@cupertino.com / colega123</span>. Si querés,
-              podés cambiar estas credenciales con <span className="font-mono">VITE_LOGIN_EMAIL</span> y{" "}
-              <span className="font-mono">VITE_LOGIN_PASSWORD</span>.
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="border-border/50">
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">
+                Demo local: <span className="font-mono">demo@cupertino.com / colega123</span>. Si querés,
+                podés cambiar estas credenciales con <span className="font-mono">VITE_LOGIN_EMAIL</span> y{" "}
+                <span className="font-mono">VITE_LOGIN_PASSWORD</span>.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );
