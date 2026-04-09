@@ -24,7 +24,7 @@ export default function Login() {
     return <Navigate to="/" replace />;
   }
 
-  const redirectTo = (location.state as LocationState | null)?.from || "/";
+  const redirectTo = (location.state as LocationState | null)?.from || "/jira";
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -55,12 +55,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card py-4 md:py-5">
-        <div className="mx-auto flex max-w-lg justify-center px-4">
+      <header className="border-b border-zinc-800 bg-black py-4 md:py-5 shadow-sm">
+        <div className="mx-auto flex max-w-2xl justify-center px-4">
           <img
             src={logo}
             alt="Cupertino Negocios Inmobiliarios"
-            className="h-20 md:h-24 object-contain"
+            className="h-20 md:h-24 w-auto max-w-full object-contain"
           />
         </div>
       </header>
@@ -69,7 +69,7 @@ export default function Login() {
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold text-foreground tracking-tight">Iniciar sesión</h1>
           <p className="text-sm text-muted-foreground">
-            Accedé con tu mail y contraseña para usar el generador de links.
+            Accedé con tu mail y contraseña para usar Jira y el generador de links.
           </p>
         </div>
 

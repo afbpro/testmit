@@ -33,8 +33,14 @@ describe("Index login flow", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
-    expect(await screen.findByText(/generador de link colega/i)).toBeInTheDocument();
+    expect(await screen.findByText(/panel jira y link de colega/i)).toBeInTheDocument();
     expect(screen.getByText(/sesión activa: demo@cupertino.com/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /link de colega/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /formulario jira/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /abrir jira real/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /formulario jira/i }));
+    expect(screen.getByRole("button", { name: /ingresar lead/i })).toBeInTheDocument();
     expect(screen.queryByText(/historial/i)).not.toBeInTheDocument();
   });
 });

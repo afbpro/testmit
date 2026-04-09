@@ -10,6 +10,12 @@ import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
+const protectedDashboard = (
+  <ProtectedRoute>
+    <Index />
+  </ProtectedRoute>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -18,14 +24,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={(
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            )}
-          />
+          <Route path="/" element={protectedDashboard} />
+          <Route path="/jira" element={protectedDashboard} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
