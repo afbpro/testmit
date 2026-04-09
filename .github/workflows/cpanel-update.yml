@@ -1,0 +1,71 @@
+name: Build and Update cPanel Repo
+
+on:
+  workflow_dispatch:   # habilita ejecucion manual
+    inputs:
+      branch:
+        description: "Branch a deployar"
+        required: true
+        default: "main"
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-update-cpanel:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    environment: cpanel
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Commit and push generated changes
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "chore: update generated files [skip ci]"
+          git push origin HEAD:main
+
+      - name: Trigger cPanel VersionControl update
+        env:
+          CPANEL_TOKEN: ${{ secrets.CPANEL_API_TOKEN }} # API token con permisos
+        run: |
+          set -euo pipefail
+
+          BRANCH="${{ github.event.inputs.branch || 'main' }}"
+
+          echo "Updating repository on cPanel..."
+          RESPONSE=$(curl -s -X GET \
+            "https://app.cupertino.uy:2083/execute/VersionControl/update?repository_root=/home/appcupertino/app&branch=${BRANCH}" \
+            -H "Authorization: cpanel appcupertino:$CPANEL_TOKEN" \
+            -H "Accept: application/json")
+
+          echo "Response from cPanel:"
+          echo "$RESPONSE"
