@@ -74,7 +74,7 @@ describe("Index login flow", () => {
     window.history.pushState({}, "", "/");
   });
 
-  it("blocks invalid credentials and only enables the generator with the configured login", async () => {
+  it("blocks invalid credentials and then shows WhatsApp and save-to-client actions after generating a colega link", async () => {
     render(<App />);
 
     expect(await screen.findByRole("heading", { name: /iniciar sesión/i })).toBeInTheDocument();
@@ -104,5 +104,20 @@ describe("Index login flow", () => {
     expect(screen.getByRole("button", { name: /guardar cliente/i })).toBeInTheDocument();
     expect(screen.getAllByText(/interesado/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/historial/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /ir a jira/i }));
+
+    expect(await screen.findByText(/panel jira y link de colega/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /seleccionar inmobiliaria/i }));
+    fireEvent.click(await screen.findByText(/acassuso propiedades/i));
+    fireEvent.change(screen.getByPlaceholderText(/ej: 25656/i), {
+      target: { value: "1234" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /generar link/i }));
+
+    expect(await screen.findByRole("button", { name: /compartir por whatsapp/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /buscar cliente existente/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /nuevo cliente/i })).toBeInTheDocument();
   });
 });
