@@ -106,7 +106,7 @@ export default function Index() {
 
       <main className="mx-auto max-w-lg px-4 py-8 space-y-6">
         <h1 className="text-2xl font-semibold text-foreground text-center tracking-tight">
-          Generador de Link Colega
+          Generador de Link Colegas
         </h1>
 
         {/* Form */}
