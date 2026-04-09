@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Copy, ExternalLink, HelpCircle } from "lucide-react";
+import { Copy, ExternalLink, HelpCircle, History, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,12 +22,36 @@ import {
 import { agencies } from "@/data/agencies";
 import logo from "@/assets/logo.png";
 
+interface HistoryEntry {
+  url: string;
+  agencyName: string;
+  type: string;
+  propertyId: string;
+  timestamp: number;
+}
+
+const HISTORY_KEY = "cupertino-link-history";
+const MAX_HISTORY = 20;
+
+function loadHistory(): HistoryEntry[] {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(entries: HistoryEntry[]) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, MAX_HISTORY)));
+}
+
 export default function Index() {
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(null);
   const [propertyType, setPropertyType] = useState<"Apartamentos" | "Casas">("Apartamentos");
   const [propertyId, setPropertyId] = useState("");
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [open, setOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>(loadHistory);
 
   const selectedAgency = useMemo(
     () => agencies.find((a) => a.id === selectedAgencyId),
@@ -47,11 +71,28 @@ export default function Index() {
     const calculatedId = pid * selectedAgencyId + 9876;
     const url = `https://www.inmobiliaria.link/c/inmobiliaria_${selectedAgencyId}/${propertyType}/${calculatedId}`;
     setGeneratedUrl(url);
+
+    const entry: HistoryEntry = {
+      url,
+      agencyName: selectedAgency?.name || `ID ${selectedAgencyId}`,
+      type: propertyType,
+      propertyId: propertyId,
+      timestamp: Date.now(),
+    };
+    const updated = [entry, ...history.filter((h) => h.url !== url)].slice(0, MAX_HISTORY);
+    setHistory(updated);
+    saveHistory(updated);
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(generatedUrl);
+  const handleCopy = async (url: string) => {
+    await navigator.clipboard.writeText(url);
     toast.success("¡Link copiado!");
+  };
+
+  const handleClearHistory = () => {
+    setHistory([]);
+    saveHistory([]);
+    toast("Historial borrado");
   };
 
   return (
