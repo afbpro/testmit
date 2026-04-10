@@ -9,6 +9,7 @@ import ClientDetail from "./pages/ClientDetail.tsx";
 import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Properties from "./pages/Properties.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,12 @@ const protectedCRM = (
   </ProtectedRoute>
 );
 
+const protectedProperties = (
+  <ProtectedRoute>
+    <Properties />
+  </ProtectedRoute>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -34,7 +41,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/" element={protectedDashboard} />
           <Route path="/jira" element={protectedDashboard} />
-          <Route path="/propiedades" element={protectedDashboard} />
+          <Route path="/propiedades" element={protectedProperties} />
           <Route path="/crm" element={protectedCRM} />
           <Route
             path="/crm/client/:id"

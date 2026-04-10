@@ -134,12 +134,11 @@ describe("Index login flow", () => {
     expect(screen.queryByText(/presupuesto \(usd\)/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /ir a jira/i })).not.toBeInTheDocument();
 
-    window.history.pushState({}, "", "/jira");
+    window.history.pushState({}, "", "/");
     window.dispatchEvent(new PopStateEvent("popstate"));
 
-    expect(await screen.findByText(/panel jira y link de colega/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /generador de link colega/i, level: 1 })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /link de colega/i }));
     fireEvent.click(screen.getByRole("button", { name: /seleccionar inmobiliaria/i }));
     fireEvent.click(await screen.findByText(/acassuso propiedades/i));
     fireEvent.change(screen.getByPlaceholderText(/ej: 25656/i), {
