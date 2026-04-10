@@ -1253,24 +1253,15 @@ export default function CRM() {
                       <SelectTrigger
                         className={`h-11 w-full rounded-xl ${stageFilter === "all" ? "border-white/10 bg-black/30 text-white" : `${getStageBadgeClass(stageFilter)} border`} `}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className={`h-2.5 w-2.5 rounded-full ${getStageDotClass(stageFilter)}`} />
-                          <SelectValue placeholder="Todas las etapas" />
-                        </div>
+                        <SelectValue placeholder="Todas las etapas" />
                       </SelectTrigger>
                       <SelectContent className={selectContentClassName}>
                         <SelectItem value="all" className="py-2 text-white focus:bg-white/10 focus:text-white">
-                          <div className="flex items-center gap-2">
-                            <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
-                            <span>Todas las etapas</span>
-                          </div>
+                          Todas las etapas
                         </SelectItem>
                         {clientStages.map((stage) => (
                           <SelectItem key={stage} value={stage} className="py-2 text-white focus:bg-white/10 focus:text-white">
-                            <div className="flex items-center gap-2">
-                              <span className={`h-2.5 w-2.5 rounded-full ${getStageDotClass(stage)}`} />
-                              <span>{stage}</span>
-                            </div>
+                            {stage}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -1365,18 +1356,12 @@ export default function CRM() {
                               <div className="min-w-0">
                                 <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
                                   <SelectTrigger className={`h-11 w-full min-w-0 max-w-full text-left ${getStageBadgeClass(client.stage)} border`}>
-                                    <div className="flex items-center gap-2">
-                                      <span className={`h-2.5 w-2.5 rounded-full ${getStageDotClass(client.stage)}`} />
-                                      <SelectValue placeholder="Estado actual" />
-                                    </div>
+                                    <SelectValue placeholder="Estado actual" />
                                   </SelectTrigger>
                                   <SelectContent className={`${selectContentClassName} max-w-[calc(100vw-2rem)]`}>
                                     {clientStages.map((stage) => (
                                       <SelectItem key={stage} value={stage} className="py-2 text-white focus:bg-white/10 focus:text-white">
-                                        <div className="flex items-center gap-2">
-                                          <span className={`h-2.5 w-2.5 rounded-full ${getStageDotClass(stage)}`} />
-                                          <span>{stage}</span>
-                                        </div>
+                                        {stage}
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
