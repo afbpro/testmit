@@ -882,6 +882,19 @@ export default function CRM() {
                 </Button>
               </div>
             </div>
+
+            <div className="mt-4 xl:hidden">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-white hover:bg-white/10"
+                onClick={() => setShowMobileStats((current) => !current)}
+              >
+                📊 {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
+                <ChevronDown className={`h-4 w-4 transition-transform ${showMobileStats ? "rotate-180" : ""}`} />
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -890,19 +903,6 @@ export default function CRM() {
             <CardContent className="p-4 text-sm text-amber-900">{errorMessage}</CardContent>
           </Card>
         )}
-
-        <div className="xl:hidden">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-white hover:bg-white/10"
-            onClick={() => setShowMobileStats((current) => !current)}
-          >
-            📊 {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
-            <ChevronDown className={`h-4 w-4 transition-transform ${showMobileStats ? "rotate-180" : ""}`} />
-          </Button>
-        </div>
 
         {showMobileStats && (
           <div className="grid grid-cols-2 gap-3 xl:hidden">
