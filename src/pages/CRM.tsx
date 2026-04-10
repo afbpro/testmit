@@ -1372,6 +1372,22 @@ export default function CRM() {
                               </div>
 
                               <div className="grid gap-2 sm:flex sm:flex-wrap">
+                                {primaryContact && (
+                                  <Button
+                                    variant="outline"
+                                    className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20 sm:w-auto"
+                                    asChild
+                                  >
+                                    <a
+                                      href={`https://wa.me/${primaryContact.replace(/\D/g, "")}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <MessageCircle className="mr-2 h-4 w-4" />
+                                      Contactar por WhatsApp
+                                    </a>
+                                  </Button>
+                                )}
                                 <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void markClientContacted(client.id)}>
                                   Contactado hoy
                                 </Button>
