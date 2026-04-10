@@ -126,22 +126,50 @@ export function buildWhatsAppHref(phone: string | null | undefined, message?: st
     : `https://wa.me/${digits}`;
 }
 
+function getClientFirstName(name: string | null | undefined) {
+  const trimmedName = name?.trim() ?? "";
+
+  if (!trimmedName) {
+    return "";
+  }
+
+  return trimmedName.split(/\s+/)[0] ?? trimmedName;
+}
+
+function buildClientInterestText(
+  client: Pick<ClientRecord, "operation_type" | "property_type" | "zone" | "period">,
+) {
+  const propertyLabel = client.property_type?.trim().toLowerCase() || "propiedad";
+  const zoneLabel = client.zone ? ` en ${client.zone}` : "";
+
+  switch (client.operation_type) {
+    case "Compra":
+      return `por tu búsqueda de ${propertyLabel}${zoneLabel}`;
+    case "Venta":
+      return `por la venta de tu ${propertyLabel}${zoneLabel}`;
+    case "Alquiler temporal":
+      return `por tu búsqueda de alquiler temporal de ${propertyLabel}${zoneLabel}${client.period ? ` para ${client.period}` : ""}`;
+    case "Alquiler anual":
+      return `por tu búsqueda de alquiler anual de ${propertyLabel}${zoneLabel}`;
+    case "Alquiler invernal":
+      return `por tu búsqueda de alquiler invernal de ${propertyLabel}${zoneLabel}`;
+    default:
+      return "por tu consulta";
+  }
+}
+
 export function buildClientWhatsAppMessage(
   client: Pick<ClientRecord, "name" | "operation_type" | "property_type" | "zone" | "period">,
 ) {
-  const interestParts = [
-    client.operation_type ? client.operation_type.toLowerCase() : null,
-    client.property_type ? client.property_type.toLowerCase() : null,
-    client.zone ? `en ${client.zone}` : null,
-    client.period ? `para ${client.period}` : null,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const firstName = getClientFirstName(client.name);
+  const greeting = firstName ? `Hola ${firstName}, ¿cómo estás?` : "Hola, ¿cómo estás?";
+  const interestText = buildClientInterestText(client);
 
   return [
-    `Hola ${client.name}, ¿cómo estás?`,
-    interestParts ? `Te escribo por tu consulta ${interestParts}.` : "Te escribo por tu consulta.",
-    "Quedo atento.",
+    greeting,
+    "Soy de Cupertino.",
+    `Te escribo ${interestText}.`,
+    "Quedo atento si querés que te pase más opciones.",
   ].join(" ");
 }
 
