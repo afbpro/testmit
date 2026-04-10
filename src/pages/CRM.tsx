@@ -780,16 +780,17 @@ export default function CRM() {
       return;
     }
 
-    const now = new Date().toISOString();
+    const isAlreadyContactedToday = getDaysSinceLastContact(currentClient.last_contact) === 0;
+    const nextLastContact = isAlreadyContactedToday ? null : new Date().toISOString();
     const nextActivityLog = appendActivityLog(
       currentClient.activity_log,
-      createActivityEntry("Contactado hoy", "contact"),
+      createActivityEntry(isAlreadyContactedToday ? "Contacto de hoy desactivado" : "Contactado hoy", "contact"),
     );
 
     setClients((current) =>
       current.map((client) =>
         client.id === clientId
-          ? { ...client, last_contact: now, activity_log: nextActivityLog }
+          ? { ...client, last_contact: nextLastContact, activity_log: nextActivityLog }
           : client,
       ),
     );
@@ -802,7 +803,7 @@ export default function CRM() {
     const { error } = await supabase
       .from("clients")
       .update({
-        last_contact: now,
+        last_contact: nextLastContact,
         activity_log: nextActivityLog,
       })
       .eq("id", clientId);
@@ -813,7 +814,7 @@ export default function CRM() {
       return;
     }
 
-    toast.success("Contacto actualizado");
+    toast.success(isAlreadyContactedToday ? "Contacto desactivado" : "Contacto actualizado");
   };
 
   const budgetLabel = getBudgetFieldLabel(form.operation_type);
@@ -1302,6 +1303,7 @@ export default function CRM() {
                         : daysSinceContact === 0
                           ? "Contactado hoy"
                           : `Hace ${daysSinceContact} día${daysSinceContact === 1 ? "" : "s"}`;
+                    const isContactedToday = daysSinceContact === 0;
                     const primaryContact = client.whatsapp || client.phone;
                     const whatsappUrl = buildClientWhatsAppUrl(client);
 
@@ -1386,8 +1388,12 @@ export default function CRM() {
                                     </a>
                                   </Button>
                                 )}
-                                <Button variant="secondary" className="w-full justify-center" onClick={() => void markClientContacted(client.id)}>
-                                  Contactado hoy
+                                <Button
+                                  variant="outline"
+                                  className={`w-full justify-center ${isContactedToday ? "border-white bg-white text-black hover:bg-zinc-200" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}
+                                  onClick={() => void markClientContacted(client.id)}
+                                >
+                                  {isContactedToday ? "Desactivar contacto de hoy" : "Contactado hoy"}
                                 </Button>
                                 <div className="grid gap-2 sm:grid-cols-2">
                                   <Button variant="outline" className="w-full justify-center" onClick={() => openEditDialog(client)}>
