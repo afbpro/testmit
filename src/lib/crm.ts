@@ -11,11 +11,11 @@ export type ClientStage = (typeof clientStages)[number];
 export const defaultClientStage: ClientStage = clientStages[0];
 
 const stageBadgeClasses: Record<ClientStage, string> = {
-  Interesado: "border-sky-200 bg-sky-50 text-sky-700",
-  "Visita agendada": "border-violet-200 bg-violet-50 text-violet-700",
-  Negociando: "border-amber-200 bg-amber-50 text-amber-700",
-  Cerrado: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  Descartado: "border-slate-200 bg-slate-100 text-slate-600",
+  Interesado: "border-yellow-400/40 bg-yellow-500/20 text-yellow-300",
+  "Visita agendada": "border-blue-400/40 bg-blue-500/20 text-blue-300",
+  Negociando: "border-orange-400/40 bg-orange-500/20 text-orange-300",
+  Cerrado: "border-emerald-400/40 bg-emerald-500/20 text-emerald-300",
+  Descartado: "border-red-400/40 bg-red-500/20 text-red-300",
 };
 
 export function getStageBadgeClass(stage: string) {
