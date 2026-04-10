@@ -1342,7 +1342,7 @@ export default function CRM() {
       </Button>
 
       <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto border border-white/10 bg-zinc-950 text-white xl:hidden">
+        <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:border-white/10 xl:hidden">
           <DialogHeader>
             <DialogTitle>Agregar cliente</DialogTitle>
             <DialogDescription className="text-zinc-300">
