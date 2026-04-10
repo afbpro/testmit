@@ -236,6 +236,31 @@ function normalizeImageUrls(value: unknown) {
   return value.filter((item): item is string => typeof item === "string" && item.length > 0);
 }
 
+function extractPhotosLink(property: Pick<PropertyRecord, "image_urls" | "notes">) {
+  const storedImageUrl = normalizeImageUrls(property.image_urls)[0];
+
+  if (storedImageUrl) {
+    return storedImageUrl;
+  }
+
+  const match = property.notes?.match(/(?:^|\n)\s*Link de fotos:\s*(\S+)/i);
+  return match?.[1] ? normalizePortalUrl(match[1]) : "";
+}
+
+function buildPropertyNotes(notes: string, photosLink: string) {
+  const cleanNotes = notes.trim();
+  const cleanPhotosLink = photosLink.trim() ? `Link de fotos: ${normalizePortalUrl(photosLink)}` : "";
+
+  return [cleanNotes || null, cleanPhotosLink || null].filter(Boolean).join("\n\n") || null;
+}
+
+function stripPhotosLinkFromNotes(notes: string | null | undefined) {
+  return (notes ?? "")
+    .replace(/(?:^|\n)\s*Link de fotos:\s*\S+/gi, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function mapPropertyTypeToColega(type: string | null | undefined) {
   switch (type) {
     case "Apartamento":
@@ -285,7 +310,7 @@ export default function Properties() {
     : `${properties.length} ${properties.length === 1 ? "propiedad cargada" : "propiedades cargadas"}`;
   const saleCount = properties.filter((property) => property.operation === "Venta").length;
   const rentalCount = properties.filter((property) => property.operation?.toLowerCase().includes("alquiler")).length;
-  const withPhotosCount = properties.filter((property) => normalizeImageUrls(property.image_urls).length > 0).length;
+  const withPhotosCount = properties.filter((property) => Boolean(extractPhotosLink(property))).length;
 
   const resetForm = () => {
     setForm(initialPropertyForm);
@@ -433,8 +458,7 @@ export default function Properties() {
       department: form.department || null,
       zone: form.zone || null,
       url: form.url.trim() ? normalizePortalUrl(form.url) : null,
-      image_urls: form.photos_link.trim() ? [normalizePortalUrl(form.photos_link)] : [],
-      notes: form.notes.trim() || null,
+      notes: buildPropertyNotes(form.notes, form.photos_link),
     };
 
     const { data, error } = await supabase.from("properties").insert(payload).select().single();
@@ -637,8 +661,9 @@ export default function Properties() {
           <div className="grid gap-4 lg:grid-cols-2">
             {properties.map((property) => {
               const locationLabel = [property.department, property.zone].filter(Boolean).join(" · ") || "Sin zona";
-              const propertyImages = normalizeImageUrls(property.image_urls);
+              const photosLink = extractPhotosLink(property);
               const colegaLink = buildPropertyColegaLink(property);
+              const visibleNotes = stripPhotosLinkFromNotes(property.notes);
 
               return (
                 <Card key={property.id} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
@@ -652,7 +677,7 @@ export default function Properties() {
                               {property.operation}
                             </Badge>
                           )}
-                          {propertyImages.length > 0 && (
+                          {photosLink && (
                             <Badge variant="outline" className="border-white/15 bg-white/10 text-white">
                               Link de fotos
                             </Badge>
@@ -686,10 +711,10 @@ export default function Properties() {
                           <span>{property.url}</span>
                         </div>
                       )}
-                      {propertyImages[0] && (
+                      {photosLink && (
                         <div className="flex items-center gap-2 break-all text-zinc-400">
                           <Link2 className="h-4 w-4 text-zinc-500" />
-                          <span>Fotos: {propertyImages[0]}</span>
+                          <span>Fotos: {photosLink}</span>
                         </div>
                       )}
                     </div>
@@ -704,8 +729,8 @@ export default function Properties() {
                       </p>
                     </div>
 
-                    {property.notes && (
-                      <p className="text-sm text-zinc-300">{property.notes}</p>
+                    {visibleNotes && (
+                      <p className="text-sm text-zinc-300">{visibleNotes}</p>
                     )}
 
                     <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
