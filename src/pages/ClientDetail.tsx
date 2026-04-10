@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  ArrowLeft,
   CircleDollarSign,
   ExternalLink,
   Loader2,
@@ -149,37 +148,6 @@ export default function ClientDetail() {
     toast.success("Cliente actualizado");
   };
 
-  const handleMarkContactedToday = async () => {
-    if (!id || !supabase || !client) {
-      toast.error("Configurá Supabase para guardar cambios");
-      return;
-    }
-
-    const now = new Date().toISOString();
-    const nextActivityLog = appendActivityLog(
-      client.activity_log,
-      createActivityEntry("Contactado hoy", "contact"),
-    );
-
-    const { error } = await supabase
-      .from("clients")
-      .update({
-        last_contact: now,
-        activity_log: nextActivityLog,
-      })
-      .eq("id", id);
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    setClient((current) =>
-      current ? { ...current, last_contact: now, activity_log: nextActivityLog } : current,
-    );
-    toast.success("Contacto actualizado");
-  };
-
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
       <AppNavigation email={session?.email} onLogout={handleLogout} />
@@ -228,29 +196,6 @@ export default function ClientDetail() {
                     </p>
                   </div>
 
-                  <div className="flex w-full flex-wrap gap-2 xl:w-auto">
-                    <Button variant="secondary" className="w-full sm:w-auto" asChild>
-                      <Link to="/crm" className="gap-2">
-                        <ArrowLeft className="h-4 w-4" />
-                        Volver al CRM
-                      </Link>
-                    </Button>
-                    <Button variant="secondary" className="w-full sm:w-auto" onClick={() => navigate("/jira")}>Ir a Jira</Button>
-                  </div>
-                </div>
-
-                <div className="grid gap-2 sm:flex sm:flex-wrap">
-                  <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void handleMarkContactedToday()}>
-                    Contactado hoy
-                  </Button>
-                  {client.email && (
-                    <Button variant="secondary" asChild>
-                      <a href={`mailto:${client.email}`} className="gap-2">
-                        <Mail className="h-4 w-4" />
-                        Email
-                      </a>
-                    </Button>
-                  )}
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
