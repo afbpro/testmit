@@ -244,19 +244,6 @@ export default function ClientDetail() {
                   <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void handleMarkContactedToday()}>
                     Contactado hoy
                   </Button>
-                  {primaryContact && (
-                    <Button variant="secondary" asChild>
-                      <a
-                        href={whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="gap-2"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        WhatsApp
-                      </a>
-                    </Button>
-                  )}
                   {client.email && (
                     <Button variant="secondary" asChild>
                       <a href={`mailto:${client.email}`} className="gap-2">
