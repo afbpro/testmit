@@ -274,6 +274,19 @@ export default function ClientDetail() {
                     <Badge variant="outline" className={`mt-2 ${leadTemperature.className}`}>
                       {leadTemperature.emoji} {leadTemperature.label}
                     </Badge>
+                    {primaryContact && (
+                      <Button variant="outline" className="mt-3 w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20" asChild>
+                        <a
+                          href={`https://wa.me/${primaryContact.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="gap-2"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          Contactar por WhatsApp
+                        </a>
+                      </Button>
+                    )}
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Operación</p>
