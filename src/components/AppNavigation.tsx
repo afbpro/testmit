@@ -27,15 +27,11 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/60 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
-          <Link
-            to="/"
-            aria-label="Ir al inicio"
-            className="flex shrink-0 items-center rounded-2xl border border-white/10 bg-white/5 px-2.5 py-1 shadow-sm transition hover:bg-white/10"
-          >
+          <Link to="/" aria-label="Ir al inicio" className="flex shrink-0 items-center">
             <img
               src="/isotipocup.png"
               alt="Cupertino"
-              className="h-[44px] w-auto object-contain md:h-[50px]"
+              className="h-[40px] w-auto object-contain md:h-[46px]"
             />
           </Link>
 
@@ -61,7 +57,7 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
               variant="secondary"
               size="sm"
               onClick={() => void onLogout()}
-              className="h-10 gap-2 px-2.5 md:px-3"
+              className="h-9 gap-2 px-2.5 md:px-3"
             >
               <LogOut className="h-4 w-4" />
               <span className="sr-only md:not-sr-only md:inline">Cerrar sesión</span>
