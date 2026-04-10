@@ -30,7 +30,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { agencies } from "@/data/agencies";
-import logo from "@/assets/logo.png";
+
 import { clearLegacyLinkHistory, getStoredSession, signOut } from "@/lib/auth";
 import { defaultClientStage, type ClientRecord } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
@@ -307,12 +307,9 @@ export default function Index() {
                   Cupertino Tools
                 </div>
                 <div>
-                  <div className="flex items-center gap-3">
-                    <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                      Panel Jira y Link de Colega
-                    </h1>
-                    <img src={logo} alt="Cupertino" className="h-7 w-auto object-contain" />
-                  </div>
+                  <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                    Panel Jira y Link de Colega
+                  </h1>
                   <p className="mt-1 text-sm text-zinc-300">
                     Un espacio simple para generar links, cargar leads y seguir el trabajo comercial.
                   </p>

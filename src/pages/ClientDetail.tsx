@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import logo from "@/assets/logo.png";
+
 import { getStoredSession, signOut } from "@/lib/auth";
 import {
   clientStages,
@@ -143,10 +143,7 @@ export default function ClientDetail() {
                       Cliente CRM
                     </Badge>
                     <div>
-                      <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{client.name}</h1>
-                        <img src={logo} alt="Cupertino" className="h-7 w-auto object-contain" />
-                      </div>
+                      <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{client.name}</h1>
                       <p className="mt-1 text-sm text-zinc-300">
                         Acá podés ver sus datos, registrar avances y abrir sus links guardados.
                       </p>
