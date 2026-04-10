@@ -27,9 +27,14 @@ import { Textarea } from "@/components/ui/textarea";
 import AppNavigation from "@/components/AppNavigation";
 import { getStoredSession, signOut } from "@/lib/auth";
 import {
+  appendActivityLog,
   clientStages,
+  createActivityEntry,
   defaultClientStage,
+  getDaysSinceLastContact,
+  getLeadTemperature,
   getStageBadgeClass,
+  normalizeActivityLog,
   type ClientRecord,
   type PropertyLinkRecord,
 } from "@/lib/crm";
@@ -101,13 +106,36 @@ export default function ClientDetail() {
   };
 
   const handleSave = async () => {
-    if (!id || !supabase) {
+    if (!id || !supabase || !client) {
       toast.error("Configurá Supabase para guardar cambios");
       return;
     }
 
+    let nextActivityLog = normalizeActivityLog(client.activity_log);
+
+    if (stage !== client.stage) {
+      nextActivityLog = appendActivityLog(
+        nextActivityLog,
+        createActivityEntry(`Etapa cambiada a ${stage}`, "stage"),
+      );
+    }
+
+    if (notes.trim() !== (client.notes || "").trim()) {
+      nextActivityLog = appendActivityLog(
+        nextActivityLog,
+        createActivityEntry("Notas actualizadas", "note"),
+      );
+    }
+
     setSaving(true);
-    const { error } = await supabase.from("clients").update({ stage, notes: notes.trim() || null }).eq("id", id);
+    const { error } = await supabase
+      .from("clients")
+      .update({
+        stage,
+        notes: notes.trim() || null,
+        activity_log: nextActivityLog,
+      })
+      .eq("id", id);
     setSaving(false);
 
     if (error) {
@@ -115,8 +143,41 @@ export default function ClientDetail() {
       return;
     }
 
-    setClient((current) => (current ? { ...current, stage, notes } : current));
+    setClient((current) =>
+      current ? { ...current, stage, notes, activity_log: nextActivityLog } : current,
+    );
     toast.success("Cliente actualizado");
+  };
+
+  const handleMarkContactedToday = async () => {
+    if (!id || !supabase || !client) {
+      toast.error("Configurá Supabase para guardar cambios");
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const nextActivityLog = appendActivityLog(
+      client.activity_log,
+      createActivityEntry("Contactado hoy", "contact"),
+    );
+
+    const { error } = await supabase
+      .from("clients")
+      .update({
+        last_contact_at: now,
+        activity_log: nextActivityLog,
+      })
+      .eq("id", id);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    setClient((current) =>
+      current ? { ...current, last_contact_at: now, activity_log: nextActivityLog } : current,
+    );
+    toast.success("Contacto actualizado");
   };
 
   return (
@@ -136,7 +197,18 @@ export default function ClientDetail() {
             <CardContent className="p-4 text-sm text-amber-900">{errorMessage}</CardContent>
           </Card>
         ) : client ? (
-          <>
+          (() => {
+            const leadTemperature = getLeadTemperature(client.last_contact_at);
+            const daysSinceContact = getDaysSinceLastContact(client.last_contact_at);
+            const activityHistory = normalizeActivityLog(client.activity_log);
+            const lastContactLabel =
+              daysSinceContact === null
+                ? "Sin registro todavía"
+                : daysSinceContact === 0
+                  ? "Hoy"
+                  : `Hace ${daysSinceContact} día${daysSinceContact === 1 ? "" : "s"}`;
+
+            return <>
             <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
               <CardContent className="p-6 md:p-7 space-y-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -167,6 +239,9 @@ export default function ClientDetail() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  <Button variant="secondary" onClick={() => void handleMarkContactedToday()}>
+                    Contactado hoy
+                  </Button>
                   {client.phone && (
                     <Button variant="secondary" asChild>
                       <a href={`tel:${client.phone}`} className="gap-2">
@@ -204,6 +279,9 @@ export default function ClientDetail() {
                     <Badge variant="outline" className={`mt-2 ${getStageBadgeClass(client.stage)}`}>
                       {client.stage}
                     </Badge>
+                    <Badge variant="outline" className={`mt-2 ${leadTemperature.className}`}>
+                      {leadTemperature.emoji} {leadTemperature.label}
+                    </Badge>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Operación</p>
@@ -224,6 +302,10 @@ export default function ClientDetail() {
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Presupuesto</p>
                     <p className="mt-2 text-sm font-medium text-white">{client.budget || client.period || "Sin dato"}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Último contacto</p>
+                    <p className="mt-2 text-sm font-medium text-white">{lastContactLabel}</p>
                   </div>
                 </div>
               </CardContent>
@@ -337,6 +419,34 @@ export default function ClientDetail() {
             <Card className="premium-fade-up-delay-2 border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-1">
+                  <h2 className="text-lg font-semibold text-white">Historial de actividad</h2>
+                  <p className="text-sm text-zinc-300">
+                    Eventos relevantes del seguimiento comercial de este cliente.
+                  </p>
+                </div>
+
+                {activityHistory.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-white/10 bg-black/25 px-6 py-8 text-center text-sm text-zinc-300">
+                    Todavía no hay eventos registrados.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {activityHistory.map((item) => (
+                      <div key={item.id} className="rounded-xl border border-white/10 bg-black/25 px-4 py-3">
+                        <p className="text-sm font-medium text-white">{item.label}</p>
+                        <p className="mt-1 text-xs text-zinc-400">
+                          {new Date(item.created_at).toLocaleString("es-UY")}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="premium-fade-up-delay-2 border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+              <CardContent className="p-6 space-y-4">
+                <div className="space-y-1">
                   <h2 className="text-lg font-semibold text-white">Links guardados</h2>
                   <p className="text-sm text-zinc-300">
                     Acá aparecen los links relacionados con este cliente para abrirlos rápido.
@@ -378,7 +488,8 @@ export default function ClientDetail() {
                 )}
               </CardContent>
             </Card>
-          </>
+          </>;
+          })()
         ) : null}
       </main>
     </div>
