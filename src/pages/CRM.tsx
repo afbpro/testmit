@@ -863,7 +863,7 @@ export default function CRM() {
                     Cupertino CRM
                   </Badge>
                   <div>
-                    <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM de clientes</h1>
+                    <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM</h1>
                     <p className="mt-1 text-sm text-zinc-300">
                       Gestioná leads, seguimiento comercial y oportunidades desde un solo lugar.
                     </p>
