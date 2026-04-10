@@ -407,13 +407,13 @@ export default function Index() {
                   <Label className="text-xs uppercase tracking-wider text-zinc-400">Inmobiliaria colega</Label>
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start border-white/10 bg-black/30 font-normal text-white hover:bg-white/5">
+                      <Button variant="outline" className="min-h-11 w-full justify-start whitespace-normal border-white/10 bg-black/30 text-left font-normal text-white hover:bg-white/5">
                         {selectedAgency
                           ? `${selectedAgency.id} — ${selectedAgency.name}`
                           : "Seleccionar inmobiliaria..."}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] border-white/10 bg-zinc-950 p-0 text-white" align="start">
+                    <PopoverContent className="w-[min(92vw,420px)] border-white/10 bg-zinc-950 p-0 text-white sm:w-[var(--radix-popover-trigger-width)]" align="start">
                       <Command className="bg-transparent text-white">
                         <CommandInput placeholder="Buscar por nombre o ID..." />
                         <CommandList>
@@ -463,14 +463,15 @@ export default function Index() {
                   <Label className="text-xs uppercase tracking-wider text-zinc-400">ID de la propiedad</Label>
                   <Input
                     type="number"
+                    inputMode="numeric"
                     placeholder="Ej: 25656"
-                    className="border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
+                    className="h-11 border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
                     value={propertyId}
                     onChange={(event) => setPropertyId(event.target.value)}
                   />
                 </div>
 
-                <Button className="w-full bg-white text-black hover:bg-zinc-200" onClick={handleGenerate}>
+                <Button className="h-12 w-full bg-white text-black hover:bg-zinc-200" onClick={handleGenerate}>
                   Generar link
                 </Button>
               </CardContent>
@@ -478,7 +479,7 @@ export default function Index() {
 
             <div className="space-y-5">
               <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="space-y-4 p-4 sm:p-6">
                   <div className="space-y-1">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-400">Resultado</p>
                     <h2 className="text-lg font-semibold text-white">Link listo para compartir</h2>
@@ -490,14 +491,15 @@ export default function Index() {
                         {generatedUrl}
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex flex-col gap-3 sm:flex-row">
                         <Button onClick={() => handleCopy(generatedUrl)} className="flex-1 gap-2 bg-white text-black hover:bg-zinc-200">
                           <Copy className="h-4 w-4" />
                           Copiar link
                         </Button>
-                        <Button variant="outline" className="border-white/10 bg-transparent text-white hover:bg-white/5" asChild>
+                        <Button variant="outline" className="w-full gap-2 border-white/10 bg-transparent text-white hover:bg-white/5 sm:w-auto" asChild>
                           <a href={generatedUrl} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-4 w-4" />
+                            Abrir link
                           </a>
                         </Button>
                       </div>
@@ -577,7 +579,7 @@ export default function Index() {
                                 Nuevo cliente
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="border border-white/10 bg-zinc-950 text-white sm:max-w-md">
+                            <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-y-contain rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-white/10">
                               <DialogHeader>
                                 <DialogTitle>Nuevo cliente</DialogTitle>
                                 <DialogDescription className="text-zinc-300">

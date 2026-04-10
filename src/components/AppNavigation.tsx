@@ -1,4 +1,5 @@
 import { Home, Link2, LogOut, Users, type LucideIcon } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
@@ -23,16 +24,25 @@ const mobileLinkClass =
 const mobileActiveClass = "bg-white/10 text-white";
 
 export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
+  const location = useLocation();
+  const currentSection =
+    navItems.find(({ to, end }) => (end ? location.pathname === to : location.pathname.startsWith(to)))?.label ??
+    "Cupertino";
+
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/60 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <img
               src={logo}
               alt="Cupertino Negocios Inmobiliarios"
               className="h-9 w-auto rounded-xl border border-white/10 bg-white/5 p-1.5 shadow-sm"
             />
+            <div className="min-w-0 md:hidden">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-400">Cupertino</p>
+              <p className="truncate text-sm font-medium text-white">{currentSection}</p>
+            </div>
           </div>
 
           <nav className="hidden items-center gap-1 md:flex md:flex-wrap">
@@ -57,29 +67,31 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
               variant="secondary"
               size="sm"
               onClick={() => void onLogout()}
-              className="gap-2"
+              className="h-9 gap-2 px-2.5 md:px-3"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden md:inline">Cerrar sesión</span>
+              <span className="sr-only md:not-sr-only md:inline">Cerrar sesión</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-full border-t border-white/10 bg-black/85 px-2 py-2 backdrop-blur-xl md:hidden">
-        <div className="mx-auto grid w-full max-w-md grid-cols-3 gap-2 pb-[calc(env(safe-area-inset-bottom)+0.15rem)]">
-          {navItems.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={mobileLinkClass}
-              activeClassName={mobileActiveClass}
-            >
-              <Icon className="h-6 w-6" />
-              <span>{label}</span>
-            </NavLink>
-          ))}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 px-2 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-2 md:hidden">
+        <div className="mx-auto w-full max-w-md rounded-[1.6rem] border border-white/10 bg-black/85 p-2 shadow-[0_-12px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+          <div className="grid w-full grid-cols-3 gap-2">
+            {navItems.map(({ to, label, icon: Icon, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={mobileLinkClass}
+                activeClassName={mobileActiveClass}
+              >
+                <Icon className="h-6 w-6" />
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </div>
         </div>
       </nav>
     </>

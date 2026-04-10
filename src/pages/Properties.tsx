@@ -750,7 +750,7 @@ export default function Properties() {
       </main>
 
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-white/10">
+        <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-y-contain rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-white/10">
           <DialogHeader>
             <DialogTitle>Agregar propiedad</DialogTitle>
             <DialogDescription className="text-zinc-300">
@@ -910,11 +910,11 @@ export default function Properties() {
               />
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="secondary" onClick={() => setIsAddOpen(false)}>
+            <DialogFooter className="sticky bottom-0 z-10 -mx-6 flex-row gap-2 border-t border-white/10 bg-zinc-950/95 px-6 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-4 backdrop-blur sm:-mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0">
+              <Button type="button" variant="secondary" className="flex-1 sm:flex-none" onClick={() => setIsAddOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-white text-black hover:bg-zinc-200" disabled={saving || !supabaseReady}>
+              <Button type="submit" className="flex-1 bg-white text-black hover:bg-zinc-200 sm:flex-none" disabled={saving || !supabaseReady}>
                 {saving ? "Guardando..." : "Guardar"}
               </Button>
             </DialogFooter>
