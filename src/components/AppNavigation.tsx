@@ -29,9 +29,13 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
           <Link to="/" aria-label="Ir al inicio" className="flex shrink-0 items-center">
             <img
-              src="/isotipocup.png"
-              alt="Cupertino"
-              className="h-[38px] w-auto object-contain md:h-[44px]"
+              src="/LOGO%20VERTICAL%20(3).png"
+              alt="Cupertino Negocios Inmobiliarios"
+              className="h-[30px] w-auto object-contain md:h-[35px]"
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = "/isotipocup.png";
+              }}
             />
           </Link>
 
