@@ -290,6 +290,9 @@ export default function Properties() {
   }, [form.operation]);
 
   const availableZones = form.department ? zoneOptionsByDepartment[form.department] : [];
+  const propertyCountLabel = loading
+    ? "Cargando propiedades..."
+    : `${properties.length} propiedade${properties.length === 1 ? "d" : "s"} cargada${properties.length === 1 ? "" : "s"}`;
 
   const resetForm = () => {
     setForm(initialPropertyForm);
@@ -521,7 +524,13 @@ export default function Properties() {
                     Guardá, compartí y administrá tus propiedades desde un solo lugar.
                   </p>
                 </div>
-                <p className="break-all text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-300">
+                  <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                    <Building2 className="mr-1.5 h-3.5 w-3.5" />
+                    {propertyCountLabel}
+                  </span>
+                  <p className="break-all text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
+                </div>
               </div>
 
               <Button className="w-full gap-2 bg-white text-black hover:bg-zinc-200 sm:w-auto" onClick={() => setIsAddOpen(true)}>
