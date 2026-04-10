@@ -262,8 +262,8 @@ export default function ClientDetail() {
                     <Badge variant="outline" className={`mt-2 ${getStageBadgeClass(client.stage)}`}>
                       {client.stage}
                     </Badge>
-                    <Badge variant="outline" className={`mt-2 ${leadTemperature.className}`}>
-                      {leadTemperature.emoji} {leadTemperature.label}
+                    <Badge variant="outline" className={`mt-2 ${leadTemperature.className}`} title={leadTemperature.label}>
+                      {leadTemperature.emoji}
                     </Badge>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">

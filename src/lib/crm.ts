@@ -104,7 +104,7 @@ export function getLeadTemperature(lastContactAt: string | null | undefined) {
   if (days === null || days > 7) {
     return {
       emoji: "🧊",
-      label: "Cold",
+      label: "Frío",
       className: "border-sky-400/30 bg-sky-500/10 text-sky-100",
     };
   }
@@ -112,14 +112,14 @@ export function getLeadTemperature(lastContactAt: string | null | undefined) {
   if (days <= 2) {
     return {
       emoji: "🔥",
-      label: "Hot",
+      label: "Activo",
       className: "border-rose-400/30 bg-rose-500/10 text-rose-100",
     };
   }
 
   return {
     emoji: "🟡",
-    label: "Warm",
+    label: "Tibio",
     className: "border-amber-400/30 bg-amber-500/10 text-amber-100",
   };
 }

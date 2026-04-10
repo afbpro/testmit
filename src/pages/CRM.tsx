@@ -1342,8 +1342,8 @@ export default function CRM() {
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2">
-                              <Badge variant="outline" className={`border ${leadTemperature.className}`}>
-                                {leadTemperature.emoji} {leadTemperature.label}
+                              <Badge variant="outline" className={`border ${leadTemperature.className}`} title={leadTemperature.label}>
+                                {leadTemperature.emoji}
                               </Badge>
                               <Badge variant="outline" className={`border ${getStageBadgeClass(client.stage)}`}>
                                 {client.stage}
@@ -1393,7 +1393,7 @@ export default function CRM() {
                                   className={`w-full justify-center ${isContactedToday ? "border-white bg-white text-black hover:bg-zinc-200" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}
                                   onClick={() => void markClientContacted(client.id)}
                                 >
-                                  {isContactedToday ? "Desactivar contacto de hoy" : "Contactado hoy"}
+                                  Contactado hoy
                                 </Button>
                                 <div className="grid gap-2 sm:grid-cols-2">
                                   <Button variant="outline" className="w-full justify-center" onClick={() => openEditDialog(client)}>
