@@ -44,6 +44,11 @@ import { supabase } from "@/lib/supabaseClient";
 const propertyTypes = ["Apartamentos", "Casas", "Terrenos", "Chacras", "Campos", "Locales"] as const;
 type PropertyType = (typeof propertyTypes)[number];
 type DashboardView = "colega" | "jira";
+type ColegaPrefillState = {
+  prefillPropertyId?: string;
+  prefillPropertyType?: PropertyType;
+  fromPropertyTitle?: string;
+};
 const newClientPropertyTypes = ["Casa", "Apartamento"] as const;
 type NewClientPropertyType = (typeof newClientPropertyTypes)[number];
 
@@ -87,6 +92,29 @@ export default function Index() {
   useEffect(() => {
     setActiveView(location.pathname === "/jira" ? "jira" : "colega");
   }, [location.pathname]);
+
+  useEffect(() => {
+    const state = location.state as ColegaPrefillState | null;
+
+    if (!state?.prefillPropertyId) {
+      return;
+    }
+
+    setPropertyId(state.prefillPropertyId);
+    setGeneratedUrl("");
+
+    if (state.prefillPropertyType && propertyTypes.includes(state.prefillPropertyType)) {
+      setPropertyType(state.prefillPropertyType);
+    }
+
+    toast.success(
+      state.fromPropertyTitle
+        ? `Propiedad cargada para Link Colega: ${state.fromPropertyTitle}`
+        : "Propiedad cargada para Link Colega",
+    );
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => {
     if (!generatedUrl || !supabase) {

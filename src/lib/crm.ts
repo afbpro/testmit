@@ -143,6 +143,7 @@ export interface PropertyRecord {
   zone: string | null;
   zone_specific: string | null;
   url: string | null;
+  image_urls: string[] | null;
   notes: string | null;
   created_at: string;
 }

@@ -7,12 +7,15 @@ import {
   ChevronsUpDown,
   CircleDollarSign,
   Copy,
+  ImagePlus,
   Link2,
   Loader2,
   MapPin,
   MessageCircle,
   Plus,
+  Sparkles,
   Trash2,
+  X,
 } from "lucide-react";
 
 import AppNavigation from "@/components/AppNavigation";
@@ -49,6 +52,7 @@ import { supabase } from "@/lib/supabaseClient";
 const propertyTypeOptions = ["Apartamento", "Casa", "Local", "Terreno", "Campo"] as const;
 const operationOptions = ["Venta", "Alquiler temporal", "Alquiler anual", "Alquiler invernal"] as const;
 const departmentOptions = ["Maldonado", "Rocha"] as const;
+const MAX_PROPERTY_IMAGES = 10;
 
 type PropertyTypeOption = (typeof propertyTypeOptions)[number];
 type OperationOption = (typeof operationOptions)[number];
@@ -224,6 +228,47 @@ function normalizePortalUrl(value: string) {
   return `https://${trimmed}`;
 }
 
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function normalizeImageUrls(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [] as string[];
+  }
+
+  return value.filter((item): item is string => typeof item === "string" && item.length > 0);
+}
+
+function extractPortalId(url: string | null | undefined) {
+  if (!url) {
+    return "";
+  }
+
+  const match = url.match(/(\d+)(?!.*\d)/);
+  return match?.[1] ?? "";
+}
+
+function mapPropertyTypeToColega(type: string | null | undefined) {
+  switch (type) {
+    case "Casa":
+      return "Casas" as const;
+    case "Terreno":
+      return "Terrenos" as const;
+    case "Campo":
+      return "Campos" as const;
+    case "Local":
+      return "Locales" as const;
+    default:
+      return "Apartamentos" as const;
+  }
+}
+
 export default function Properties() {
   const navigate = useNavigate();
   const session = getStoredSession();
@@ -233,6 +278,7 @@ export default function Properties() {
   const [saving, setSaving] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [form, setForm] = useState(initialPropertyForm);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
 
   const priceOptions = useMemo(() => {
@@ -244,6 +290,11 @@ export default function Properties() {
   }, [form.operation]);
 
   const availableZones = form.department ? zoneOptionsByDepartment[form.department] : [];
+
+  const resetForm = () => {
+    setForm(initialPropertyForm);
+    setPhotoUrls([]);
+  };
 
   const loadProperties = useCallback(async () => {
     if (!supabase) {
@@ -311,6 +362,41 @@ export default function Properties() {
     }));
   };
 
+  const handlePhotoSelection = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+
+    if (files.length === 0) {
+      return;
+    }
+
+    const availableSlots = MAX_PROPERTY_IMAGES - photoUrls.length;
+
+    if (availableSlots <= 0) {
+      toast.error("Podés cargar hasta 10 fotos por propiedad.");
+      event.target.value = "";
+      return;
+    }
+
+    const selectedFiles = files.slice(0, availableSlots);
+
+    if (files.length > availableSlots) {
+      toast.error(`Solo se agregaron ${availableSlots} foto(s) para completar el máximo de 10.`);
+    }
+
+    try {
+      const nextImages = await Promise.all(selectedFiles.map((file) => readFileAsDataUrl(file)));
+      setPhotoUrls((current) => [...current, ...nextImages]);
+    } catch {
+      toast.error("No se pudieron procesar las fotos seleccionadas.");
+    }
+
+    event.target.value = "";
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setPhotoUrls((current) => current.filter((_, currentIndex) => currentIndex !== index));
+  };
+
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -338,6 +424,7 @@ export default function Properties() {
       department: form.department || null,
       zone: form.zone || null,
       url: normalizePortalUrl(form.url),
+      image_urls: photoUrls,
       notes: form.notes.trim() || null,
     };
 
@@ -350,7 +437,7 @@ export default function Properties() {
     }
 
     setProperties((current) => [data as PropertyRecord, ...current]);
-    setForm(initialPropertyForm);
+    resetForm();
     setIsAddOpen(false);
     toast.success("Propiedad guardada");
   };
@@ -398,6 +485,22 @@ export default function Properties() {
       .join("\n");
 
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  };
+
+  const handleLinkColega = (property: PropertyRecord) => {
+    const portalId = extractPortalId(property.url);
+
+    navigate("/", {
+      state: {
+        prefillPropertyId: portalId,
+        prefillPropertyType: mapPropertyTypeToColega(property.type),
+        fromPropertyTitle: property.title,
+      },
+    });
+
+    if (!portalId) {
+      toast.error("No pude detectar el ID automáticamente. Te dejé la propiedad cargada para completar el Link Colega.");
+    }
   };
 
   return (
@@ -454,18 +557,43 @@ export default function Properties() {
           <div className="grid gap-4 lg:grid-cols-2">
             {properties.map((property) => {
               const locationLabel = [property.department, property.zone].filter(Boolean).join(" · ") || "Sin zona";
+              const propertyImages = normalizeImageUrls(property.image_urls);
 
               return (
                 <Card key={property.id} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
                   <CardContent className="p-5 space-y-4">
+                    {propertyImages.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+                          <img src={propertyImages[0]} alt={property.title} className="h-48 w-full object-cover" />
+                        </div>
+                        {propertyImages.length > 1 && (
+                          <div className="grid grid-cols-4 gap-2">
+                            {propertyImages.slice(1, 5).map((image, index) => (
+                              <div key={`${property.id}-thumb-${index}`} className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+                                <img src={image} alt={`${property.title} ${index + 2}`} className="h-16 w-full object-cover" />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <h2 className="text-lg font-semibold text-white">{property.title}</h2>
-                        {property.operation && (
-                          <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-200">
-                            {property.operation}
-                          </Badge>
-                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {property.operation && (
+                            <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-200">
+                              {property.operation}
+                            </Badge>
+                          )}
+                          {propertyImages.length > 0 && (
+                            <Badge variant="outline" className="border-white/15 bg-white/10 text-white">
+                              {propertyImages.length} foto{propertyImages.length === 1 ? "" : "s"}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2 text-xs text-zinc-300">
@@ -500,7 +628,7 @@ export default function Properties() {
                       <p className="text-sm text-zinc-300">{property.notes}</p>
                     )}
 
-                    <div className="grid gap-2 sm:grid-cols-3">
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
                       <Button variant="outline" className="w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => handleShareWhatsApp(property)}>
                         <MessageCircle className="mr-2 h-4 w-4" />
                         WhatsApp
@@ -508,6 +636,10 @@ export default function Properties() {
                       <Button variant="outline" className="w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => void handleCopyLink(property.url)}>
                         <Copy className="mr-2 h-4 w-4" />
                         Copiar link
+                      </Button>
+                      <Button variant="outline" className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20" onClick={() => handleLinkColega(property)}>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Link colega
                       </Button>
                       <Button variant="outline" className="w-full border-red-500/30 bg-transparent text-red-200 hover:bg-red-500/10 hover:text-red-100" onClick={() => void handleDelete(property)}>
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -522,12 +654,20 @@ export default function Properties() {
         )}
       </main>
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+      <Dialog
+        open={isAddOpen}
+        onOpenChange={(open) => {
+          setIsAddOpen(open);
+          if (!open && !saving) {
+            resetForm();
+          }
+        }}
+      >
         <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-white/10">
           <DialogHeader>
             <DialogTitle>Agregar propiedad</DialogTitle>
             <DialogDescription className="text-zinc-300">
-              Completá los datos y guardá la propiedad en Supabase.
+              Completá los datos, sumá hasta 10 fotos y guardá la propiedad en Supabase.
             </DialogDescription>
           </DialogHeader>
 
@@ -628,6 +768,47 @@ export default function Properties() {
                   placeholder="https://portal.com/propiedad/123"
                   className={inputWithIconClassName}
                 />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="property-photos">Fotos</Label>
+                <span className="text-[11px] text-zinc-500">Hasta 10 imágenes</span>
+              </div>
+              <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-3">
+                <label htmlFor="property-photos" className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-200 transition hover:bg-white/10">
+                  <ImagePlus className="h-4 w-4" />
+                  Agregar fotos
+                </label>
+                <Input
+                  id="property-photos"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePhotoSelection}
+                  className="hidden"
+                />
+
+                {photoUrls.length > 0 ? (
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {photoUrls.map((photoUrl, index) => (
+                      <div key={`${photoUrl.slice(0, 20)}-${index}`} className="relative overflow-hidden rounded-xl border border-white/10 bg-black/30">
+                        <img src={photoUrl} alt={`Foto ${index + 1}`} className="h-24 w-full object-cover" />
+                        <button
+                          type="button"
+                          className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white transition hover:bg-black"
+                          onClick={() => handleRemovePhoto(index)}
+                          aria-label={`Eliminar foto ${index + 1}`}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-zinc-400">Todavía no agregaste fotos para esta propiedad.</p>
+                )}
               </div>
             </div>
 

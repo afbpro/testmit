@@ -1391,13 +1391,15 @@ export default function CRM() {
                                 <Button variant="secondary" className="w-full justify-center" onClick={() => void markClientContacted(client.id)}>
                                   Contactado hoy
                                 </Button>
-                                <Button variant="outline" className="w-full justify-center" onClick={() => openEditDialog(client)}>
-                                  <Pencil className="mr-2 h-4 w-4" />
-                                  Editar
-                                </Button>
-                                <Button variant="outline" className="w-full justify-center" onClick={() => navigate(`/crm/client/${client.id}`)}>
-                                  Abrir ficha
-                                </Button>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  <Button variant="outline" className="w-full justify-center" onClick={() => openEditDialog(client)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Editar
+                                  </Button>
+                                  <Button variant="outline" className="w-full justify-center" onClick={() => navigate(`/crm/client/${client.id}`)}>
+                                    Abrir ficha
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
