@@ -7,15 +7,12 @@ import {
   ChevronsUpDown,
   CircleDollarSign,
   Loader2,
-  LogOut,
   Mail,
   MapPin,
   MessageCircle,
-  MoreVertical,
   Pencil,
   Phone,
   Plus,
-  RefreshCw,
   Search,
   UserPlus,
   Users,
@@ -31,12 +28,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -62,6 +53,7 @@ import {
   type ClientStage,
 } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
+import AppNavigation from "@/components/AppNavigation";
 import logo from "@/assets/logo.png";
 
 const propertyTypeOptions = [
@@ -390,6 +382,7 @@ export default function CRM() {
   const [stageFilter, setStageFilter] = useState("all");
   const [form, setForm] = useState(initialClientForm);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [showMobileStats, setShowMobileStats] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientRecord | null>(null);
   const [editForm, setEditForm] = useState(initialClientForm);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -757,8 +750,9 @@ export default function CRM() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
+      <AppNavigation email={session?.email} onLogout={handleLogout} />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 md:py-7 space-y-5">
+      <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 pb-24 md:py-7 md:pb-7">
         <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
           <CardContent className="p-6 md:p-7">
             <div className="flex items-start justify-between gap-4">
@@ -833,6 +827,38 @@ export default function CRM() {
           <Card className="border-amber-500/40 bg-amber-50 shadow-sm">
             <CardContent className="p-4 text-sm text-amber-900">{errorMessage}</CardContent>
           </Card>
+        )}
+
+        <div className="xl:hidden">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full border-white/10 bg-white/[0.04] text-white hover:bg-white/10"
+            onClick={() => setShowMobileStats((current) => !current)}
+          >
+            {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
+          </Button>
+        </div>
+
+        {showMobileStats && (
+          <div className="grid gap-3 xl:hidden">
+            {metricCards.map(({ title, value, helper, icon: Icon }) => (
+              <Card key={title} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-zinc-400">{title}</p>
+                      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+                      <p className="mt-1 text-sm text-zinc-300">{helper}</p>
+                    </div>
+                    <div className="rounded-full bg-white/5 p-2.5 text-zinc-300">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
 
         <div className="hidden premium-fade-up-delay-1 gap-3 xl:grid xl:grid-cols-4">
@@ -1129,7 +1155,7 @@ export default function CRM() {
                 <Badge variant="secondary" className="self-start sm:self-auto">{filteredClients.length} visibles</Badge>
               </div>
 
-              <div className="space-y-3">
+              <div className="sticky top-[4.5rem] z-20 -mx-2 space-y-3 rounded-2xl bg-[#09090b]/95 px-2 py-2 backdrop-blur md:static md:mx-0 md:bg-transparent md:px-0 md:py-0">
                 <div className="grid gap-3 md:grid-cols-[1fr_220px]">
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />

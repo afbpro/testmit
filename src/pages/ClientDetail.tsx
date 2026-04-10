@@ -6,7 +6,6 @@ import {
   CircleDollarSign,
   ExternalLink,
   Loader2,
-  LogOut,
   Mail,
   MapPin,
   MessageCircle,
@@ -25,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import AppNavigation from "@/components/AppNavigation";
 import { getStoredSession, signOut } from "@/lib/auth";
 import {
   clientStages,
@@ -121,7 +121,9 @@ export default function ClientDetail() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
-      <main className="mx-auto max-w-6xl px-4 py-6 md:py-7 space-y-5">
+      <AppNavigation email={session?.email} onLogout={handleLogout} />
+
+      <main className="mx-auto max-w-6xl space-y-5 px-4 py-6 pb-24 md:py-7 md:pb-7">
         {loading ? (
           <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
             <CardContent className="p-6 flex items-center gap-2 text-sm text-zinc-300">
@@ -161,10 +163,6 @@ export default function ClientDetail() {
                       </Link>
                     </Button>
                     <Button variant="secondary" onClick={() => navigate("/jira")}>Ir a Jira</Button>
-                    <Button variant="secondary" onClick={handleLogout} className="gap-2">
-                      <LogOut className="h-4 w-4" />
-                      Cerrar sesión
-                    </Button>
                   </div>
                 </div>
 

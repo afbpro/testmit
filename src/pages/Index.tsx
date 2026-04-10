@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Copy, ExternalLink, HelpCircle, LogOut, MessageCircle, Search, UserPlus } from "lucide-react";
+import { Copy, ExternalLink, HelpCircle, MessageCircle, Search, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { agencies } from "@/data/agencies";
 
+import AppNavigation from "@/components/AppNavigation";
 import { clearLegacyLinkHistory, getStoredSession, signOut } from "@/lib/auth";
 import { defaultClientStage, type ClientRecord } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
@@ -57,6 +58,7 @@ const initialNewClientForm = {
 
 export default function Index() {
   const navigate = useNavigate();
+  const location = useLocation();
   const session = getStoredSession();
   const supabaseReady = Boolean(supabase);
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(null);
@@ -76,6 +78,10 @@ export default function Index() {
   useEffect(() => {
     clearLegacyLinkHistory();
   }, []);
+
+  useEffect(() => {
+    setActiveView(location.pathname === "/jira" ? "jira" : "colega");
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!generatedUrl || !supabase) {
@@ -298,7 +304,9 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
-      <main className="mx-auto max-w-5xl px-4 py-6 md:py-7 space-y-5">
+      <AppNavigation email={session?.email} onLogout={handleLogout} />
+
+      <main className="mx-auto max-w-5xl space-y-5 px-4 py-6 pb-24 md:py-7 md:pb-7">
         <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
           <CardContent className="p-6 md:p-7">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
@@ -317,12 +325,7 @@ export default function Index() {
                 <p className="text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" size="sm" onClick={handleLogout} className="gap-2">
-                  <LogOut className="h-4 w-4" />
-                  Cerrar sesión
-                </Button>
-              </div>
+              <div />
             </div>
           </CardContent>
         </Card>
@@ -331,14 +334,14 @@ export default function Index() {
           <Button
             className={activeView === "colega" ? "bg-white text-black hover:bg-zinc-200" : "border-white/10 bg-transparent text-white hover:bg-white/5"}
             variant={activeView === "colega" ? "default" : "outline"}
-            onClick={() => setActiveView("colega")}
+            onClick={() => navigate("/")}
           >
             Link de colega
           </Button>
           <Button
             className={activeView === "jira" ? "bg-white text-black hover:bg-zinc-200" : "border-white/10 bg-transparent text-white hover:bg-white/5"}
             variant={activeView === "jira" ? "default" : "outline"}
-            onClick={() => setActiveView("jira")}
+            onClick={() => navigate("/jira")}
           >
             Formulario Jira
           </Button>
