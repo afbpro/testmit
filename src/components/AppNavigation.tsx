@@ -31,7 +31,7 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
             <img
               src="/isotipocup.png"
               alt="Cupertino"
-              className="h-[40px] w-auto object-contain md:h-[46px]"
+              className="h-[44px] w-auto object-contain md:h-[50px]"
             />
           </Link>
 
