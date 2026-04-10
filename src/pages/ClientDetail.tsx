@@ -121,16 +121,6 @@ export default function ClientDetail() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
-      <header className="border-b border-white/10 bg-black/75 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center px-4">
-          <img
-            src={logo}
-            alt="Cupertino"
-            className="h-8 w-auto object-contain"
-          />
-        </div>
-      </header>
-
       <main className="mx-auto max-w-6xl px-4 py-6 md:py-7 space-y-5">
         {loading ? (
           <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
@@ -153,7 +143,10 @@ export default function ClientDetail() {
                       Cliente CRM
                     </Badge>
                     <div>
-                      <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{client.name}</h1>
+                      <div className="flex items-center gap-3">
+                        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{client.name}</h1>
+                        <img src={logo} alt="Cupertino" className="h-7 w-auto object-contain" />
+                      </div>
                       <p className="mt-1 text-sm text-zinc-300">
                         Acá podés ver sus datos, registrar avances y abrir sus links guardados.
                       </p>
