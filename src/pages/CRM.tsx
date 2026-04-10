@@ -248,10 +248,10 @@ export default function CRM() {
                   Cupertino CRM
                 </Badge>
                 <div>
-                  <div className="flex items-center gap-3">
-                    <img src={logo} alt="Cupertino" className="h-7 w-auto object-contain" />
-                    <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM de clientes</h1>
-                  </div>
+                    <div className="flex items-center gap-3">
+                     <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM de clientes</h1>
+                     <img src={logo} alt="Cupertino" className="h-7 w-auto object-contain" />
+                   </div>
                   <p className="mt-1 text-sm text-zinc-300">
                     Gestioná leads, seguimiento comercial y oportunidades desde un solo lugar.
                   </p>
