@@ -274,7 +274,6 @@ export default function Properties() {
   const [form, setForm] = useState(initialPropertyForm);
   const [errorMessage, setErrorMessage] = useState("");
   const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
-  const [savedColegaLink, setSavedColegaLink] = useState<{ title: string; url: string } | null>(null);
   const [editingProperty, setEditingProperty] = useState<PropertyRecord | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [operationFilter, setOperationFilter] = useState<PropertyFilterOption>("all");
@@ -384,18 +383,6 @@ export default function Properties() {
       }),
     );
   }, [form, hasRestoredDraft]);
-
-  useEffect(() => {
-    if (!savedColegaLink) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setSavedColegaLink(null);
-    }, 8000);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [savedColegaLink]);
 
   const loadProperties = useCallback(async () => {
     if (!supabase) {
@@ -541,7 +528,6 @@ export default function Properties() {
 
   const openEditDialog = (property: PropertyRecord) => {
     setEditingProperty(property);
-    setSavedColegaLink(null);
     setForm({
       title: property.title || "",
       type: (property.type as PropertyTypeOption) || "",
@@ -595,20 +581,11 @@ export default function Properties() {
     }
 
     const savedProperty = data as PropertyRecord;
-    const colegaLink = buildPropertyColegaLink(savedProperty);
 
     setProperties((current) =>
       wasEditing
         ? current.map((item) => (item.id === savedProperty.id ? savedProperty : item))
         : [savedProperty, ...current],
-    );
-    setSavedColegaLink(
-      colegaLink
-        ? {
-            title: savedProperty.title,
-            url: colegaLink,
-          }
-        : null,
     );
     resetForm();
     setIsAddOpen(false);
@@ -699,7 +676,6 @@ export default function Properties() {
                 className="w-full gap-2 bg-white text-black hover:bg-zinc-200 sm:w-auto"
                 onClick={() => {
                   setEditingProperty(null);
-                  setSavedColegaLink(null);
                   setIsAddOpen(true);
                 }}
               >
@@ -761,59 +737,6 @@ export default function Properties() {
             </p>
           </CardContent>
         </Card>
-
-        {savedColegaLink && (
-          <Card className="border border-emerald-500/30 bg-emerald-500/10 text-white shadow-sm backdrop-blur-xl">
-            <CardContent className="space-y-3 p-4 sm:p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2 text-emerald-100">
-                  <Sparkles className="h-4 w-4" />
-                  <div>
-                    <p className="font-medium">✅ Propiedad guardada</p>
-                    <p className="text-sm text-emerald-50">Tu link colega está listo.</p>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-emerald-50 hover:bg-emerald-500/20 hover:text-white"
-                  onClick={() => setSavedColegaLink(null)}
-                  aria-label="Cerrar aviso"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <p className="break-all rounded-xl border border-emerald-400/20 bg-black/20 p-3 font-mono text-sm text-white">
-                {savedColegaLink.url}
-              </p>
-              <div className="grid gap-2 md:max-w-xl md:grid-cols-2">
-                <Button
-                  variant="outline"
-                  className="h-11 w-full border-emerald-400/30 bg-emerald-500/10 text-emerald-50 hover:bg-emerald-500/20"
-                  onClick={() =>
-                    window.open(
-                      `https://wa.me/?text=${encodeURIComponent(`Hola! Te comparto esta propiedad: ${savedColegaLink.url}`)}`,
-                      "_blank",
-                      "noopener,noreferrer",
-                    )
-                  }
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Compartir por WhatsApp
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-11 w-full border-white/10 bg-transparent text-white hover:bg-white/5"
-                  onClick={() => void handleCopyLink(savedColegaLink.url)}
-                >
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copiar link
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {errorMessage && (
           <Card className="border-amber-500/40 bg-amber-50 shadow-sm">
