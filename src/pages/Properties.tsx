@@ -13,6 +13,7 @@ import {
   MessageCircle,
   Pencil,
   Plus,
+  Search,
   Sparkles,
   Trash2,
 } from "lucide-react";
@@ -57,6 +58,7 @@ const COLEGA_AGENCY_ID = 584;
 type PropertyTypeOption = (typeof propertyTypeOptions)[number];
 type OperationOption = (typeof operationOptions)[number];
 type DepartmentOption = (typeof departmentOptions)[number];
+type PropertyFilterOption = "all" | "sale" | "rent";
 
 const salePriceOptions = [
   "Hasta 100K",
@@ -297,6 +299,8 @@ export default function Properties() {
   const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
   const [savedColegaLink, setSavedColegaLink] = useState<{ title: string; url: string } | null>(null);
   const [editingProperty, setEditingProperty] = useState<PropertyRecord | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [operationFilter, setOperationFilter] = useState<PropertyFilterOption>("all");
 
   const priceOptions = useMemo(() => {
     if (form.operation === "Venta") {
@@ -310,9 +314,42 @@ export default function Properties() {
   const propertyCountLabel = loading
     ? "Cargando propiedades..."
     : `${properties.length} ${properties.length === 1 ? "propiedad cargada" : "propiedades cargadas"}`;
-  const saleCount = properties.filter((property) => property.operation === "Venta").length;
-  const rentalCount = properties.filter((property) => property.operation?.toLowerCase().includes("alquiler")).length;
-  const withPhotosCount = properties.filter((property) => Boolean(extractPhotosLink(property))).length;
+
+  const filteredProperties = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    return properties.filter((property) => {
+      const isRental = property.operation?.toLowerCase().includes("alquiler") ?? false;
+      const matchesOperation =
+        operationFilter === "all" ||
+        (operationFilter === "sale" && property.operation === "Venta") ||
+        (operationFilter === "rent" && isRental);
+
+      if (!matchesOperation) {
+        return false;
+      }
+
+      if (!normalizedQuery) {
+        return true;
+      }
+
+      const searchableText = [
+        property.title,
+        property.type,
+        property.operation,
+        isRental ? "alquiler renta" : property.operation === "Venta" ? "venta" : "",
+        property.price,
+        property.department,
+        property.zone,
+        stripPhotosLinkFromNotes(property.notes),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedQuery);
+    });
+  }, [properties, searchQuery, operationFilter]);
 
   const resetForm = () => {
     setForm(initialPropertyForm);
@@ -610,26 +647,38 @@ export default function Properties() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
-            <CardContent className="p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-400">En venta</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{saleCount}</p>
-            </CardContent>
-          </Card>
-          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
-            <CardContent className="p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-400">En alquiler</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{rentalCount}</p>
-            </CardContent>
-          </Card>
-          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
-            <CardContent className="p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-400">Con fotos</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{withPhotosCount}</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+          <CardContent className="space-y-3 p-4">
+            <div className="flex flex-col gap-3 md:flex-row">
+              <div className="relative flex-1 rounded-2xl border border-white/10 bg-black/30 shadow-inner shadow-black/20">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Buscar por título, zona, precio o escribir venta / alquiler"
+                  className="h-11 border-0 bg-transparent pl-10 text-white placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-white/20"
+                />
+              </div>
+
+              <div className="md:w-[240px]">
+                <Select value={operationFilter} onValueChange={(value) => setOperationFilter(value as PropertyFilterOption)}>
+                  <SelectTrigger className={selectTriggerClassName}>
+                    <SelectValue placeholder="Filtrar por operación" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClassName}>
+                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="sale">En venta</SelectItem>
+                    <SelectItem value="rent">En alquiler</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <p className="text-sm text-zinc-300">
+              Mostrando <span className="font-medium text-white">{filteredProperties.length}</span> de <span className="font-medium text-white">{properties.length}</span> propiedades.
+            </p>
+          </CardContent>
+        </Card>
 
         {savedColegaLink && (
           <Card className="border border-emerald-500/30 bg-emerald-500/10 text-white shadow-sm backdrop-blur-xl">
@@ -693,9 +742,17 @@ export default function Properties() {
               <p className="mt-1 text-sm text-zinc-300">Agregá tu primera propiedad.</p>
             </CardContent>
           </Card>
+        ) : filteredProperties.length === 0 ? (
+          <Card className="border border-dashed border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+            <CardContent className="px-6 py-10 text-center">
+              <Search className="mx-auto mb-3 h-8 w-8 text-zinc-400" />
+              <p className="font-medium text-white">No encontramos propiedades con ese filtro.</p>
+              <p className="mt-1 text-sm text-zinc-300">Probá buscando otro texto o cambiando la operación.</p>
+            </CardContent>
+          </Card>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
-            {properties.map((property) => {
+            {filteredProperties.map((property) => {
               const locationLabel = [property.department, property.zone].filter(Boolean).join(" · ") || "Sin zona";
               const photosLink = extractPhotosLink(property);
               const colegaLink = buildPropertyColegaLink(property);
