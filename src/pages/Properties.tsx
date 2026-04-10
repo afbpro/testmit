@@ -14,7 +14,6 @@ import {
   Pencil,
   Plus,
   Search,
-  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
@@ -830,11 +829,7 @@ export default function Properties() {
                     </div>
 
                     {colegaLink ? (
-                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-3 text-sm text-emerald-50 shadow-inner shadow-emerald-950/10">
-                        <div className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4" />
-                          <span className="font-medium">Link colega</span>
-                        </div>
+                      <div className="flex justify-end rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-3 text-sm text-emerald-50 shadow-inner shadow-emerald-950/10">
                         <Button
                           type="button"
                           variant="secondary"
