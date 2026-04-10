@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import logo from "@/assets/logo.png";
+
 import { getStoredSession, signOut } from "@/lib/auth";
 import {
   clientStages,
@@ -248,10 +248,7 @@ export default function CRM() {
                   Cupertino CRM
                 </Badge>
                 <div>
-                    <div className="flex items-center gap-3">
-                     <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM de clientes</h1>
-                     <img src={logo} alt="Cupertino" className="h-7 w-auto object-contain" />
-                   </div>
+                  <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM de clientes</h1>
                   <p className="mt-1 text-sm text-zinc-300">
                     Gestioná leads, seguimiento comercial y oportunidades desde un solo lugar.
                   </p>
@@ -260,6 +257,10 @@ export default function CRM() {
               </div>
 
               <div className="flex flex-wrap gap-2">
+                <Button className="gap-2 bg-white text-black hover:bg-zinc-200" onClick={() => document.getElementById('client-name')?.focus()}>
+                  <UserPlus className="h-4 w-4" />
+                  Agregar cliente
+                </Button>
                 <Button variant="secondary" onClick={() => navigate("/jira")}>Ir a Jira</Button>
                 <Button variant="secondary" onClick={() => void loadClients()} className="gap-2">
                   <RefreshCw className="h-4 w-4" />
