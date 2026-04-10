@@ -81,26 +81,23 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white flex flex-col">
-      <header className="border-b border-white/10 bg-black/75 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-3xl items-center justify-center px-4">
-          <img
-            src={logo}
-            alt="Cupertino"
-            className="h-10 w-auto object-contain"
-          />
-        </div>
-      </header>
-
       <main className="flex flex-1 items-center justify-center px-4 py-6 md:py-8">
         <div className="premium-fade-up w-full max-w-md space-y-5">
           {checkingSession && (
             <p className="text-center text-sm text-zinc-400">Verificando sesión activa...</p>
           )}
-          <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-semibold tracking-tight text-white">Iniciar sesión</h1>
-            <p className="text-sm text-zinc-300">
-              Entrá con tu correo y contraseña para ver clientes y hacer seguimiento.
-            </p>
+          <div className="space-y-4 text-center">
+            <img
+              src={logo}
+              alt="Cupertino"
+              className="mx-auto h-16 w-auto object-contain"
+            />
+            <div className="space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight text-white">Iniciar sesión</h1>
+              <p className="text-sm text-zinc-300">
+                Entrá con tu correo y contraseña para ver clientes y hacer seguimiento.
+              </p>
+            </div>
           </div>
 
           <Card className="border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
