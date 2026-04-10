@@ -1340,13 +1340,13 @@ export default function CRM() {
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`border ${getStageBadgeClass(client.stage)}`}
-                                title={client.stage}
+                              <span
+                                className={`inline-flex h-7 w-7 items-center justify-center rounded-full border text-sm ${getStageBadgeClass(client.stage)}`}
+                                title={`Estado: ${client.stage}`}
+                                aria-label={`Estado ${client.stage}`}
                               >
                                 🔥
-                              </Badge>
+                              </span>
                             </div>
                           </div>
 
