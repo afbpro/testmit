@@ -303,17 +303,16 @@ export default function ClientDetail() {
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-xl border border-white/10 bg-black/25 p-4">
-                      <div className="mb-2 flex items-center gap-2 text-zinc-400">
+                      <div className="mb-3 flex items-center gap-2 text-zinc-400">
                         <MessageCircle className="h-4 w-4" />
                         <p className="text-xs uppercase tracking-[0.18em]">WhatsApp</p>
                       </div>
                       {primaryContact ? (
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="space-y-3">
                           <p className="text-sm font-medium text-white">{primaryContact}</p>
                           <Button
                             size="sm"
-                            variant="outline"
-                            className="h-8 border-emerald-500/30 bg-emerald-500/10 px-2.5 text-emerald-100 hover:bg-emerald-500/20"
+                            className="h-10 w-full justify-center bg-emerald-500 text-black hover:bg-emerald-400"
                             asChild
                           >
                             <a
@@ -321,8 +320,8 @@ export default function ClientDetail() {
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
-                              Abrir WhatsApp
+                              <MessageCircle className="mr-2 h-4 w-4" />
+                              Enviar WhatsApp
                             </a>
                           </Button>
                         </div>
