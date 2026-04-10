@@ -1,9 +1,8 @@
 import { Home, Link2, LogOut, Users, type LucideIcon } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
 
 type AppNavigationProps = {
   email?: string | null;
@@ -24,26 +23,19 @@ const mobileLinkClass =
 const mobileActiveClass = "bg-white/[0.06] text-white";
 
 export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
-  const location = useLocation();
-  const currentSection =
-    navItems.find(({ to, end }) => (end ? location.pathname === to : location.pathname.startsWith(to)))?.label ??
-    "Cupertino";
+  useLocation();
 
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/60 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
-          <div className="flex min-w-0 items-center gap-3">
+          <Link to="/" aria-label="Ir al inicio" className="flex shrink-0 items-center">
             <img
-              src={logo}
-              alt="Cupertino Negocios Inmobiliarios"
-              className="h-9 w-auto rounded-xl border border-white/10 bg-white/5 p-1.5 shadow-sm"
+              src="/ISOTIPO__2_.png"
+              alt="Cupertino"
+              className="h-[35px] w-auto object-contain md:h-10"
             />
-            <div className="min-w-0 md:hidden">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-400">Cupertino</p>
-              <p className="truncate text-sm font-medium text-white">{currentSection}</p>
-            </div>
-          </div>
+          </Link>
 
           <nav className="hidden items-center gap-1 md:flex md:flex-wrap">
             {navItems.map(({ to, label, icon: Icon, end }) => (
