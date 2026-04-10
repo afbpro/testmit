@@ -1335,7 +1335,7 @@ export default function CRM() {
         type="button"
         size="icon"
         aria-label="Agregar cliente"
-        className="fixed bottom-5 right-5 z-50 h-14 w-14 rounded-full bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:bg-zinc-200 xl:hidden"
+        className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:bg-zinc-200 md:bottom-5 md:right-5 xl:hidden"
         onClick={() => setIsAddClientOpen(true)}
       >
         <Plus className="h-6 w-6" />
