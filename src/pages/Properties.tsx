@@ -53,6 +53,7 @@ const propertyTypeOptions = ["Apartamento", "Casa", "Local", "Terreno", "Campo"]
 const operationOptions = ["Venta", "Alquiler temporal", "Alquiler anual", "Alquiler invernal"] as const;
 const departmentOptions = ["Maldonado", "Rocha"] as const;
 const MAX_PROPERTY_IMAGES = 10;
+const PROPERTY_DRAFT_STORAGE_KEY = "colega-linker-property-draft";
 
 type PropertyTypeOption = (typeof propertyTypeOptions)[number];
 type OperationOption = (typeof operationOptions)[number];
@@ -280,6 +281,7 @@ export default function Properties() {
   const [form, setForm] = useState(initialPropertyForm);
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
 
   const priceOptions = useMemo(() => {
     if (form.operation === "Venta") {
@@ -292,12 +294,75 @@ export default function Properties() {
   const availableZones = form.department ? zoneOptionsByDepartment[form.department] : [];
   const propertyCountLabel = loading
     ? "Cargando propiedades..."
-    : `${properties.length} propiedade${properties.length === 1 ? "d" : "s"} cargada${properties.length === 1 ? "" : "s"}`;
+    : `${properties.length} ${properties.length === 1 ? "propiedad cargada" : "propiedades cargadas"}`;
+  const saleCount = properties.filter((property) => property.operation === "Venta").length;
+  const rentalCount = properties.filter((property) => property.operation?.toLowerCase().includes("alquiler")).length;
+  const withPhotosCount = properties.filter((property) => normalizeImageUrls(property.image_urls).length > 0).length;
 
   const resetForm = () => {
     setForm(initialPropertyForm);
     setPhotoUrls([]);
+
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(PROPERTY_DRAFT_STORAGE_KEY);
+    }
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      setHasRestoredDraft(true);
+      return;
+    }
+
+    try {
+      const storedDraft = window.localStorage.getItem(PROPERTY_DRAFT_STORAGE_KEY);
+
+      if (storedDraft) {
+        const parsedDraft = JSON.parse(storedDraft) as {
+          form?: Partial<typeof initialPropertyForm>;
+          photoUrls?: string[];
+        };
+
+        if (parsedDraft.form && typeof parsedDraft.form === "object") {
+          setForm((current) => ({
+            ...current,
+            ...Object.fromEntries(
+              Object.entries(parsedDraft.form).filter(([, value]) => typeof value === "string"),
+            ),
+          }));
+        }
+
+        if (Array.isArray(parsedDraft.photoUrls)) {
+          setPhotoUrls(parsedDraft.photoUrls.filter((value): value is string => typeof value === "string").slice(0, MAX_PROPERTY_IMAGES));
+        }
+      }
+    } catch {
+      window.localStorage.removeItem(PROPERTY_DRAFT_STORAGE_KEY);
+    } finally {
+      setHasRestoredDraft(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasRestoredDraft || typeof window === "undefined") {
+      return;
+    }
+
+    const hasDraftContent = Object.values(form).some((value) => value.trim() !== "") || photoUrls.length > 0;
+
+    if (!hasDraftContent) {
+      window.localStorage.removeItem(PROPERTY_DRAFT_STORAGE_KEY);
+      return;
+    }
+
+    window.localStorage.setItem(
+      PROPERTY_DRAFT_STORAGE_KEY,
+      JSON.stringify({
+        form,
+        photoUrls,
+      }),
+    );
+  }, [form, photoUrls, hasRestoredDraft]);
 
   const loadProperties = useCallback(async () => {
     if (!supabase) {
@@ -541,6 +606,27 @@ export default function Properties() {
           </CardContent>
         </Card>
 
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+            <CardContent className="p-4">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-400">En venta</p>
+              <p className="mt-2 text-2xl font-semibold text-white">{saleCount}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+            <CardContent className="p-4">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-400">En alquiler</p>
+              <p className="mt-2 text-2xl font-semibold text-white">{rentalCount}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+            <CardContent className="p-4">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-400">Con fotos</p>
+              <p className="mt-2 text-2xl font-semibold text-white">{withPhotosCount}</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {errorMessage && (
           <Card className="border-amber-500/40 bg-amber-50 shadow-sm">
             <CardContent className="p-4 text-sm text-amber-900">{errorMessage}</CardContent>
@@ -663,20 +749,12 @@ export default function Properties() {
         )}
       </main>
 
-      <Dialog
-        open={isAddOpen}
-        onOpenChange={(open) => {
-          setIsAddOpen(open);
-          if (!open && !saving) {
-            resetForm();
-          }
-        }}
-      >
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-white/10">
           <DialogHeader>
             <DialogTitle>Agregar propiedad</DialogTitle>
             <DialogDescription className="text-zinc-300">
-              Completá los datos, sumá hasta 10 fotos y guardá la propiedad en Supabase.
+              Completá los datos, sumá hasta 10 fotos y guardá la propiedad en Supabase. Tu borrador queda guardado automáticamente.
             </DialogDescription>
           </DialogHeader>
 
