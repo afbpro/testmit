@@ -200,12 +200,16 @@ export default function ClientDetail() {
                   )}
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Etapa</p>
                     <Badge variant="outline" className={`mt-2 ${getStageBadgeClass(client.stage)}`}>
                       {client.stage}
                     </Badge>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Operación</p>
+                    <p className="mt-2 text-sm font-medium text-white">{client.operation_type || "No definida"}</p>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Tipo</p>
@@ -264,6 +268,22 @@ export default function ClientDetail() {
                         <p className="text-xs uppercase tracking-[0.18em]">Zona</p>
                       </div>
                       <p className="text-sm font-medium text-white">{client.zone || "-"}</p>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+                      <div className="mb-2 flex items-center gap-2 text-zinc-400">
+                        <CircleDollarSign className="h-4 w-4" />
+                        <p className="text-xs uppercase tracking-[0.18em]">Período</p>
+                      </div>
+                      <p className="text-sm font-medium text-white">{client.period || "-"}</p>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-black/25 p-4">
+                      <div className="mb-2 flex items-center gap-2 text-zinc-400">
+                        <CircleDollarSign className="h-4 w-4" />
+                        <p className="text-xs uppercase tracking-[0.18em]">Obs. presupuesto</p>
+                      </div>
+                      <p className="text-sm font-medium text-white">{client.budget_notes || "-"}</p>
                     </div>
                   </div>
                 </CardContent>

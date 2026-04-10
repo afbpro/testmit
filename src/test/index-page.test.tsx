@@ -104,8 +104,32 @@ describe("Index login flow", () => {
     expect(screen.getByRole("button", { name: /guardar cliente/i })).toBeInTheDocument();
     expect(screen.getAllByText(/interesado/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/historial/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/presupuesto \(usd\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^período$/i)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /ir a jira/i }));
+    fireEvent.click(screen.getByRole("combobox", { name: /tipo de operación/i }));
+    fireEvent.click(await screen.findByRole("option", { name: "Compra" }));
+
+    expect(await screen.findByText(/presupuesto \(usd\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/observaciones de presupuesto/i)).toBeInTheDocument();
+    expect(screen.getByText(/seleccioná o escribí un monto/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("combobox", { name: /tipo de operación/i }));
+    fireEvent.click(await screen.findByRole("option", { name: "Venta" }));
+
+    expect(await screen.findByText(/precio de venta \(usd\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/seleccioná o escribí el precio/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/dirección \/ descripción de la propiedad/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("combobox", { name: /tipo de operación/i }));
+    fireEvent.click(await screen.findByRole("option", { name: "Alquiler temporal" }));
+
+    expect(await screen.findByText(/^período$/i)).toBeInTheDocument();
+    expect(screen.queryByText(/presupuesto \(usd\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /ir a jira/i })).not.toBeInTheDocument();
+
+    window.history.pushState({}, "", "/jira");
+    window.dispatchEvent(new PopStateEvent("popstate"));
 
     expect(await screen.findByText(/panel jira y link de colega/i)).toBeInTheDocument();
 

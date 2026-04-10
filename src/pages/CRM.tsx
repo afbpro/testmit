@@ -3,9 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Building2,
+  Check,
+  ChevronsUpDown,
   CircleDollarSign,
   Loader2,
   LogOut,
+  Mail,
+  MapPin,
+  MessageCircle,
+  MoreVertical,
+  Pencil,
+  Phone,
+  Plus,
   RefreshCw,
   Search,
   UserPlus,
@@ -14,8 +23,27 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -34,18 +62,256 @@ import {
   type ClientStage,
 } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
+import logo from "@/assets/logo.png";
+
+const propertyTypeOptions = [
+  "Apartamento",
+  "Casa",
+  "Local comercial",
+  "Terreno",
+  "Campo",
+  "Otro",
+] as const;
+
+const operationTypeOptions = [
+  "Compra",
+  "Venta",
+  "Alquiler temporal",
+  "Alquiler anual",
+  "Alquiler invernal",
+] as const;
+
+type OperationType = (typeof operationTypeOptions)[number];
+type BudgetOperationType = Exclude<OperationType, "Alquiler temporal">;
+
+const purchaseBudgetOptions = [
+  "Hasta 100K",
+  "100K - 150K",
+  "150K - 200K",
+  "200K - 250K",
+  "250K - 300K",
+  "300K - 400K",
+  "400K - 500K",
+  "500K - 750K",
+  "750K - 1M",
+  "1M - 2M",
+  "2M - 5M",
+  "+5M",
+] as const;
+
+const annualBudgetOptions = [
+  "Hasta 500",
+  "500-1K",
+  "1K-1.5K",
+  "1.5K-2K",
+  "2K-2.5K",
+  "2.5K-3K",
+  "3K-3.5K",
+  "3.5K-4K",
+  "4K-4.5K",
+  "4.5K-5K",
+  "5K-6K",
+  "6K-7K",
+  "+7K",
+] as const;
+
+const winterBudgetOptions = [
+  "Hasta 500",
+  "500-1K",
+  "1K-1.5K",
+  "1.5K-2K",
+  "2K-2.5K",
+  "2.5K-3K",
+  "3K-3.5K",
+  "3.5K-4K",
+  "4K-5K",
+  "+5K",
+] as const;
+
+const temporaryPeriodOptions = [
+  "Reveión",
+  "Enero",
+  "1a. Quincena Enero",
+  "2a. Quincena Enero",
+  "Febrero",
+  "1a. Quincena Febrero",
+  "2a. Quincena Febrero",
+  "Carnaval",
+  "Semana Santa",
+  "Marzo",
+  "1a. Quincena Marzo",
+  "2a. Quincena Marzo",
+  "Diciembre",
+  "1a. Quincena Diciembre",
+  "2a. Quincena Diciembre",
+] as const;
+
+const budgetOptionsByOperation: Record<BudgetOperationType, readonly string[]> = {
+  Compra: purchaseBudgetOptions,
+  Venta: purchaseBudgetOptions,
+  "Alquiler anual": annualBudgetOptions,
+  "Alquiler invernal": winterBudgetOptions,
+};
+
+const fieldClassName = "h-11 border-white/10 bg-black/30 text-white placeholder:text-zinc-500";
+const inputWithIconClassName = `${fieldClassName} pl-10`;
+const selectTriggerClassName = "h-11 border-white/10 bg-black/30 text-white";
+const selectWithIconClassName = `${selectTriggerClassName} pl-10`;
+const selectContentClassName = "border-white/10 bg-zinc-950 text-white";
+const helperTextClassName = "text-[11px] text-zinc-500";
+
+function isBudgetOperation(operationType: string): operationType is BudgetOperationType {
+  return ["Compra", "Venta", "Alquiler anual", "Alquiler invernal"].includes(operationType);
+}
+
+function getBudgetFieldLabel(operationType: OperationType | "") {
+  return operationType === "Venta" ? "Precio de venta (USD)" : "Presupuesto (USD)";
+}
+
+function getBudgetFieldPlaceholder(operationType: OperationType | "") {
+  return operationType === "Venta" ? "Seleccioná o escribí el precio" : "Seleccioná o escribí un monto";
+}
+
+function getZoneFieldLabel(operationType: OperationType | "") {
+  return operationType === "Venta" ? "Dirección / descripción de la propiedad" : "Zona de interés";
+}
+
+function getZoneFieldPlaceholder(operationType: OperationType | "") {
+  return operationType === "Venta"
+    ? "Ej: Av. Roosevelt 1234, 3 dorm, vista al mar"
+    : "Punta del Este, Maldonado...";
+}
+
+function BudgetCombobox({
+  id,
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  id?: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly string[];
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value);
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredOptions = normalizedQuery
+    ? options.filter((option) => option.toLowerCase().includes(normalizedQuery))
+    : options;
+  const showCustomValue = query.trim() && !options.some((option) => option.toLowerCase() === normalizedQuery);
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (nextOpen) {
+          setQuery(value);
+        }
+      }}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          id={id}
+          className={`${selectWithIconClassName} w-full justify-between font-normal hover:bg-black/40`}
+        >
+          <span className={`truncate ${value ? "text-white" : "text-zinc-500"}`}>{value || placeholder}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-zinc-400" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] border-white/10 bg-zinc-950 p-0 text-white">
+        <div className="border-b border-white/10 p-2">
+          <Input
+            value={query}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              setQuery(nextValue);
+              onChange(nextValue);
+            }}
+            placeholder={placeholder}
+            className={fieldClassName}
+          />
+        </div>
+
+        <div className="max-h-60 overflow-y-auto p-1">
+          {showCustomValue && (
+            <button
+              type="button"
+              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-zinc-200 transition hover:bg-white/5"
+              onClick={() => {
+                const customValue = query.trim();
+                onChange(customValue);
+                setQuery(customValue);
+                setOpen(false);
+              }}
+            >
+              <span>Usar “{query.trim()}”</span>
+              <Pencil className="h-4 w-4 text-zinc-500" />
+            </button>
+          )}
+
+          {filteredOptions.length === 0 && !showCustomValue ? (
+            <p className="px-3 py-2 text-sm text-zinc-400">No hay opciones disponibles.</p>
+          ) : (
+            filteredOptions.map((option) => (
+              <button
+                key={option}
+                type="button"
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-zinc-200 transition hover:bg-white/5"
+                onClick={() => {
+                  onChange(option);
+                  setQuery(option);
+                  setOpen(false);
+                }}
+              >
+                <span>{option}</span>
+                <Check className={`h-4 w-4 ${value === option ? "text-emerald-400" : "text-transparent"}`} />
+              </button>
+            ))
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 const initialClientForm = {
   name: "",
   phone: "",
   whatsapp: "",
   email: "",
+  operation_type: "" as OperationType | "",
   property_type: "",
   budget: "",
+  period: "",
+  budget_notes: "",
   zone: "",
   notes: "",
   stage: defaultClientStage as ClientStage,
 };
+
+const buildClientPayload = (values: typeof initialClientForm) => ({
+  name: values.name.trim(),
+  phone: values.phone.trim() || null,
+  whatsapp: values.whatsapp.trim() || null,
+  email: values.email.trim() || null,
+  operation_type: values.operation_type || null,
+  property_type: values.property_type.trim() || null,
+  budget: isBudgetOperation(values.operation_type) ? values.budget.trim() || null : null,
+  period: values.operation_type === "Alquiler temporal" ? values.period.trim() || null : null,
+  budget_notes: values.budget_notes.trim() || null,
+  zone: values.zone.trim() || null,
+  notes: values.notes.trim() || null,
+  stage: values.stage,
+});
 
 export default function CRM() {
   const navigate = useNavigate();
@@ -58,6 +324,10 @@ export default function CRM() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stageFilter, setStageFilter] = useState("all");
   const [form, setForm] = useState(initialClientForm);
+  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<ClientRecord | null>(null);
+  const [editForm, setEditForm] = useState(initialClientForm);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const loadClients = useCallback(async () => {
     if (!supabase) {
@@ -111,7 +381,15 @@ export default function CRM() {
       const matchesStage = stageFilter === "all" || client.stage === stageFilter;
       const matchesQuery =
         !normalizedQuery ||
-        [client.name, client.email, client.phone, client.zone, client.property_type]
+        [
+          client.name,
+          client.email,
+          client.phone,
+          client.zone,
+          client.property_type,
+          client.operation_type,
+          client.period,
+        ]
           .filter(Boolean)
           .some((value) => value?.toLowerCase().includes(normalizedQuery));
 
@@ -147,11 +425,115 @@ export default function CRM() {
     }));
   };
 
+  const handleSelectFieldChange = (field: "property_type" | "budget") => (value: string) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const handleOperationChange = (value: string) => {
+    setForm((current) => ({
+      ...current,
+      operation_type: value as OperationType,
+      budget: value === "Alquiler temporal" ? "" : current.budget,
+      period: value === "Alquiler temporal" ? current.period : "",
+    }));
+  };
+
+  const handlePeriodChange = (value: string) => {
+    setForm((current) => ({
+      ...current,
+      period: value,
+    }));
+  };
+
+  const resetEditState = () => {
+    setEditingClient(null);
+    setEditForm(initialClientForm);
+  };
+
+  const openEditDialog = (client: ClientRecord) => {
+    setEditingClient(client);
+    setEditForm({
+      name: client.name || "",
+      phone: client.phone || "",
+      whatsapp: client.whatsapp || "",
+      email: client.email || "",
+      operation_type: operationTypeOptions.includes(client.operation_type as OperationType)
+        ? (client.operation_type as OperationType)
+        : "",
+      property_type: client.property_type || "",
+      budget: client.budget || "",
+      period: client.period || "",
+      budget_notes: client.budget_notes || "",
+      zone: client.zone || "",
+      notes: client.notes || "",
+      stage: clientStages.includes(client.stage as ClientStage)
+        ? (client.stage as ClientStage)
+        : defaultClientStage,
+    });
+  };
+
+  const handleEditChange = (field: keyof typeof initialClientForm) => (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setEditForm((current) => ({
+      ...current,
+      [field]: event.target.value,
+    }));
+  };
+
+  const handleEditStageChange = (value: string) => {
+    setEditForm((current) => ({
+      ...current,
+      stage: value as ClientStage,
+    }));
+  };
+
+  const handleEditSelectFieldChange = (field: "property_type" | "budget") => (value: string) => {
+    setEditForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const handleEditOperationChange = (value: string) => {
+    setEditForm((current) => ({
+      ...current,
+      operation_type: value as OperationType,
+      budget: value === "Alquiler temporal" ? "" : current.budget,
+      period: value === "Alquiler temporal" ? current.period : "",
+    }));
+  };
+
+  const handleEditPeriodChange = (value: string) => {
+    setEditForm((current) => ({
+      ...current,
+      period: value,
+    }));
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!form.name.trim()) {
       toast.error("El nombre del cliente es obligatorio");
+      return;
+    }
+
+    if (!form.operation_type) {
+      toast.error("Seleccioná el tipo de operación");
+      return;
+    }
+
+    if (isBudgetOperation(form.operation_type) && !form.budget.trim()) {
+      toast.error("Completá el presupuesto en USD");
+      return;
+    }
+
+    if (form.operation_type === "Alquiler temporal" && !form.period.trim()) {
+      toast.error("Seleccioná el período");
       return;
     }
 
@@ -161,17 +543,7 @@ export default function CRM() {
     }
 
     setSaving(true);
-    const payload = {
-      name: form.name.trim(),
-      phone: form.phone.trim() || null,
-      whatsapp: form.whatsapp.trim() || null,
-      email: form.email.trim() || null,
-      property_type: form.property_type.trim() || null,
-      budget: form.budget.trim() || null,
-      zone: form.zone.trim() || null,
-      notes: form.notes.trim() || null,
-      stage: form.stage,
-    };
+    const payload = buildClientPayload(form);
 
     const { data, error } = await supabase.from("clients").insert(payload).select().single();
     setSaving(false);
@@ -183,11 +555,64 @@ export default function CRM() {
 
     toast.success("Cliente agregado");
     setForm(initialClientForm);
+    setIsAddClientOpen(false);
     await loadClients();
 
     if (data?.id) {
       navigate(`/crm/client/${data.id}`);
     }
+  };
+
+  const handleSaveEdit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!editingClient) {
+      return;
+    }
+
+    if (!editForm.name.trim()) {
+      toast.error("El nombre del cliente es obligatorio");
+      return;
+    }
+
+    if (!editForm.operation_type) {
+      toast.error("Seleccioná el tipo de operación");
+      return;
+    }
+
+    if (isBudgetOperation(editForm.operation_type) && !editForm.budget.trim()) {
+      toast.error("Completá el presupuesto en USD");
+      return;
+    }
+
+    if (editForm.operation_type === "Alquiler temporal" && !editForm.period.trim()) {
+      toast.error("Seleccioná el período");
+      return;
+    }
+
+    if (!supabase) {
+      toast.error("Configurá Supabase para guardar cambios");
+      return;
+    }
+
+    setSavingEdit(true);
+    const payload = buildClientPayload(editForm);
+    const { data, error } = await supabase
+      .from("clients")
+      .update(payload)
+      .eq("id", editingClient.id)
+      .select()
+      .single();
+    setSavingEdit(false);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    setClients((current) => current.map((client) => (client.id === editingClient.id ? ((data as ClientRecord) ?? client) : client)));
+    toast.success("Cliente actualizado");
+    resetEditState();
   };
 
   const updateClientStage = async (clientId: string, stage: string) => {
@@ -208,6 +633,15 @@ export default function CRM() {
 
     toast.success("Etapa actualizada");
   };
+
+  const budgetLabel = getBudgetFieldLabel(form.operation_type);
+  const budgetPlaceholder = getBudgetFieldPlaceholder(form.operation_type);
+  const zoneLabel = getZoneFieldLabel(form.operation_type);
+  const zonePlaceholder = getZoneFieldPlaceholder(form.operation_type);
+  const editBudgetLabel = getBudgetFieldLabel(editForm.operation_type);
+  const editBudgetPlaceholder = getBudgetFieldPlaceholder(editForm.operation_type);
+  const editZoneLabel = getZoneFieldLabel(editForm.operation_type);
+  const editZonePlaceholder = getZoneFieldPlaceholder(editForm.operation_type);
 
   const metricCards = [
     {
@@ -242,26 +676,61 @@ export default function CRM() {
       <main className="mx-auto max-w-7xl px-4 py-6 md:py-7 space-y-5">
         <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
           <CardContent className="p-6 md:p-7">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <div className="space-y-3">
-                <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
-                  Cupertino CRM
-                </Badge>
-                <div>
-                  <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM de clientes</h1>
-                  <p className="mt-1 text-sm text-zinc-300">
-                    Gestioná leads, seguimiento comercial y oportunidades desde un solo lugar.
-                  </p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex min-w-0 items-start gap-3">
+                <img
+                  src={logo}
+                  alt="Cupertino Negocios Inmobiliarios"
+                  className="h-12 w-auto rounded-xl border border-white/10 bg-white/5 p-2 shadow-sm md:h-14"
+                />
+
+                <div className="min-w-0 space-y-2">
+                  <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
+                    Cupertino CRM
+                  </Badge>
+                  <div>
+                    <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">CRM de clientes</h1>
+                    <p className="mt-1 text-sm text-zinc-300">
+                      Gestioná leads, seguimiento comercial y oportunidades desde un solo lugar.
+                    </p>
+                  </div>
+                  <p className="text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
                 </div>
-                <p className="text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <Button className="gap-2 bg-white text-black hover:bg-zinc-200" onClick={() => document.getElementById('client-name')?.focus()}>
+              <div className="xl:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">Abrir menú</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="border-white/10 bg-zinc-950 text-white">
+                    <DropdownMenuItem className="gap-2 focus:bg-white/10 focus:text-white" onClick={() => void loadClients()}>
+                      <RefreshCw className="h-4 w-4" />
+                      Recargar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="gap-2 focus:bg-white/10 focus:text-white" onClick={handleLogout}>
+                      <LogOut className="h-4 w-4" />
+                      Cerrar sesión
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="hidden gap-2 xl:flex xl:flex-wrap xl:justify-end">
+                <Button
+                  className="gap-2 bg-white text-black hover:bg-zinc-200"
+                  onClick={() => document.getElementById("client-name")?.focus()}
+                >
                   <UserPlus className="h-4 w-4" />
                   Agregar cliente
                 </Button>
-                <Button variant="secondary" onClick={() => navigate("/jira")}>Ir a Jira</Button>
                 <Button variant="secondary" onClick={() => void loadClients()} className="gap-2">
                   <RefreshCw className="h-4 w-4" />
                   Recargar
@@ -281,7 +750,7 @@ export default function CRM() {
           </Card>
         )}
 
-        <div className="premium-fade-up-delay-1 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="hidden premium-fade-up-delay-1 gap-3 xl:grid xl:grid-cols-4">
           {metricCards.map(({ title, value, helper, icon: Icon }) => (
             <Card key={title} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
               <CardContent className="p-4">
@@ -301,97 +770,194 @@ export default function CRM() {
         </div>
 
         <div className="premium-fade-up-delay-2 grid gap-5 xl:grid-cols-[390px_1fr]">
-          <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl xl:sticky xl:top-6">
+          <Card className="hidden border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl xl:sticky xl:top-6 xl:block">
             <CardContent className="p-6 space-y-5">
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-400">Paso 1</p>
-                <h2 className="text-lg font-semibold text-white">Agregar cliente</h2>
-                <p className="text-sm text-zinc-300">
-                  Completá los datos básicos de la persona y guardala para empezar el seguimiento.
-                </p>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-[0.18em] text-emerald-300">Paso 1 · Alta rápida</p>
+                  <h2 className="text-lg font-semibold text-white">Agregar cliente</h2>
+                  <p className="text-sm text-zinc-300">
+                    Completá los datos básicos de la persona y guardala para empezar el seguimiento.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3">
+                  <p className="text-sm font-medium text-white">Carga simple, seguimiento claro</p>
+                  <p className="mt-1 text-xs text-zinc-400">
+                    Elegí tipo, precio y agregá comentarios para que el equipo vea el contexto enseguida.
+                  </p>
+                </div>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="client-name">Nombre</Label>
-                  <Input
-                    id="client-name"
-                    placeholder="Ej: María Pérez"
-                    value={form.name}
-                    onChange={handleChange("name")}
-                  />
+                  <div className="relative">
+                    <UserPlus className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Input
+                      id="client-name"
+                      placeholder="Ej: María Pérez"
+                      value={form.name}
+                      onChange={handleChange("name")}
+                      className={inputWithIconClassName}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="client-phone">Teléfono</Label>
-                    <Input
-                      id="client-phone"
-                      placeholder="099 123 456"
-                      value={form.phone}
-                      onChange={handleChange("phone")}
-                    />
+                    <div className="relative">
+                      <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                      <Input
+                        id="client-phone"
+                        placeholder="099 123 456"
+                        value={form.phone}
+                        onChange={handleChange("phone")}
+                        className={inputWithIconClassName}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="client-whatsapp">WhatsApp</Label>
-                    <Input
-                      id="client-whatsapp"
-                      placeholder="099 123 456"
-                      value={form.whatsapp}
-                      onChange={handleChange("whatsapp")}
-                    />
+                    <div className="relative">
+                      <MessageCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                      <Input
+                        id="client-whatsapp"
+                        placeholder="099 123 456"
+                        value={form.whatsapp}
+                        onChange={handleChange("whatsapp")}
+                        className={inputWithIconClassName}
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="client-email">Email</Label>
-                  <Input
-                    id="client-email"
-                    type="email"
-                    placeholder="cliente@correo.com"
-                    value={form.email}
-                    onChange={handleChange("email")}
-                  />
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Input
+                      id="client-email"
+                      type="email"
+                      placeholder="cliente@correo.com"
+                      value={form.email}
+                      onChange={handleChange("email")}
+                      className={inputWithIconClassName}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="client-property-type">Qué busca</Label>
-                    <Input
-                      id="client-property-type"
-                      placeholder="Apartamento, casa, terreno..."
-                      value={form.property_type}
-                      onChange={handleChange("property_type")}
-                    />
+                    <Label htmlFor="client-operation-type">Tipo de Operación</Label>
+                    <Select value={form.operation_type} onValueChange={handleOperationChange}>
+                      <SelectTrigger id="client-operation-type" className={selectTriggerClassName}>
+                        <SelectValue placeholder="Seleccioná una operación" />
+                      </SelectTrigger>
+                      <SelectContent className={selectContentClassName}>
+                        {operationTypeOptions.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="client-budget">Presupuesto aproximado</Label>
-                    <Input
-                      id="client-budget"
-                      placeholder="USD 200.000"
-                      value={form.budget}
-                      onChange={handleChange("budget")}
-                    />
+                    <Label htmlFor="client-property-type">Tipo de propiedad</Label>
+                    <div className="relative">
+                      <Building2 className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                      <Select value={form.property_type} onValueChange={handleSelectFieldChange("property_type")}>
+                        <SelectTrigger id="client-property-type" className={selectWithIconClassName}>
+                          <SelectValue placeholder="Seleccioná un tipo" />
+                        </SelectTrigger>
+                        <SelectContent className={selectContentClassName}>
+                          {propertyTypeOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
 
+                {form.operation_type ? (
+                  <div className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+                    {isBudgetOperation(form.operation_type) ? (
+                      <div className="space-y-2">
+                        <Label htmlFor="client-budget">{budgetLabel}</Label>
+                        <div className="relative">
+                          <CircleDollarSign className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                          <BudgetCombobox
+                            id="client-budget"
+                            value={form.budget}
+                            onChange={handleSelectFieldChange("budget")}
+                            options={budgetOptionsByOperation[form.operation_type]}
+                            placeholder={budgetPlaceholder}
+                          />
+                        </div>
+                        <p className={helperTextClassName}>Todos los valores se manejan en USD.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="client-period">Período</Label>
+                        <Select value={form.period} onValueChange={handlePeriodChange}>
+                          <SelectTrigger id="client-period" className={selectTriggerClassName}>
+                            <SelectValue placeholder="Seleccioná un período" />
+                          </SelectTrigger>
+                          <SelectContent className={selectContentClassName}>
+                            {temporaryPeriodOptions.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label htmlFor="client-budget-notes">Observaciones de presupuesto</Label>
+                      <Input
+                        id="client-budget-notes"
+                        placeholder="Ej: préstamo bancario, paga adelantado..."
+                        value={form.budget_notes}
+                        onChange={handleChange("budget_notes")}
+                        className={`${fieldClassName} text-sm`}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-300">
+                    Seleccioná el tipo de operación para mostrar precio, presupuesto o período.
+                  </div>
+                )}
+
                 <div className="space-y-2">
-                  <Label htmlFor="client-zone">Zona de interés</Label>
-                  <Input
-                    id="client-zone"
-                    placeholder="Punta del Este, Maldonado..."
-                    value={form.zone}
-                    onChange={handleChange("zone")}
-                  />
+                  <Label htmlFor="client-zone">{zoneLabel}</Label>
+                  <div className="relative">
+                    <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Input
+                      id="client-zone"
+                      placeholder={zonePlaceholder}
+                      value={form.zone}
+                      onChange={handleChange("zone")}
+                      className={inputWithIconClassName}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Estado actual</Label>
                   <Select value={form.stage} onValueChange={handleStageChange}>
-                    <SelectTrigger>
+                    <SelectTrigger className={selectTriggerClassName}>
                       <SelectValue placeholder="Seleccioná una etapa" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className={selectContentClassName}>
                       {clientStages.map((stage) => (
                         <SelectItem key={stage} value={stage}>
                           {stage}
@@ -402,13 +968,16 @@ export default function CRM() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="client-notes">Notas útiles</Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label htmlFor="client-notes">Comentarios</Label>
+                    <span className="text-[11px] text-zinc-500">Contexto para el seguimiento</span>
+                  </div>
                   <Textarea
                     id="client-notes"
                     placeholder="Ej: busca 2 dormitorios, quiere visitar el fin de semana, prefiere Pocitos"
                     value={form.notes}
                     onChange={handleChange("notes")}
-                    className="min-h-24"
+                    className="min-h-28 border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
                   />
                 </div>
 
@@ -431,37 +1000,65 @@ export default function CRM() {
                   <div>
                     <h2 className="text-lg font-semibold text-white">Clientes</h2>
                     <p className="text-sm text-zinc-300">
-                      Buscá una persona, cambiá su estado o abrí su ficha completa.
+                      Buscá una persona, filtrá por operación y actualizá sus datos sin salir del CRM.
                     </p>
                   </div>
                 </div>
-                <Badge variant="secondary">{filteredClients.length} visibles</Badge>
+                <Badge variant="secondary" className="self-start sm:self-auto">{filteredClients.length} visibles</Badge>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-[1fr_220px]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                  <Input
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder="Buscar por nombre, zona, email o teléfono"
-                    className="border-white/10 bg-black/30 pl-9 text-white placeholder:text-zinc-500"
-                  />
+              <div className="space-y-3">
+                <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                    <Input
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder="Buscar por nombre, operación, zona, email o teléfono"
+                      className="h-11 border-white/10 bg-black/30 pl-9 text-white placeholder:text-zinc-500"
+                    />
+                  </div>
+
+                  <div className="hidden md:block">
+                    <Select value={stageFilter} onValueChange={setStageFilter}>
+                      <SelectTrigger className={selectTriggerClassName}>
+                        <SelectValue placeholder="Todas las etapas" />
+                      </SelectTrigger>
+                      <SelectContent className={selectContentClassName}>
+                        <SelectItem value="all">Todas las etapas</SelectItem>
+                        {clientStages.map((stage) => (
+                          <SelectItem key={stage} value={stage}>
+                            {stage}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <Select value={stageFilter} onValueChange={setStageFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todas las etapas" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas las etapas</SelectItem>
-                    {clientStages.map((stage) => (
-                      <SelectItem key={stage} value={stage}>
-                        {stage}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2 overflow-x-auto pb-1 md:hidden">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={stageFilter === "all" ? "secondary" : "outline"}
+                    className="shrink-0 rounded-full border-white/10 bg-black/30 text-white"
+                    onClick={() => setStageFilter("all")}
+                  >
+                    Todas
+                  </Button>
+                  {clientStages.map((stage) => (
+                    <Button
+                      key={stage}
+                      type="button"
+                      size="sm"
+                      variant={stageFilter === stage ? "secondary" : "outline"}
+                      className="shrink-0 rounded-full border-white/10 bg-black/30 text-white"
+                      onClick={() => setStageFilter(stage)}
+                    >
+                      {stage}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
               {loading ? (
@@ -502,10 +1099,14 @@ export default function CRM() {
                           </div>
 
                           <div className="flex flex-wrap gap-2 text-xs text-zinc-300">
+                            {client.operation_type && (
+                              <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-200">{client.operation_type}</span>
+                            )}
                             {client.zone && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone}</span>}
                             {client.property_type && (
                               <span className="rounded-full bg-white/5 px-2.5 py-1">{client.property_type}</span>
                             )}
+                            {client.period && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.period}</span>}
                             {client.budget && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.budget}</span>}
                           </div>
                         </div>
@@ -515,12 +1116,12 @@ export default function CRM() {
                         </Badge>
                       </div>
 
-                      <div className="grid gap-3 pt-3 md:grid-cols-[1fr_auto] md:items-center">
+                      <div className="grid gap-3 pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
                         <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
-                          <SelectTrigger>
+                          <SelectTrigger className={selectTriggerClassName}>
                             <SelectValue placeholder="Estado actual" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className={selectContentClassName}>
                             {clientStages.map((stage) => (
                               <SelectItem key={stage} value={stage}>
                                 {stage}
@@ -529,9 +1130,15 @@ export default function CRM() {
                           </SelectContent>
                         </Select>
 
-                        <Button variant="outline" onClick={() => navigate(`/crm/client/${client.id}`)}>
-                          Abrir ficha
-                        </Button>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <Button variant="outline" className="w-full md:w-auto" onClick={() => openEditDialog(client)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Editar
+                          </Button>
+                          <Button variant="outline" className="w-full md:w-auto" onClick={() => navigate(`/crm/client/${client.id}`)}>
+                            Abrir ficha
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -541,6 +1148,437 @@ export default function CRM() {
           </Card>
         </div>
       </main>
+
+      <Button
+        type="button"
+        size="icon"
+        aria-label="Agregar cliente"
+        className="fixed bottom-5 right-5 z-50 h-14 w-14 rounded-full bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:bg-zinc-200 xl:hidden"
+        onClick={() => setIsAddClientOpen(true)}
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
+
+      <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border border-white/10 bg-zinc-950 text-white xl:hidden">
+          <DialogHeader>
+            <DialogTitle>Agregar cliente</DialogTitle>
+            <DialogDescription className="text-zinc-300">
+              Completá la ficha y guardá el lead sin salir de la vista principal.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="mobile-client-name">Nombre</Label>
+              <div className="relative">
+                <UserPlus className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <Input
+                  id="mobile-client-name"
+                  placeholder="Ej: María Pérez"
+                  value={form.name}
+                  onChange={handleChange("name")}
+                  className={inputWithIconClassName}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="mobile-client-phone">Teléfono</Label>
+                <div className="relative">
+                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Input
+                    id="mobile-client-phone"
+                    placeholder="099 123 456"
+                    value={form.phone}
+                    onChange={handleChange("phone")}
+                    className={inputWithIconClassName}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="mobile-client-whatsapp">WhatsApp</Label>
+                <div className="relative">
+                  <MessageCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Input
+                    id="mobile-client-whatsapp"
+                    placeholder="099 123 456"
+                    value={form.whatsapp}
+                    onChange={handleChange("whatsapp")}
+                    className={inputWithIconClassName}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="mobile-client-email">Email</Label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <Input
+                  id="mobile-client-email"
+                  type="email"
+                  placeholder="cliente@correo.com"
+                  value={form.email}
+                  onChange={handleChange("email")}
+                  className={inputWithIconClassName}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="mobile-client-operation-type">Tipo de Operación</Label>
+                <Select value={form.operation_type} onValueChange={handleOperationChange}>
+                  <SelectTrigger id="mobile-client-operation-type" className={selectTriggerClassName}>
+                    <SelectValue placeholder="Seleccioná una operación" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClassName}>
+                    {operationTypeOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mobile-client-property-type">Tipo de propiedad</Label>
+                <div className="relative">
+                  <Building2 className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Select value={form.property_type} onValueChange={handleSelectFieldChange("property_type")}>
+                    <SelectTrigger id="mobile-client-property-type" className={selectWithIconClassName}>
+                      <SelectValue placeholder="Seleccioná un tipo" />
+                    </SelectTrigger>
+                    <SelectContent className={selectContentClassName}>
+                      {propertyTypeOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {form.operation_type ? (
+              <div className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+                {isBudgetOperation(form.operation_type) ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="mobile-client-budget">{budgetLabel}</Label>
+                    <div className="relative">
+                      <CircleDollarSign className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                      <BudgetCombobox
+                        id="mobile-client-budget"
+                        value={form.budget}
+                        onChange={handleSelectFieldChange("budget")}
+                        options={budgetOptionsByOperation[form.operation_type]}
+                        placeholder={budgetPlaceholder}
+                      />
+                    </div>
+                    <p className={helperTextClassName}>Todos los valores se manejan en USD.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="mobile-client-period">Período</Label>
+                    <Select value={form.period} onValueChange={handlePeriodChange}>
+                      <SelectTrigger id="mobile-client-period" className={selectTriggerClassName}>
+                        <SelectValue placeholder="Seleccioná un período" />
+                      </SelectTrigger>
+                      <SelectContent className={selectContentClassName}>
+                        {temporaryPeriodOptions.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="mobile-client-budget-notes">Observaciones de presupuesto</Label>
+                  <Input
+                    id="mobile-client-budget-notes"
+                    placeholder="Ej: préstamo bancario, paga adelantado..."
+                    value={form.budget_notes}
+                    onChange={handleChange("budget_notes")}
+                    className={`${fieldClassName} text-sm`}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-300">
+                Seleccioná el tipo de operación para mostrar precio, presupuesto o período.
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="mobile-client-zone">{zoneLabel}</Label>
+              <div className="relative">
+                <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <Input
+                  id="mobile-client-zone"
+                  placeholder={zonePlaceholder}
+                  value={form.zone}
+                  onChange={handleChange("zone")}
+                  className={inputWithIconClassName}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Estado actual</Label>
+              <Select value={form.stage} onValueChange={handleStageChange}>
+                <SelectTrigger className={selectTriggerClassName}>
+                  <SelectValue placeholder="Seleccioná una etapa" />
+                </SelectTrigger>
+                <SelectContent className={selectContentClassName}>
+                  {clientStages.map((stage) => (
+                    <SelectItem key={stage} value={stage}>
+                      {stage}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="mobile-client-notes">Comentarios</Label>
+                <span className="text-[11px] text-zinc-500">Contexto para el seguimiento</span>
+              </div>
+              <Textarea
+                id="mobile-client-notes"
+                placeholder="Ej: busca 2 dormitorios, quiere visitar el fin de semana, prefiere Pocitos"
+                value={form.notes}
+                onChange={handleChange("notes")}
+                className="min-h-28 border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="secondary" onClick={() => setIsAddClientOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="bg-white text-black hover:bg-zinc-200" disabled={saving || !supabaseReady}>
+                {saving ? "Guardando..." : "Guardar cliente"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(editingClient)} onOpenChange={(open) => !open && resetEditState()}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border border-white/10 bg-zinc-950 text-white sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar cliente</DialogTitle>
+            <DialogDescription className="text-zinc-300">
+              Actualizá los datos de {editingClient?.name ?? "este cliente"} sin salir del CRM.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveEdit} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="edit-client-name">Nombre</Label>
+                <div className="relative">
+                  <UserPlus className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Input
+                    id="edit-client-name"
+                    value={editForm.name}
+                    onChange={handleEditChange("name")}
+                    placeholder="Ej: María Pérez"
+                    className={inputWithIconClassName}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-phone">Teléfono</Label>
+                <div className="relative">
+                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Input
+                    id="edit-client-phone"
+                    value={editForm.phone}
+                    onChange={handleEditChange("phone")}
+                    placeholder="099 123 456"
+                    className={inputWithIconClassName}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-whatsapp">WhatsApp</Label>
+                <div className="relative">
+                  <MessageCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Input
+                    id="edit-client-whatsapp"
+                    value={editForm.whatsapp}
+                    onChange={handleEditChange("whatsapp")}
+                    placeholder="099 123 456"
+                    className={inputWithIconClassName}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="edit-client-email">Email</Label>
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Input
+                    id="edit-client-email"
+                    type="email"
+                    value={editForm.email}
+                    onChange={handleEditChange("email")}
+                    placeholder="cliente@correo.com"
+                    className={inputWithIconClassName}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-operation-type">Tipo de Operación</Label>
+                <Select value={editForm.operation_type} onValueChange={handleEditOperationChange}>
+                  <SelectTrigger id="edit-client-operation-type" className={selectTriggerClassName}>
+                    <SelectValue placeholder="Seleccioná una operación" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClassName}>
+                    {operationTypeOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-property-type">Tipo de propiedad</Label>
+                <div className="relative">
+                  <Building2 className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Select value={editForm.property_type} onValueChange={handleEditSelectFieldChange("property_type")}>
+                    <SelectTrigger id="edit-client-property-type" className={selectWithIconClassName}>
+                      <SelectValue placeholder="Seleccioná un tipo" />
+                    </SelectTrigger>
+                    <SelectContent className={selectContentClassName}>
+                      {propertyTypeOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {editForm.operation_type ? (
+                <div className="space-y-4 rounded-2xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
+                  {isBudgetOperation(editForm.operation_type) ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-client-budget">{editBudgetLabel}</Label>
+                      <div className="relative">
+                        <CircleDollarSign className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                        <BudgetCombobox
+                          id="edit-client-budget"
+                          value={editForm.budget}
+                          onChange={handleEditSelectFieldChange("budget")}
+                          options={budgetOptionsByOperation[editForm.operation_type]}
+                          placeholder={editBudgetPlaceholder}
+                        />
+                      </div>
+                      <p className={helperTextClassName}>Todos los valores se manejan en USD.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-client-period">Período</Label>
+                      <Select value={editForm.period} onValueChange={handleEditPeriodChange}>
+                        <SelectTrigger id="edit-client-period" className={selectTriggerClassName}>
+                          <SelectValue placeholder="Seleccioná un período" />
+                        </SelectTrigger>
+                        <SelectContent className={selectContentClassName}>
+                          {temporaryPeriodOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-client-budget-notes">Observaciones de presupuesto</Label>
+                    <Input
+                      id="edit-client-budget-notes"
+                      value={editForm.budget_notes}
+                      onChange={handleEditChange("budget_notes")}
+                      placeholder="Ej: préstamo bancario, paga adelantado..."
+                      className={`${fieldClassName} text-sm`}
+                    />
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-zone">{editZoneLabel}</Label>
+                <div className="relative">
+                  <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Input
+                    id="edit-client-zone"
+                    value={editForm.zone}
+                    onChange={handleEditChange("zone")}
+                    placeholder={editZonePlaceholder}
+                    className={inputWithIconClassName}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Estado</Label>
+                <Select value={editForm.stage} onValueChange={handleEditStageChange}>
+                  <SelectTrigger className={selectTriggerClassName}>
+                    <SelectValue placeholder="Seleccioná una etapa" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClassName}>
+                    {clientStages.map((stage) => (
+                      <SelectItem key={stage} value={stage}>
+                        {stage}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="edit-client-notes">Comentarios</Label>
+                  <span className="text-[11px] text-zinc-500">Se guardan en la ficha</span>
+                </div>
+                <Textarea
+                  id="edit-client-notes"
+                  value={editForm.notes}
+                  onChange={handleEditChange("notes")}
+                  placeholder="Agregá contexto útil para el seguimiento"
+                  className="min-h-28 border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="secondary" onClick={resetEditState}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="bg-white text-black hover:bg-zinc-200" disabled={savingEdit || !supabaseReady}>
+                {savingEdit ? "Guardando..." : "Guardar cambios"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

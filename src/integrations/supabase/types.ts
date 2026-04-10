@@ -17,11 +17,14 @@ export type Database = {
       clients: {
         Row: {
           budget: string | null
+          budget_notes: string | null
           created_at: string | null
           email: string | null
           id: string
           name: string
           notes: string | null
+          operation_type: string | null
+          period: string | null
           phone: string | null
           property_type: string | null
           stage: string | null
@@ -30,11 +33,14 @@ export type Database = {
         }
         Insert: {
           budget?: string | null
+          budget_notes?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
           name: string
           notes?: string | null
+          operation_type?: string | null
+          period?: string | null
           phone?: string | null
           property_type?: string | null
           stage?: string | null
@@ -43,11 +49,14 @@ export type Database = {
         }
         Update: {
           budget?: string | null
+          budget_notes?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
           name?: string
           notes?: string | null
+          operation_type?: string | null
+          period?: string | null
           phone?: string | null
           property_type?: string | null
           stage?: string | null

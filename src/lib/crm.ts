@@ -28,8 +28,11 @@ export interface ClientRecord {
   phone: string | null;
   whatsapp: string | null;
   email: string | null;
+  operation_type: string | null;
   property_type: string | null;
   budget: string | null;
+  period: string | null;
+  budget_notes: string | null;
   zone: string | null;
   notes: string | null;
   stage: string;
