@@ -869,25 +869,6 @@ export default function CRM() {
                     </p>
                   </div>
                   <p className="break-all text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
-
-                  <div className="flex flex-wrap gap-2 pt-1 md:hidden">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-9 flex-1 border-white/10 bg-transparent text-white hover:bg-white/5"
-                      onClick={() => navigate("/")}
-                    >
-                      Link colega
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-9 flex-1 border-white/10 bg-transparent text-white hover:bg-white/5"
-                      onClick={() => navigate("/jira")}
-                    >
-                      Jira
-                    </Button>
-                  </div>
                 </div>
               </div>
 
@@ -903,6 +884,27 @@ export default function CRM() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="grid gap-2 md:hidden">
+          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-2 backdrop-blur-xl">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 border-white/10 bg-transparent text-white hover:bg-white/5"
+              onClick={() => navigate("/")}
+            >
+              Link colega
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 border-white/10 bg-transparent text-white hover:bg-white/5"
+              onClick={() => navigate("/jira")}
+            >
+              Jira
+            </Button>
+          </div>
+        </div>
 
         {errorMessage && (
           <Card className="border-amber-500/40 bg-amber-50 shadow-sm">
