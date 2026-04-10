@@ -345,14 +345,14 @@ export default function Index() {
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div className="space-y-3">
                 <div className="inline-flex w-fit rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-zinc-200">
-                  Cupertino Tools
+                  CUPERTINO
                 </div>
                 <div>
                   <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                    Panel Jira y Link de Colega
+                    Generador de Link Colega
                   </h1>
                   <p className="mt-1 text-sm text-zinc-300">
-                    Un espacio simple para generar links, cargar leads y seguir el trabajo comercial.
+                    Generá links de propiedades para compartir con tus clientes al instante.
                   </p>
                 </div>
                 <p className="break-all text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
@@ -362,29 +362,6 @@ export default function Index() {
             </div>
           </CardContent>
         </Card>
-
-        <div className="premium-fade-up-delay-1 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-2 shadow-sm backdrop-blur-xl lg:grid-cols-4">
-          <Button
-            className={activeView === "colega" ? "bg-white text-black hover:bg-zinc-200" : "border-white/10 bg-transparent text-white hover:bg-white/5"}
-            variant={activeView === "colega" ? "default" : "outline"}
-            onClick={() => navigate("/")}
-          >
-            Link de colega
-          </Button>
-          <Button
-            className={activeView === "jira" ? "bg-white text-black hover:bg-zinc-200" : "border-white/10 bg-transparent text-white hover:bg-white/5"}
-            variant={activeView === "jira" ? "default" : "outline"}
-            onClick={() => navigate("/jira")}
-          >
-            Formulario Jira
-          </Button>
-          <Button variant="outline" className="border-white/10 bg-transparent text-white hover:bg-white/5" onClick={openExternalJira}>
-            Abrir Jira real
-          </Button>
-          <Button variant="outline" className="border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => navigate("/crm")}>
-            CRM
-          </Button>
-        </div>
 
         {activeView === "colega" ? (
           <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">

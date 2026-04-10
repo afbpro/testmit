@@ -26,18 +26,13 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/60 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
           <div className="flex items-center gap-3">
             <img
               src={logo}
               alt="Cupertino Negocios Inmobiliarios"
               className="h-9 w-auto rounded-xl border border-white/10 bg-white/5 p-1.5 shadow-sm"
             />
-
-            <div className="hidden sm:block">
-              <p className="text-sm font-semibold text-white">Cupertino</p>
-              <p className="text-[11px] text-zinc-400">Tools & CRM</p>
-            </div>
           </div>
 
           <nav className="hidden items-center gap-1 md:flex md:flex-wrap">
@@ -55,7 +50,7 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
             ))}
           </nav>
 
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex shrink-0 items-center justify-end gap-2">
             <p className="hidden text-sm text-zinc-300 lg:block">{email ?? "usuario"}</p>
             <Button
               type="button"

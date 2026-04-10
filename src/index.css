@@ -51,15 +51,18 @@
   *::after {
     @apply border-border;
     box-sizing: border-box;
-    max-width: 100%;
   }
 
   html,
-  body,
-  #root {
+  body {
     overflow-x: hidden;
     max-width: 100vw;
+  }
+
+  #root {
     width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
 
   html {
@@ -73,7 +76,6 @@
   }
 
   img,
-  svg,
   video,
   canvas {
     display: block;
@@ -82,16 +84,13 @@
   }
 
   p,
-  span,
-  a,
   h1,
   h2,
   h3,
   h4,
   h5,
-  h6,
-  label {
-    overflow-wrap: anywhere;
+  h6 {
+    overflow-wrap: break-word;
   }
 
   button,
