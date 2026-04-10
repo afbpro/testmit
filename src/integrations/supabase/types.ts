@@ -26,8 +26,6 @@ export type Database = {
           last_contact: string | null
           name: string
           notes: string | null
-          operation_type: string | null
-          period: string | null
           phone: string | null
           property_type: string | null
           stage: string | null
@@ -46,8 +44,6 @@ export type Database = {
           last_contact?: string | null
           name: string
           notes?: string | null
-          operation_type?: string | null
-          period?: string | null
           phone?: string | null
           property_type?: string | null
           stage?: string | null
@@ -66,8 +62,6 @@ export type Database = {
           last_contact?: string | null
           name?: string
           notes?: string | null
-          operation_type?: string | null
-          period?: string | null
           phone?: string | null
           property_type?: string | null
           stage?: string | null

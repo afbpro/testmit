@@ -4,14 +4,18 @@ import { toast } from "sonner";
 import {
   Building2,
   Check,
+  ChevronDown,
   ChevronsUpDown,
   CircleDollarSign,
   Loader2,
+  LogOut,
   Mail,
   MapPin,
   MessageCircle,
+  MoreVertical,
   Pencil,
   Plus,
+  RefreshCw,
   Search,
   UserPlus,
   Users,
@@ -27,6 +31,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -893,11 +903,12 @@ export default function CRM() {
           <Button
             type="button"
             size="sm"
-            variant="outline"
-            className="h-9 rounded-full border-white/10 bg-white/[0.04] px-3 text-white hover:bg-white/10"
+            variant="ghost"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-white hover:bg-white/10"
             onClick={() => setShowMobileStats((current) => !current)}
           >
             📊 {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
+            <ChevronDown className={`h-4 w-4 transition-transform ${showMobileStats ? "rotate-180" : ""}`} />
           </Button>
         </div>
 
@@ -1389,14 +1400,14 @@ export default function CRM() {
         type="button"
         size="icon"
         aria-label="Agregar cliente"
-        className="fixed bottom-5 right-5 z-50 h-14 w-14 rounded-full bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:bg-zinc-200 xl:hidden"
+        className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:bg-zinc-200 md:bottom-5 md:right-5 xl:hidden"
         onClick={() => setIsAddClientOpen(true)}
       >
         <Plus className="h-6 w-6" />
       </Button>
 
       <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
-        <DialogContent className="max-h-[90vh] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-y-auto border border-white/10 bg-zinc-950 text-white sm:max-w-lg xl:hidden">
+        <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:border-white/10 xl:hidden">
           <DialogHeader>
             <DialogTitle>Agregar cliente</DialogTitle>
             <DialogDescription className="text-zinc-300">
