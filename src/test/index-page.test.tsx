@@ -99,7 +99,7 @@ describe("Index login flow", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /ingresar/i }));
 
-    expect(await screen.findByText(/crm de clientes/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /^crm$/i, level: 1 })).toBeInTheDocument();
     expect(screen.getByText(/sesión activa: demo@cupertino.com/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /guardar cliente/i })).toBeInTheDocument();
     expect(screen.getAllByText(/interesado/i).length).toBeGreaterThan(0);

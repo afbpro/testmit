@@ -8,9 +8,9 @@ describe("crm helpers", () => {
     const warmDate = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
     const coldDate = new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString();
 
-    expect(getLeadTemperature(today).label).toBe("Hot");
-    expect(getLeadTemperature(warmDate).label).toBe("Warm");
-    expect(getLeadTemperature(coldDate).label).toBe("Cold");
+    expect(getLeadTemperature(today).label).toBe("Activo");
+    expect(getLeadTemperature(warmDate).label).toBe("Tibio");
+    expect(getLeadTemperature(coldDate).label).toBe("Frío");
   });
 
   it("returns null when there is no last contact and a number when it exists", () => {
