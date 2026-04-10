@@ -258,13 +258,9 @@ export default function ClientDetail() {
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Etapa</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <span
-                        className={`inline-flex h-8 w-8 items-center justify-center rounded-full border text-sm ${getStageBadgeClass(client.stage)}`}
-                        title={`Estado: ${client.stage}`}
-                        aria-label={`Estado ${client.stage}`}
-                      >
-                        🔥
-                      </span>
+                      <Badge variant="outline" className={`border ${getStageBadgeClass(client.stage)}`}>
+                        {client.stage}
+                      </Badge>
                     </div>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
