@@ -112,6 +112,45 @@ export function getLeadTemperature(lastContactAt: string | null | undefined) {
   };
 }
 
+export function buildWhatsAppHref(phone: string | null | undefined, message?: string) {
+  const digits = (phone ?? "").replace(/\D/g, "");
+
+  if (!digits) {
+    return "";
+  }
+
+  const normalizedMessage = message?.trim();
+
+  return normalizedMessage
+    ? `https://wa.me/${digits}?text=${encodeURIComponent(normalizedMessage)}`
+    : `https://wa.me/${digits}`;
+}
+
+export function buildClientWhatsAppMessage(
+  client: Pick<ClientRecord, "name" | "operation_type" | "property_type" | "zone" | "period">,
+) {
+  const interestParts = [
+    client.operation_type ? client.operation_type.toLowerCase() : null,
+    client.property_type ? client.property_type.toLowerCase() : null,
+    client.zone ? `en ${client.zone}` : null,
+    client.period ? `para ${client.period}` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return [
+    `Hola ${client.name}, ¿cómo estás?`,
+    interestParts ? `Te escribo por tu consulta ${interestParts}.` : "Te escribo por tu consulta.",
+    "Quedo atento.",
+  ].join(" ");
+}
+
+export function buildClientWhatsAppUrl(
+  client: Pick<ClientRecord, "name" | "phone" | "whatsapp" | "operation_type" | "property_type" | "zone" | "period">,
+) {
+  return buildWhatsAppHref(client.whatsapp || client.phone, buildClientWhatsAppMessage(client));
+}
+
 export interface ClientRecord {
   id: string;
   name: string;

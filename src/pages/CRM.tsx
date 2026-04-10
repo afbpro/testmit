@@ -56,6 +56,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getStoredSession, signOut } from "@/lib/auth";
 import {
   appendActivityLog,
+  buildClientWhatsAppUrl,
   clientStages,
   createActivityEntry,
   defaultClientStage,
@@ -1299,6 +1300,7 @@ export default function CRM() {
                           ? "Contactado hoy"
                           : `Hace ${daysSinceContact} día${daysSinceContact === 1 ? "" : "s"}`;
                     const primaryContact = client.whatsapp || client.phone;
+                    const whatsappUrl = buildClientWhatsAppUrl(client);
 
                     return (
                       <div
@@ -1310,15 +1312,26 @@ export default function CRM() {
                             <div className="min-w-0 space-y-1">
                               <p className="text-lg font-semibold leading-tight text-white">{client.name}</p>
                               {primaryContact ? (
-                                <a
-                                  href={`https://wa.me/${primaryContact.replace(/\D/g, "")}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex max-w-full items-center gap-1 text-sm text-zinc-200 underline-offset-4 hover:text-white hover:underline"
-                                >
-                                  <MessageCircle className="h-3.5 w-3.5" />
-                                  <span className="truncate">{primaryContact}</span>
-                                </a>
+                                <div className="flex max-w-full flex-wrap items-center gap-2">
+                                  <p className="truncate text-sm text-zinc-100">{primaryContact}</p>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 border-emerald-500/30 bg-emerald-500/10 px-2.5 text-emerald-100 hover:bg-emerald-500/20"
+                                    asChild
+                                  >
+                                    <a
+                                      href={whatsappUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      aria-label={`Enviar WhatsApp a ${client.name}`}
+                                    >
+                                      <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
+                                      WhatsApp
+                                    </a>
+                                  </Button>
+                                </div>
                               ) : (
                                 <p className="text-sm text-zinc-300">{client.email || "Sin WhatsApp principal"}</p>
                               )}
@@ -1379,7 +1392,7 @@ export default function CRM() {
                                     asChild
                                   >
                                     <a
-                                      href={`https://wa.me/${primaryContact.replace(/\D/g, "")}`}
+                                      href={whatsappUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                     >

@@ -27,6 +27,7 @@ import AppNavigation from "@/components/AppNavigation";
 import { getStoredSession, signOut } from "@/lib/auth";
 import {
   appendActivityLog,
+  buildClientWhatsAppUrl,
   clientStages,
   createActivityEntry,
   defaultClientStage,
@@ -207,6 +208,7 @@ export default function ClientDetail() {
                   ? "Hoy"
                   : `Hace ${daysSinceContact} día${daysSinceContact === 1 ? "" : "s"}`;
             const primaryContact = client.whatsapp || client.phone;
+            const whatsappUrl = buildClientWhatsAppUrl(client);
 
             return <>
             <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
@@ -245,7 +247,7 @@ export default function ClientDetail() {
                   {primaryContact && (
                     <Button variant="secondary" asChild>
                       <a
-                        href={`https://wa.me/${primaryContact.replace(/\D/g, "")}`}
+                        href={whatsappUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="gap-2"
@@ -277,7 +279,7 @@ export default function ClientDetail() {
                     {primaryContact && (
                       <Button variant="outline" className="mt-3 w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20" asChild>
                         <a
-                          href={`https://wa.me/${primaryContact.replace(/\D/g, "")}`}
+                          href={whatsappUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="gap-2"
@@ -332,7 +334,28 @@ export default function ClientDetail() {
                         <MessageCircle className="h-4 w-4" />
                         <p className="text-xs uppercase tracking-[0.18em]">WhatsApp</p>
                       </div>
-                      <p className="text-sm font-medium text-white">{primaryContact || "-"}</p>
+                      {primaryContact ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-medium text-white">{primaryContact}</p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 border-emerald-500/30 bg-emerald-500/10 px-2.5 text-emerald-100 hover:bg-emerald-500/20"
+                            asChild
+                          >
+                            <a
+                              href={whatsappUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
+                              Abrir WhatsApp
+                            </a>
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="text-sm font-medium text-white">-</p>
+                      )}
                     </div>
 
                     <div className="rounded-xl border border-white/10 bg-black/25 p-4">
