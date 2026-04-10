@@ -25,8 +25,8 @@ const mobileActiveClass = "bg-white/10 text-white";
 export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-black/60 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/60 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-4">
           <div className="flex items-center gap-3">
             <img
               src={logo}
@@ -40,7 +40,7 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
             </div>
           </div>
 
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="hidden items-center gap-1 md:flex md:flex-wrap">
             {navItems.map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
@@ -55,7 +55,7 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <p className="hidden text-sm text-zinc-300 lg:block">{email ?? "usuario"}</p>
             <Button
               type="button"
@@ -71,8 +71,8 @@ export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
         </div>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/85 px-2 py-2 backdrop-blur-xl md:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-2 pb-[calc(env(safe-area-inset-bottom)+0.15rem)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-full border-t border-white/10 bg-black/85 px-2 py-2 backdrop-blur-xl md:hidden">
+        <div className="mx-auto grid w-full max-w-md grid-cols-3 gap-2 pb-[calc(env(safe-area-inset-bottom)+0.15rem)]">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}

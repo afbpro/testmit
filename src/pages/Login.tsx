@@ -80,8 +80,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white flex flex-col">
-      <main className="flex flex-1 items-center justify-center px-4 py-4 md:py-8">
+    <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
+      <main className="flex flex-1 items-center justify-center px-3 py-4 sm:px-4 md:py-8">
         <div className="premium-fade-up w-full max-w-md space-y-4">
           {checkingSession && (
             <p className="text-center text-sm text-zinc-400">Verificando sesión activa...</p>

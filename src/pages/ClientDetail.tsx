@@ -180,10 +180,10 @@ export default function ClientDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
       <AppNavigation email={session?.email} onLogout={handleLogout} />
 
-      <main className="mx-auto max-w-6xl space-y-5 px-4 py-6 pb-24 md:py-7 md:pb-7">
+      <main className="mx-auto max-w-6xl space-y-5 px-3 py-6 pb-24 sm:px-4 md:py-7 md:pb-7">
         {loading ? (
           <Card className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
             <CardContent className="p-6 flex items-center gap-2 text-sm text-zinc-300">
@@ -222,24 +222,24 @@ export default function ClientDetail() {
                         Acá podés ver sus datos, registrar avances y abrir sus links guardados.
                       </p>
                     </div>
-                    <p className="text-xs text-zinc-400">
+                    <p className="break-all text-xs text-zinc-400">
                       Sesión activa: {session?.email ?? "usuario"} · Creado: {new Date(client.created_at).toLocaleString("es-UY")}
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="secondary" asChild>
+                  <div className="flex w-full flex-wrap gap-2 xl:w-auto">
+                    <Button variant="secondary" className="w-full sm:w-auto" asChild>
                       <Link to="/crm" className="gap-2">
                         <ArrowLeft className="h-4 w-4" />
                         Volver al CRM
                       </Link>
                     </Button>
-                    <Button variant="secondary" onClick={() => navigate("/jira")}>Ir a Jira</Button>
+                    <Button variant="secondary" className="w-full sm:w-auto" onClick={() => navigate("/jira")}>Ir a Jira</Button>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="secondary" onClick={() => void handleMarkContactedToday()}>
+                <div className="grid gap-2 sm:flex sm:flex-wrap">
+                  <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void handleMarkContactedToday()}>
                     Contactado hoy
                   </Button>
                   {primaryContact && (

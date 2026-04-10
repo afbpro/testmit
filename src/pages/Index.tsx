@@ -336,10 +336,10 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
       <AppNavigation email={session?.email} onLogout={handleLogout} />
 
-      <main className="mx-auto max-w-5xl space-y-5 px-4 py-6 pb-24 md:py-7 md:pb-7">
+      <main className="mx-auto max-w-5xl space-y-5 px-3 py-6 pb-24 sm:px-4 md:py-7 md:pb-7">
         <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
           <CardContent className="p-6 md:p-7">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
@@ -355,7 +355,7 @@ export default function Index() {
                     Un espacio simple para generar links, cargar leads y seguir el trabajo comercial.
                   </p>
                 </div>
-                <p className="text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
+                <p className="break-all text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
               </div>
 
               <div />
@@ -363,7 +363,7 @@ export default function Index() {
           </CardContent>
         </Card>
 
-        <div className="premium-fade-up-delay-1 grid gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-2 shadow-sm backdrop-blur-xl sm:grid-cols-2 lg:grid-cols-4">
+        <div className="premium-fade-up-delay-1 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-2 shadow-sm backdrop-blur-xl lg:grid-cols-4">
           <Button
             className={activeView === "colega" ? "bg-white text-black hover:bg-zinc-200" : "border-white/10 bg-transparent text-white hover:bg-white/5"}
             variant={activeView === "colega" ? "default" : "outline"}
@@ -439,7 +439,7 @@ export default function Index() {
                   <RadioGroup
                     value={propertyType}
                     onValueChange={(value) => setPropertyType(value as PropertyType)}
-                    className="grid grid-cols-2 gap-3"
+                    className="grid grid-cols-1 gap-3 sm:grid-cols-2"
                   >
                     {propertyTypes.map((type) => {
                       const id = type.toLowerCase();
@@ -613,7 +613,7 @@ export default function Index() {
                                         propertyType: value as typeof current.propertyType,
                                       }))
                                     }
-                                    className="grid grid-cols-2 gap-3"
+                                    className="grid grid-cols-1 gap-3 sm:grid-cols-2"
                                   >
                                     {newClientPropertyTypes.map((type) => (
                                       <div key={type} className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-3 py-2.5">

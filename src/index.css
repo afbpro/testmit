@@ -46,8 +46,20 @@
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     @apply border-border;
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
   }
 
   html {
@@ -56,7 +68,30 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  p,
+  span,
+  a,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  label {
+    overflow-wrap: anywhere;
   }
 
   button,
