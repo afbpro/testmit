@@ -23,7 +23,7 @@ export type Database = {
           department: string | null
           email: string | null
           id: string
-          last_contact_at: string | null
+          last_contact: string | null
           name: string
           notes: string | null
           operation_type: string | null
@@ -43,7 +43,7 @@ export type Database = {
           department?: string | null
           email?: string | null
           id?: string
-          last_contact_at?: string | null
+          last_contact?: string | null
           name: string
           notes?: string | null
           operation_type?: string | null
@@ -63,7 +63,7 @@ export type Database = {
           department?: string | null
           email?: string | null
           id?: string
-          last_contact_at?: string | null
+          last_contact?: string | null
           name?: string
           notes?: string | null
           operation_type?: string | null
@@ -74,6 +74,75 @@ export type Database = {
           whatsapp?: string | null
           zone?: string | null
           zone_specific?: string | null
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          created_at: string | null
+          department: string | null
+          id: string
+          notes: string | null
+          operation: string | null
+          price: string | null
+          title: string
+          type: string | null
+          url: string | null
+          zone: string | null
+          zone_specific: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          department?: string | null
+          id?: string
+          notes?: string | null
+          operation?: string | null
+          price?: string | null
+          title: string
+          type?: string | null
+          url?: string | null
+          zone?: string | null
+          zone_specific?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          department?: string | null
+          id?: string
+          notes?: string | null
+          operation?: string | null
+          price?: string | null
+          title?: string
+          type?: string | null
+          url?: string | null
+          zone?: string | null
+          zone_specific?: string | null
+        }
+        Relationships: []
+      }
+      property_links: {
+        Row: {
+          client_id: string | null
+          colleague_agency: string | null
+          created_at: string | null
+          generated_url: string | null
+          id: string
+          property_type: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          colleague_agency?: string | null
+          created_at?: string | null
+          generated_url?: string | null
+          id?: string
+          property_type?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          colleague_agency?: string | null
+          created_at?: string | null
+          generated_url?: string | null
+          id?: string
+          property_type?: string | null
         }
         Relationships: []
       }

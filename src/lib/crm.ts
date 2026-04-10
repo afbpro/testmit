@@ -127,9 +127,23 @@ export interface ClientRecord {
   period: string | null;
   budget_notes: string | null;
   notes: string | null;
-  last_contact_at: string | null;
+  last_contact: string | null;
   activity_log: ClientActivityEntry[] | null;
   stage: string;
+  created_at: string;
+}
+
+export interface PropertyRecord {
+  id: string;
+  title: string;
+  type: string | null;
+  operation: string | null;
+  price: string | null;
+  department: string | null;
+  zone: string | null;
+  zone_specific: string | null;
+  url: string | null;
+  notes: string | null;
   created_at: string;
 }
 

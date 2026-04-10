@@ -766,7 +766,7 @@ export default function CRM() {
     setClients((current) =>
       current.map((client) =>
         client.id === clientId
-          ? { ...client, last_contact_at: now, activity_log: nextActivityLog }
+          ? { ...client, last_contact: now, activity_log: nextActivityLog }
           : client,
       ),
     );
@@ -779,7 +779,7 @@ export default function CRM() {
     const { error } = await supabase
       .from("clients")
       .update({
-        last_contact_at: now,
+        last_contact: now,
         activity_log: nextActivityLog,
       })
       .eq("id", clientId);
@@ -1273,8 +1273,8 @@ export default function CRM() {
               ) : (
                 <div className="space-y-3">
                   {filteredClients.map((client) => {
-                    const leadTemperature = getLeadTemperature(client.last_contact_at);
-                    const daysSinceContact = getDaysSinceLastContact(client.last_contact_at);
+                    const leadTemperature = getLeadTemperature(client.last_contact);
+                    const daysSinceContact = getDaysSinceLastContact(client.last_contact);
                     const lastContactLabel =
                       daysSinceContact === null
                         ? "Sin último contacto"

@@ -164,7 +164,7 @@ export default function ClientDetail() {
     const { error } = await supabase
       .from("clients")
       .update({
-        last_contact_at: now,
+        last_contact: now,
         activity_log: nextActivityLog,
       })
       .eq("id", id);
@@ -175,7 +175,7 @@ export default function ClientDetail() {
     }
 
     setClient((current) =>
-      current ? { ...current, last_contact_at: now, activity_log: nextActivityLog } : current,
+      current ? { ...current, last_contact: now, activity_log: nextActivityLog } : current,
     );
     toast.success("Contacto actualizado");
   };
@@ -198,8 +198,8 @@ export default function ClientDetail() {
           </Card>
         ) : client ? (
           (() => {
-            const leadTemperature = getLeadTemperature(client.last_contact_at);
-            const daysSinceContact = getDaysSinceLastContact(client.last_contact_at);
+            const leadTemperature = getLeadTemperature(client.last_contact);
+            const daysSinceContact = getDaysSinceLastContact(client.last_contact);
             const activityHistory = normalizeActivityLog(client.activity_log);
             const lastContactLabel =
               daysSinceContact === null

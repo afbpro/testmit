@@ -202,7 +202,7 @@ export default function Index() {
     const { error: activityError } = await supabase
       .from("clients")
       .update({
-        last_contact_at: now,
+        last_contact: now,
         activity_log: nextActivityLog,
       })
       .eq("id", clientId);
@@ -213,7 +213,7 @@ export default function Index() {
       setClients((current) =>
         current.map((client) =>
           client.id === clientId
-            ? { ...client, last_contact_at: now, activity_log: nextActivityLog }
+            ? { ...client, last_contact: now, activity_log: nextActivityLog }
             : client,
         ),
       );
