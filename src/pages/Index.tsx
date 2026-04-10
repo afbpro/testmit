@@ -21,6 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { formatSmartText } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -274,9 +275,18 @@ export default function Index() {
   const handleLeadChange = (field: keyof typeof initialLeadForm) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    const mode =
+      field === "fullName"
+        ? "name"
+        : field === "email"
+          ? "email"
+          : field === "details" || field === "zone"
+            ? "sentence"
+            : "none";
+
     setLeadForm((current) => ({
       ...current,
-      [field]: event.target.value,
+      [field]: formatSmartText(event.target.value, mode),
     }));
   };
 
@@ -285,7 +295,7 @@ export default function Index() {
   ) => {
     setNewClientForm((current) => ({
       ...current,
-      [field]: event.target.value,
+      [field]: field === "name" ? formatSmartText(event.target.value, "name") : event.target.value,
     }));
   };
 

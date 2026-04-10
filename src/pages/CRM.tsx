@@ -69,6 +69,7 @@ import {
 } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
 import AppNavigation from "@/components/AppNavigation";
+import { formatSmartText } from "@/lib/utils";
 
 const propertyTypeOptions = [
   "Apartamento",
@@ -366,6 +367,14 @@ const initialClientForm = {
   stage: defaultClientStage as ClientStage,
 };
 
+const clientFieldFormatters: Partial<Record<keyof typeof initialClientForm, "none" | "name" | "email" | "sentence" | "title">> = {
+  name: "name",
+  email: "email",
+  zone_specific: "sentence",
+  budget_notes: "sentence",
+  notes: "sentence",
+};
+
 const buildClientPayload = (values: typeof initialClientForm) => {
   const contactNumber = values.whatsapp.trim();
 
@@ -492,7 +501,7 @@ export default function CRM() {
   ) => {
     setForm((current) => ({
       ...current,
-      [field]: event.target.value,
+      [field]: formatSmartText(event.target.value, clientFieldFormatters[field] ?? "none"),
     }));
   };
 
@@ -569,7 +578,7 @@ export default function CRM() {
   ) => {
     setEditForm((current) => ({
       ...current,
-      [field]: event.target.value,
+      [field]: formatSmartText(event.target.value, clientFieldFormatters[field] ?? "none"),
     }));
   };
 

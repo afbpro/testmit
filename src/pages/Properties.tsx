@@ -48,6 +48,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getStoredSession, signOut } from "@/lib/auth";
 import { type PropertyRecord } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
+import { formatSmartText } from "@/lib/utils";
 
 const propertyTypeOptions = ["Apartamento", "Casa", "Local", "Terreno", "Campo"] as const;
 const operationOptions = ["Venta", "Alquiler temporal", "Alquiler anual", "Alquiler invernal"] as const;
@@ -547,9 +548,11 @@ export default function Properties() {
   const handleChange = (field: keyof typeof initialPropertyForm) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    const mode = field === "title" ? "title" : field === "notes" ? "sentence" : "none";
+
     setForm((current) => ({
       ...current,
-      [field]: event.target.value,
+      [field]: formatSmartText(event.target.value, mode),
     }));
   };
 

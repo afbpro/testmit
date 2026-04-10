@@ -39,6 +39,7 @@ import {
   type PropertyLinkRecord,
 } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
+import { formatSmartText } from "@/lib/utils";
 
 export default function ClientDetail() {
   const navigate = useNavigate();
@@ -399,7 +400,7 @@ export default function ClientDetail() {
                       id="client-notes"
                       className="min-h-32 border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
                       value={notes}
-                      onChange={(event) => setNotes(event.target.value)}
+                      onChange={(event) => setNotes(formatSmartText(event.target.value, "sentence"))}
                     />
                   </div>
 
