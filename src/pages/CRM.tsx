@@ -840,14 +840,14 @@ export default function CRM() {
         )}
 
         <div className="xl:hidden">
-          <Button
+          <button
             type="button"
-            variant="outline"
-            className="w-full border-white/10 bg-white/[0.04] text-white hover:bg-white/10"
+            className="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm text-zinc-400 transition hover:text-zinc-200"
             onClick={() => setShowMobileStats((current) => !current)}
           >
             {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
-          </Button>
+            <ChevronDown className={`h-4 w-4 transition-transform ${showMobileStats ? "rotate-180" : ""}`} />
+          </button>
         </div>
 
         {showMobileStats && (
