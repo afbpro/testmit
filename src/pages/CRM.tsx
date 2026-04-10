@@ -1204,12 +1204,12 @@ export default function CRM() {
               <div className="sticky top-[4.75rem] z-20 space-y-3 rounded-2xl bg-[#09090b]/95 py-2 backdrop-blur md:static md:bg-transparent md:py-0">
                 <div className="grid gap-3 md:grid-cols-[1fr_220px]">
                   <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                    <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400" />
                     <Input
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
                       placeholder="Buscar por nombre, operación, zona, email o WhatsApp"
-                      className="h-11 border-white/10 bg-black/30 pl-9 text-white placeholder:text-zinc-500"
+                      className="h-11 border-white/10 bg-black/30 pl-10 text-white placeholder:text-zinc-500"
                     />
                   </div>
 
