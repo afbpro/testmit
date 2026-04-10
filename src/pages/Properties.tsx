@@ -264,6 +264,94 @@ function stripPhotosLinkFromNotes(notes: string | null | undefined) {
     .trim();
 }
 
+function extractMetaContent(document: Document, selectors: string[]) {
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    const content = element?.getAttribute("content")?.trim() || element?.textContent?.trim();
+
+    if (content) {
+      return content;
+    }
+  }
+
+  return "";
+}
+
+function inferPropertyTypeFromText(text: string): PropertyTypeOption | "" {
+  const normalizedText = text.toLowerCase();
+
+  if (normalizedText.includes("apartamento") || normalizedText.includes("apto")) {
+    return "Apartamento";
+  }
+
+  if (normalizedText.includes("casa")) {
+    return "Casa";
+  }
+
+  if (normalizedText.includes("local")) {
+    return "Local";
+  }
+
+  if (normalizedText.includes("terreno") || normalizedText.includes("lote")) {
+    return "Terreno";
+  }
+
+  if (normalizedText.includes("campo") || normalizedText.includes("chacra")) {
+    return "Campo";
+  }
+
+  return "";
+}
+
+function inferOperationFromText(text: string): OperationOption | "" {
+  const normalizedText = text.toLowerCase();
+
+  if (normalizedText.includes("alquiler temporal") || normalizedText.includes("alquiler temporario") || normalizedText.includes("temporada")) {
+    return "Alquiler temporal";
+  }
+
+  if (normalizedText.includes("alquiler anual")) {
+    return "Alquiler anual";
+  }
+
+  if (normalizedText.includes("alquiler invernal") || normalizedText.includes("invernal")) {
+    return "Alquiler invernal";
+  }
+
+  if (normalizedText.includes("venta")) {
+    return "Venta";
+  }
+
+  return "";
+}
+
+function extractPriceFromText(text: string) {
+  const match = text.match(/(?:u\$s|usd|us\$|\$)\s*([\d.]+(?:,\d+)?)/i);
+  return match?.[1]?.trim() ?? "";
+}
+
+function inferLocationFromText(text: string) {
+  const normalizedText = text.toLowerCase();
+
+  for (const department of departmentOptions) {
+    const zoneMatch = zoneOptionsByDepartment[department].find((zone) => normalizedText.includes(zone.toLowerCase()));
+
+    if (zoneMatch) {
+      return { department, zone: zoneMatch };
+    }
+  }
+
+  if (normalizedText.includes("maldonado")) {
+    return { department: "Maldonado" as DepartmentOption, zone: "" };
+  }
+
+  if (normalizedText.includes("rocha")) {
+    return { department: "Rocha" as DepartmentOption, zone: "" };
+  }
+
+  return { department: "" as DepartmentOption | "", zone: "" };
+}
+
 function mapPropertyTypeToColega(type: string | null | undefined) {
   switch (type) {
     case "Apartamento":
@@ -301,6 +389,7 @@ export default function Properties() {
   const [editingProperty, setEditingProperty] = useState<PropertyRecord | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [operationFilter, setOperationFilter] = useState<PropertyFilterOption>("all");
+  const [importingFromUrl, setImportingFromUrl] = useState(false);
 
   const priceOptions = useMemo(() => {
     if (form.operation === "Venta") {
@@ -477,6 +566,80 @@ export default function Properties() {
       department: value as DepartmentOption,
       zone: "",
     }));
+  };
+
+  const handleImportFromUrl = async () => {
+    if (!form.url.trim()) {
+      toast.error("Pegá primero un enlace del portal.");
+      return;
+    }
+
+    setImportingFromUrl(true);
+
+    try {
+      const normalizedUrl = normalizePortalUrl(form.url);
+      const attempts = [
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(normalizedUrl)}`,
+        normalizedUrl,
+      ];
+
+      let html = "";
+
+      for (const attempt of attempts) {
+        try {
+          const response = await fetch(attempt);
+
+          if (response.ok) {
+            html = await response.text();
+            if (html.trim()) {
+              break;
+            }
+          }
+        } catch {
+          // try next attempt
+        }
+      }
+
+      if (!html) {
+        throw new Error("No se pudo leer el enlace.");
+      }
+
+      const document = new DOMParser().parseFromString(html, "text/html");
+      const title =
+        extractMetaContent(document, [
+          'meta[property="og:title"]',
+          'meta[name="twitter:title"]',
+          "title",
+        ]) || form.title;
+      const description = extractMetaContent(document, [
+        'meta[property="og:description"]',
+        'meta[name="description"]',
+      ]);
+      const bodyText = `${title} ${description} ${document.body?.textContent ?? ""}`.replace(/\s+/g, " ").trim();
+      const inferredType = inferPropertyTypeFromText(bodyText);
+      const inferredOperation = inferOperationFromText(bodyText);
+      const inferredPrice = extractPriceFromText(bodyText);
+      const inferredLocation = inferLocationFromText(bodyText);
+
+      setForm((current) => ({
+        ...current,
+        url: normalizedUrl,
+        title: title || current.title,
+        type: inferredType || current.type,
+        operation: inferredOperation || current.operation,
+        price: inferredPrice || current.price,
+        department: inferredLocation.department || current.department,
+        zone: inferredLocation.zone || current.zone,
+        photos_link: current.photos_link || normalizedUrl,
+        notes: current.notes || description || current.notes,
+      }));
+
+      toast.success("Info extraída del enlace.");
+    } catch {
+      toast.error("No pude extraer la info automáticamente. Podés completar los campos manualmente.");
+    } finally {
+      setImportingFromUrl(false);
+    }
   };
 
   const openEditDialog = (property: PropertyRecord) => {
@@ -975,16 +1138,31 @@ export default function Properties() {
 
             <div className="space-y-2">
               <Label htmlFor="property-url">URL del portal (opcional)</Label>
-              <div className="relative">
-                <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                <Input
-                  id="property-url"
-                  value={form.url}
-                  onChange={handleChange("url")}
-                  placeholder="https://portal.com/propiedad/123"
-                  className={inputWithIconClassName}
-                />
+              <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                <div className="relative">
+                  <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Input
+                    id="property-url"
+                    value={form.url}
+                    onChange={handleChange("url")}
+                    placeholder="https://portal.com/propiedad/123"
+                    className={inputWithIconClassName}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 border-white/10 bg-transparent text-white hover:bg-white/5"
+                  onClick={() => void handleImportFromUrl()}
+                  disabled={importingFromUrl || !form.url.trim()}
+                >
+                  {importingFromUrl ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Link2 className="mr-2 h-4 w-4" />}
+                  Traer info
+                </Button>
               </div>
+              <p className="text-xs text-zinc-400">
+                Pegá un enlace del portal y vamos a intentar completar título, tipo, operación, precio y zona automáticamente.
+              </p>
             </div>
 
             <div className="space-y-2">
