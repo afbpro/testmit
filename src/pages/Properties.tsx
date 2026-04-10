@@ -699,10 +699,10 @@ export default function Properties() {
                   {savedColegaLink.url}
                 </p>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 md:max-w-xl md:grid-cols-2">
                 <Button
                   variant="outline"
-                  className="w-full border-emerald-400/30 bg-emerald-500/10 text-emerald-50 hover:bg-emerald-500/20"
+                  className="h-11 w-full border-emerald-400/30 bg-emerald-500/10 text-emerald-50 hover:bg-emerald-500/20"
                   onClick={() =>
                     window.open(
                       `https://wa.me/?text=${encodeURIComponent(`Hola! Te comparto esta propiedad: ${savedColegaLink.url}`)}`,
@@ -716,7 +716,7 @@ export default function Properties() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full border-white/10 bg-transparent text-white hover:bg-white/5"
+                  className="h-11 w-full border-white/10 bg-transparent text-white hover:bg-white/5"
                   onClick={() => void handleCopyLink(savedColegaLink.url)}
                 >
                   <Copy className="mr-2 h-4 w-4" />
@@ -832,10 +832,10 @@ export default function Properties() {
                       <p className="text-sm text-zinc-300">{visibleNotes}</p>
                     )}
 
-                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="grid gap-2 md:grid-cols-2">
                       <Button
                         variant="outline"
-                        className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                        className="h-11 w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
                         onClick={() => handleShareWhatsApp(property)}
                         disabled={!colegaLink}
                       >
@@ -844,18 +844,18 @@ export default function Properties() {
                       </Button>
                       <Button
                         variant="outline"
-                        className="w-full border-white/10 bg-transparent text-white hover:bg-white/5"
+                        className="h-11 w-full border-white/10 bg-transparent text-white hover:bg-white/5"
                         onClick={() => void handleCopyLink(colegaLink)}
                         disabled={!colegaLink}
                       >
                         <Copy className="mr-2 h-4 w-4" />
                         Copiar link
                       </Button>
-                      <Button variant="outline" className="w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => openEditDialog(property)}>
+                      <Button variant="outline" className="h-11 w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => openEditDialog(property)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
                       </Button>
-                      <Button variant="outline" className="w-full border-red-500/30 bg-transparent text-red-200 hover:bg-red-500/10 hover:text-red-100" onClick={() => void handleDelete(property)}>
+                      <Button variant="outline" className="h-11 w-full border-red-500/30 bg-transparent text-red-200 hover:bg-red-500/10 hover:text-red-100" onClick={() => void handleDelete(property)}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Eliminar
                       </Button>
