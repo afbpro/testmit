@@ -829,21 +829,33 @@ export default function Properties() {
                       )}
                     </div>
 
-                    <div className="space-y-2 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-4 text-sm text-zinc-100 shadow-inner shadow-emerald-950/10">
-                      <div className="flex items-center gap-2 text-emerald-100">
-                        <Sparkles className="h-4 w-4" />
-                        <p className="text-xs uppercase tracking-[0.18em]">Link colega</p>
+                    {colegaLink ? (
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-3 text-sm text-emerald-50 shadow-inner shadow-emerald-950/10">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" />
+                          <span className="font-medium">Link colega listo para compartir</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="h-9 border border-white/10 bg-black/30 text-white hover:bg-black/40"
+                          onClick={() => void handleCopyLink(colegaLink)}
+                        >
+                          <Copy className="mr-2 h-4 w-4" />
+                          Copiar link colega
+                        </Button>
                       </div>
-                      <p className="break-all rounded-xl border border-white/10 bg-black/20 px-3 py-2 font-mono text-[13px] text-white">
-                        {colegaLink || "Aplicá la migración de auto_id para generar el link automáticamente."}
+                    ) : (
+                      <p className="rounded-xl border border-dashed border-white/10 bg-black/20 px-3 py-2 text-xs text-zinc-400">
+                        Aplicá la migración de auto_id para generar el link colega automáticamente.
                       </p>
-                    </div>
+                    )}
 
                     {visibleNotes && (
                       <p className="text-sm text-zinc-300">{visibleNotes}</p>
                     )}
 
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="grid gap-2 sm:grid-cols-3">
                       <Button
                         variant="outline"
                         className="h-11 w-full justify-center border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
@@ -852,15 +864,6 @@ export default function Properties() {
                       >
                         <MessageCircle className="mr-2 h-4 w-4" />
                         Compartir por WhatsApp
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="h-11 w-full justify-center border-white/10 bg-transparent text-white hover:bg-white/5"
-                        onClick={() => void handleCopyLink(colegaLink)}
-                        disabled={!colegaLink}
-                      >
-                        <Copy className="mr-2 h-4 w-4" />
-                        Copiar link
                       </Button>
                       <Button variant="outline" className="h-11 w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => openEditDialog(property)}>
                         <Pencil className="mr-2 h-4 w-4" />
