@@ -1312,17 +1312,36 @@ export default function CRM() {
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0 space-y-2">
-                            <div className="min-w-0 space-y-1">
-                              <p className="text-lg font-semibold leading-tight text-white">{client.name}</p>
-                              {primaryContact ? (
-                                <p className="truncate text-sm text-zinc-100">{primaryContact}</p>
-                              ) : (
-                                <p className="text-sm text-zinc-300">{client.email || "Sin WhatsApp principal"}</p>
-                              )}
-                              {client.email && primaryContact && (
-                                <p className="break-all text-xs text-zinc-400">{client.email}</p>
-                              )}
-                              <p className="mt-1 text-xs text-zinc-400">{lastContactLabel}</p>
+                            <div className="min-w-0 space-y-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-lg font-semibold leading-tight text-white">{client.name}</p>
+                                <span
+                                  className={`inline-flex h-7 w-7 items-center justify-center rounded-full border text-sm ${getStageBadgeClass(client.stage)}`}
+                                  title={`Estado: ${client.stage}`}
+                                  aria-label={`Estado ${client.stage}`}
+                                >
+                                  🔥
+                                </span>
+                              </div>
+
+                              <div className="space-y-1">
+                                {primaryContact ? (
+                                  <p className="truncate text-sm text-zinc-100">{primaryContact}</p>
+                                ) : (
+                                  <p className="text-sm text-zinc-300">{client.email || "Sin WhatsApp principal"}</p>
+                                )}
+
+                                {client.email && (
+                                  <a
+                                    href={`mailto:${client.email}`}
+                                    className="inline-flex break-all text-xs text-zinc-400 transition hover:text-white hover:underline"
+                                  >
+                                    {client.email}
+                                  </a>
+                                )}
+
+                                <p className="mt-1 text-xs text-zinc-400">{lastContactLabel}</p>
+                              </div>
                             </div>
 
                             <div className="flex max-w-full flex-wrap gap-2 overflow-hidden text-xs text-zinc-300">
@@ -1339,15 +1358,6 @@ export default function CRM() {
                               {client.budget && <span className="max-w-full break-words rounded-full bg-white/5 px-2.5 py-1">{client.budget}</span>}
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span
-                                className={`inline-flex h-7 w-7 items-center justify-center rounded-full border text-sm ${getStageBadgeClass(client.stage)}`}
-                                title={`Estado: ${client.stage}`}
-                                aria-label={`Estado ${client.stage}`}
-                              >
-                                🔥
-                              </span>
-                            </div>
                           </div>
 
                           <div className="mt-3 w-full rounded-xl border border-white/10 bg-black/20 p-3 sm:mt-0 lg:min-w-[320px] xl:min-w-[340px]">
@@ -1389,10 +1399,10 @@ export default function CRM() {
                                 )}
                                 <Button
                                   variant="outline"
-                                  className={`w-full justify-center ${isContactedToday ? "border-white bg-white text-black hover:bg-zinc-200" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}
+                                  className={`w-full justify-center font-medium ${isContactedToday ? "border-white bg-white !text-black hover:bg-zinc-200 hover:!text-black" : "border-white/10 bg-white/5 !text-white hover:bg-white/10 hover:!text-white"}`}
                                   onClick={() => void markClientContacted(client.id)}
                                 >
-                                  Contactado hoy
+                                  <span className={isContactedToday ? "text-black" : "text-white"}>Contactado hoy</span>
                                 </Button>
                                 <div className="grid gap-2 sm:grid-cols-2">
                                   <Button variant="outline" className="w-full justify-center" onClick={() => openEditDialog(client)}>
