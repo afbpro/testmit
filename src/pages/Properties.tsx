@@ -16,6 +16,7 @@ import {
   Search,
   Sparkles,
   Trash2,
+  X,
 } from "lucide-react";
 
 import AppNavigation from "@/components/AppNavigation";
@@ -233,6 +234,13 @@ function inferLocationFromText(text: string) {
   return { department: "" as DepartmentOption | "", zone: "" };
 }
 
+function normalizeSearchText(value: string | null | undefined) {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 function mapPropertyTypeToColega(type: string | null | undefined) {
   switch (type) {
     case "Apartamento":
@@ -284,9 +292,10 @@ export default function Properties() {
       ) as Record<OperationOption, number>,
     [properties],
   );
+  const hasActiveFilters = searchQuery.trim().length > 0 || operationFilter !== "all";
 
   const filteredProperties = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const normalizedQuery = normalizeSearchText(searchQuery.trim());
 
     return properties.filter((property) => {
       const matchesOperation = operationFilter === "all" || property.operation === operationFilter;
@@ -299,18 +308,19 @@ export default function Properties() {
         return true;
       }
 
-      const searchableText = [
-        property.title,
-        property.type,
-        property.operation,
-        property.price,
-        property.department,
-        property.zone,
-        stripPhotosLinkFromNotes(property.notes),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+      const searchableText = normalizeSearchText(
+        [
+          property.title,
+          property.type,
+          property.operation,
+          property.price,
+          property.department,
+          property.zone,
+          stripPhotosLinkFromNotes(property.notes),
+        ]
+          .filter(Boolean)
+          .join(" "),
+      );
 
       return searchableText.includes(normalizedQuery);
     });
@@ -374,6 +384,18 @@ export default function Properties() {
       }),
     );
   }, [form, hasRestoredDraft]);
+
+  useEffect(() => {
+    if (!savedColegaLink) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSavedColegaLink(null);
+    }, 8000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [savedColegaLink]);
 
   const loadProperties = useCallback(async () => {
     if (!supabase) {
@@ -696,25 +718,41 @@ export default function Properties() {
                 <Input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Buscar por título, zona, precio o escribir venta / alquiler"
+                  placeholder="Buscar por título, zona, precio o comentario"
                   className="h-11 border-0 bg-transparent pl-10 text-white placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-white/20"
                 />
               </div>
 
-              <div className="md:w-[240px]">
-                <Select value={operationFilter} onValueChange={(value) => setOperationFilter(value as PropertyFilterOption)}>
-                  <SelectTrigger className={selectTriggerClassName}>
-                    <SelectValue placeholder="Filtrar por operación" />
-                  </SelectTrigger>
-                  <SelectContent className={selectContentClassName}>
-                    <SelectItem value="all">Todas ({properties.length})</SelectItem>
-                    {operationOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option} ({operationCountMap[option]})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex gap-2 md:w-auto">
+                <div className="min-w-0 flex-1 md:w-[260px] md:flex-none">
+                  <Select value={operationFilter} onValueChange={(value) => setOperationFilter(value as PropertyFilterOption)}>
+                    <SelectTrigger className={selectTriggerClassName}>
+                      <SelectValue placeholder="Filtrar por operación" />
+                    </SelectTrigger>
+                    <SelectContent className={selectContentClassName}>
+                      <SelectItem value="all">Todas ({properties.length})</SelectItem>
+                      {operationOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option} ({operationCountMap[option]})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {hasActiveFilters && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 shrink-0 border-white/10 bg-transparent text-white hover:bg-white/5"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setOperationFilter("all");
+                    }}
+                  >
+                    Limpiar
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -727,16 +765,28 @@ export default function Properties() {
         {savedColegaLink && (
           <Card className="border border-emerald-500/30 bg-emerald-500/10 text-white shadow-sm backdrop-blur-xl">
             <CardContent className="space-y-3 p-4 sm:p-5">
-              <div className="flex items-center gap-2 text-emerald-100">
-                <Sparkles className="h-4 w-4" />
-                <p className="font-medium">✅ Propiedad guardada</p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2 text-emerald-100">
+                  <Sparkles className="h-4 w-4" />
+                  <div>
+                    <p className="font-medium">✅ Propiedad guardada</p>
+                    <p className="text-sm text-emerald-50">Tu link colega está listo.</p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-emerald-50 hover:bg-emerald-500/20 hover:text-white"
+                  onClick={() => setSavedColegaLink(null)}
+                  aria-label="Cerrar aviso"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-              <div>
-                <p className="text-sm text-emerald-50">Tu link colega:</p>
-                <p className="mt-1 break-all rounded-xl border border-emerald-400/20 bg-black/20 p-3 font-mono text-sm text-white">
-                  {savedColegaLink.url}
-                </p>
-              </div>
+              <p className="break-all rounded-xl border border-emerald-400/20 bg-black/20 p-3 font-mono text-sm text-white">
+                {savedColegaLink.url}
+              </p>
               <div className="grid gap-2 md:max-w-xl md:grid-cols-2">
                 <Button
                   variant="outline"
