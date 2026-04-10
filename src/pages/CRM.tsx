@@ -1224,9 +1224,9 @@ export default function CRM() {
                 <Badge variant="secondary" className="self-start sm:self-auto">{filteredClients.length} visibles</Badge>
               </div>
 
-              <div className="sticky top-[4.75rem] z-20 space-y-3 rounded-2xl bg-[#09090b]/95 py-2 backdrop-blur md:static md:bg-transparent md:py-0">
-                <div className="grid gap-3 md:grid-cols-[1fr_220px]">
-                  <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-inner shadow-black/20 transition focus-within:border-white/20 focus-within:bg-black/40">
+              <div className="sticky top-[4.75rem] z-20 rounded-2xl border border-white/10 bg-[#09090b]/95 p-2 shadow-[0_10px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl md:static md:border-0 md:bg-transparent md:p-0 md:shadow-none">
+                <div className="grid gap-2 md:grid-cols-[1fr_220px]">
+                  <div className="group relative overflow-hidden rounded-xl border border-white/10 bg-black/30 shadow-inner shadow-black/20 transition focus-within:border-white/20 focus-within:bg-black/40">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex w-11 items-center justify-center border-r border-white/10 bg-white/[0.03] text-zinc-400">
                       <Search className="h-4 w-4" />
                     </div>
@@ -1248,10 +1248,10 @@ export default function CRM() {
                     )}
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <Select value={stageFilter} onValueChange={setStageFilter}>
                       <SelectTrigger
-                        className={`h-11 w-full ${stageFilter === "all" ? "border-white/10 bg-black/30 text-white" : `${getStageBadgeClass(stageFilter)} border`} `}
+                        className={`h-11 w-full rounded-xl ${stageFilter === "all" ? "border-white/10 bg-black/30 text-white" : `${getStageBadgeClass(stageFilter)} border`} `}
                       >
                         <div className="flex items-center gap-2">
                           <span className={`h-2.5 w-2.5 rounded-full ${getStageDotClass(stageFilter)}`} />
