@@ -33,7 +33,12 @@ import { agencies } from "@/data/agencies";
 
 import AppNavigation from "@/components/AppNavigation";
 import { clearLegacyLinkHistory, getStoredSession, signOut } from "@/lib/auth";
-import { defaultClientStage, type ClientRecord } from "@/lib/crm";
+import {
+  appendActivityLog,
+  createActivityEntry,
+  defaultClientStage,
+  type ClientRecord,
+} from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
 
 const propertyTypes = ["Apartamentos", "Casas", "Terrenos", "Chacras", "Campos", "Locales"] as const;
@@ -187,6 +192,33 @@ export default function Index() {
       return;
     }
 
+    const selectedClient = clients.find((client) => client.id === clientId);
+    const now = new Date().toISOString();
+    const nextActivityLog = appendActivityLog(
+      selectedClient?.activity_log,
+      createActivityEntry(`Link guardado: ${propertyLabel || propertyType}`, "link"),
+    );
+
+    const { error: activityError } = await supabase
+      .from("clients")
+      .update({
+        last_contact_at: now,
+        activity_log: nextActivityLog,
+      })
+      .eq("id", clientId);
+
+    if (activityError) {
+      toast.error("El link se guardó, pero no se pudo actualizar el historial del cliente.");
+    } else {
+      setClients((current) =>
+        current.map((client) =>
+          client.id === clientId
+            ? { ...client, last_contact_at: now, activity_log: nextActivityLog }
+            : client,
+        ),
+      );
+    }
+
     setClientPickerOpen(false);
     toast.success(`✅ Link guardado para ${clientName}`);
   };
@@ -249,6 +281,7 @@ export default function Index() {
         whatsapp: newClientForm.phone.trim(),
         property_type: newClientForm.propertyType,
         stage: defaultClientStage,
+        activity_log: appendActivityLog([], createActivityEntry("Cliente creado desde Link Colega", "client")),
       })
       .select()
       .single();

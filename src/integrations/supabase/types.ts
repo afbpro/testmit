@@ -16,12 +16,14 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          activity_log: Json | null
           budget: string | null
           budget_notes: string | null
           created_at: string | null
           department: string | null
           email: string | null
           id: string
+          last_contact_at: string | null
           name: string
           notes: string | null
           operation_type: string | null
@@ -34,12 +36,14 @@ export type Database = {
           zone_specific: string | null
         }
         Insert: {
+          activity_log?: Json | null
           budget?: string | null
           budget_notes?: string | null
           created_at?: string | null
           department?: string | null
           email?: string | null
           id?: string
+          last_contact_at?: string | null
           name: string
           notes?: string | null
           operation_type?: string | null
@@ -52,12 +56,14 @@ export type Database = {
           zone_specific?: string | null
         }
         Update: {
+          activity_log?: Json | null
           budget?: string | null
           budget_notes?: string | null
           created_at?: string | null
           department?: string | null
           email?: string | null
           id?: string
+          last_contact_at?: string | null
           name?: string
           notes?: string | null
           operation_type?: string | null
