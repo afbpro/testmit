@@ -386,6 +386,7 @@ export default function CRM() {
   const [stageFilter, setStageFilter] = useState("all");
   const [form, setForm] = useState(initialClientForm);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [showMobileStats, setShowMobileStats] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientRecord | null>(null);
   const [editForm, setEditForm] = useState(initialClientForm);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -887,6 +888,39 @@ export default function CRM() {
           </Card>
         )}
 
+        <div className="xl:hidden">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-9 rounded-full border-white/10 bg-white/[0.04] px-3 text-white hover:bg-white/10"
+            onClick={() => setShowMobileStats((current) => !current)}
+          >
+            📊 {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
+          </Button>
+        </div>
+
+        {showMobileStats && (
+          <div className="grid gap-3 xl:hidden">
+            {metricCards.map(({ title, value, helper, icon: Icon }) => (
+              <Card key={title} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-zinc-400">{title}</p>
+                      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+                      <p className="mt-1 text-sm text-zinc-300">{helper}</p>
+                    </div>
+                    <div className="rounded-full bg-white/5 p-2.5 text-zinc-300">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
         <div className="hidden premium-fade-up-delay-1 gap-3 xl:grid xl:grid-cols-4">
           {metricCards.map(({ title, value, helper, icon: Icon }) => (
             <Card key={title} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
@@ -1210,12 +1244,12 @@ export default function CRM() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-1 md:hidden">
+                <div className="grid grid-cols-2 gap-2 md:hidden">
                   <Button
                     type="button"
                     size="sm"
                     variant={stageFilter === "all" ? "secondary" : "outline"}
-                    className="shrink-0 rounded-full border-white/10 bg-black/30 text-white"
+                    className="h-auto min-h-9 whitespace-normal rounded-2xl border-white/10 bg-black/30 text-white"
                     onClick={() => setStageFilter("all")}
                   >
                     Todas
@@ -1226,7 +1260,7 @@ export default function CRM() {
                       type="button"
                       size="sm"
                       variant={stageFilter === stage ? "secondary" : "outline"}
-                      className="shrink-0 rounded-full border-white/10 bg-black/30 text-white"
+                      className="h-auto min-h-9 whitespace-normal rounded-2xl border-white/10 bg-black/30 text-white"
                       onClick={() => setStageFilter(stage)}
                     >
                       {stage}
@@ -1271,19 +1305,30 @@ export default function CRM() {
                     return (
                       <div
                         key={client.id}
-                        className="overflow-hidden rounded-2xl border border-white/10 bg-black/30 p-4 shadow-sm transition-colors hover:border-white/20 hover:bg-white/[0.03]"
+                        className="w-full overflow-hidden rounded-2xl border border-white/10 bg-black/30 p-4 shadow-sm transition-colors hover:border-white/20 hover:bg-white/[0.03]"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="space-y-2 min-w-0">
-                            <div>
-                              <p className="font-semibold text-white">{client.name}</p>
-                              <p className="text-sm text-zinc-300">
-                                {client.email || client.phone || "Sin contacto principal"}
-                              </p>
+                            <div className="min-w-0 space-y-1">
+                              <p className="text-lg font-semibold leading-tight text-white">{client.name}</p>
+                              {client.phone ? (
+                                <a
+                                  href={`tel:${client.phone}`}
+                                  className="inline-flex max-w-full items-center gap-1 text-sm text-zinc-200 underline-offset-4 hover:text-white hover:underline"
+                                >
+                                  <Phone className="h-3.5 w-3.5" />
+                                  <span className="truncate">{client.phone}</span>
+                                </a>
+                              ) : (
+                                <p className="text-sm text-zinc-300">{client.email || "Sin contacto principal"}</p>
+                              )}
+                              {client.email && client.phone && (
+                                <p className="break-all text-xs text-zinc-400">{client.email}</p>
+                              )}
                               <p className="mt-1 text-xs text-zinc-400">{lastContactLabel}</p>
                             </div>
 
-                            <div className="flex max-w-full flex-wrap gap-2 text-xs text-zinc-300">
+                            <div className="flex max-w-full flex-wrap gap-2 overflow-hidden text-xs text-zinc-300">
                               {client.operation_type && (
                                 <span className="max-w-full break-words rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-200">{client.operation_type}</span>
                               )}
@@ -1312,18 +1357,20 @@ export default function CRM() {
                           <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">Estado del cliente</p>
 
                           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-                            <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
-                              <SelectTrigger className={selectTriggerClassName}>
-                                <SelectValue placeholder="Estado actual" />
-                              </SelectTrigger>
-                              <SelectContent className={selectContentClassName}>
-                                {clientStages.map((stage) => (
-                                  <SelectItem key={stage} value={stage}>
-                                    {stage}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <div className="min-w-0">
+                              <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
+                                <SelectTrigger className={`${selectTriggerClassName} w-full min-w-0 max-w-full text-left`}>
+                                  <SelectValue placeholder="Estado actual" />
+                                </SelectTrigger>
+                                <SelectContent className={`${selectContentClassName} max-w-[calc(100vw-2rem)]`}>
+                                  {clientStages.map((stage) => (
+                                    <SelectItem key={stage} value={stage}>
+                                      {stage}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
 
                             <div className="grid gap-2 sm:flex sm:flex-wrap">
                               <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void markClientContacted(client.id)}>

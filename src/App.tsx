@@ -34,6 +34,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/" element={protectedDashboard} />
           <Route path="/jira" element={protectedDashboard} />
+          <Route path="/propiedades" element={protectedDashboard} />
           <Route path="/crm" element={protectedCRM} />
           <Route
             path="/crm/client/:id"

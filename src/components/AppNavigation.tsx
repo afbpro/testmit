@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Link2, LogOut, Users, type LucideIcon } from "lucide-react";
+import { Home, Link2, LogOut, Users, type LucideIcon } from "lucide-react";
 
 import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,8 @@ type AppNavigationProps = {
 };
 
 const navItems: Array<{ to: string; label: string; icon: LucideIcon; end?: boolean }> = [
-  { to: "/", label: "Link", icon: Link2, end: true },
-  { to: "/jira", label: "Jira", icon: BriefcaseBusiness },
+  { to: "/", label: "Links", icon: Link2, end: true },
+  { to: "/propiedades", label: "Propiedades", icon: Home },
   { to: "/crm", label: "CRM", icon: Users },
 ];
 
