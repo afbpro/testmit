@@ -1215,20 +1215,20 @@ export default function CRM() {
               <div className="sticky top-[4.75rem] z-20 rounded-2xl border border-white/10 bg-[#09090b]/95 p-2 shadow-[0_10px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl md:static md:border-0 md:bg-transparent md:p-0 md:shadow-none">
                 <div className="grid gap-2 md:grid-cols-[1fr_220px]">
                   <div className="group relative overflow-hidden rounded-xl border border-white/10 bg-black/30 shadow-inner shadow-black/20 transition focus-within:border-white/20 focus-within:bg-black/40">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex w-11 items-center justify-center border-r border-white/10 bg-white/[0.03] text-zinc-400">
-                      <Search className="h-4 w-4" />
-                    </div>
                     <Input
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
                       placeholder="Buscar por nombre, operación, zona, email o WhatsApp"
-                      className="h-11 border-0 bg-transparent pl-12 pr-10 text-white placeholder:text-zinc-500 focus-visible:ring-0"
+                      className="h-11 border-0 bg-transparent pl-4 pr-20 text-white placeholder:text-zinc-500 focus-visible:ring-0"
                     />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex w-11 items-center justify-center border-l border-white/10 bg-white/[0.03] text-zinc-400">
+                      <Search className="h-4 w-4" />
+                    </div>
                     {searchQuery && (
                       <button
                         type="button"
                         onClick={() => setSearchQuery("")}
-                        className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-zinc-400 transition hover:bg-white/5 hover:text-white"
+                        className="absolute right-12 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-zinc-400 transition hover:bg-white/5 hover:text-white"
                         aria-label="Limpiar búsqueda"
                       >
                         <X className="h-4 w-4" />
