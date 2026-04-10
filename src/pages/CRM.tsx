@@ -777,46 +777,13 @@ export default function CRM() {
                 </div>
               </div>
 
-              <div className="xl:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                      <span className="sr-only">Abrir menú</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="border-white/10 bg-zinc-950 text-white">
-                    <DropdownMenuItem className="gap-2 focus:bg-white/10 focus:text-white" onClick={() => void loadClients()}>
-                      <RefreshCw className="h-4 w-4" />
-                      Recargar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="gap-2 focus:bg-white/10 focus:text-white" onClick={handleLogout}>
-                      <LogOut className="h-4 w-4" />
-                      Cerrar sesión
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <div className="hidden gap-2 xl:flex xl:flex-wrap xl:justify-end">
+              <div className="hidden xl:flex xl:flex-wrap xl:justify-end">
                 <Button
                   className="gap-2 bg-white text-black hover:bg-zinc-200"
                   onClick={() => document.getElementById("client-name")?.focus()}
                 >
                   <UserPlus className="h-4 w-4" />
                   Agregar cliente
-                </Button>
-                <Button variant="secondary" onClick={() => void loadClients()} className="gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  Recargar
-                </Button>
-                <Button variant="secondary" onClick={handleLogout} className="gap-2">
-                  <LogOut className="h-4 w-4" />
-                  Cerrar sesión
                 </Button>
               </div>
             </div>

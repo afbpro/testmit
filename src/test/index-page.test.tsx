@@ -139,6 +139,7 @@ describe("Index login flow", () => {
 
     expect(await screen.findByText(/panel jira y link de colega/i)).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: /link de colega/i }));
     fireEvent.click(screen.getByRole("button", { name: /seleccionar inmobiliaria/i }));
     fireEvent.click(await screen.findByText(/acassuso propiedades/i));
     fireEvent.change(screen.getByPlaceholderText(/ej: 25656/i), {
