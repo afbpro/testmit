@@ -11,6 +11,7 @@ import {
   Loader2,
   MapPin,
   MessageCircle,
+  Pencil,
   Plus,
   Sparkles,
   Trash2,
@@ -295,6 +296,7 @@ export default function Properties() {
   const [errorMessage, setErrorMessage] = useState("");
   const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
   const [savedColegaLink, setSavedColegaLink] = useState<{ title: string; url: string } | null>(null);
+  const [editingProperty, setEditingProperty] = useState<PropertyRecord | null>(null);
 
   const priceOptions = useMemo(() => {
     if (form.operation === "Venta") {
@@ -314,6 +316,7 @@ export default function Properties() {
 
   const resetForm = () => {
     setForm(initialPropertyForm);
+    setEditingProperty(null);
 
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(PROPERTY_DRAFT_STORAGE_KEY);
@@ -436,6 +439,23 @@ export default function Properties() {
     }));
   };
 
+  const openEditDialog = (property: PropertyRecord) => {
+    setEditingProperty(property);
+    setSavedColegaLink(null);
+    setForm({
+      title: property.title || "",
+      type: (property.type as PropertyTypeOption) || "",
+      operation: (property.operation as OperationOption) || "",
+      price: property.price || "",
+      department: (property.department as DepartmentOption) || "",
+      zone: property.zone || "",
+      url: property.url || "",
+      photos_link: extractPhotosLink(property),
+      notes: stripPhotosLinkFromNotes(property.notes),
+    });
+    setIsAddOpen(true);
+  };
+
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -461,7 +481,12 @@ export default function Properties() {
       notes: buildPropertyNotes(form.notes, form.photos_link),
     };
 
-    const { data, error } = await supabase.from("properties").insert(payload).select().single();
+    const wasEditing = Boolean(editingProperty);
+    const query = editingProperty
+      ? supabase.from("properties").update(payload).eq("id", editingProperty.id).select().single()
+      : supabase.from("properties").insert(payload).select().single();
+
+    const { data, error } = await query;
     setSaving(false);
 
     if (error) {
@@ -472,7 +497,11 @@ export default function Properties() {
     const savedProperty = data as PropertyRecord;
     const colegaLink = buildPropertyColegaLink(savedProperty);
 
-    setProperties((current) => [savedProperty, ...current]);
+    setProperties((current) =>
+      wasEditing
+        ? current.map((item) => (item.id === savedProperty.id ? savedProperty : item))
+        : [savedProperty, ...current],
+    );
     setSavedColegaLink(
       colegaLink
         ? {
@@ -483,7 +512,7 @@ export default function Properties() {
     );
     resetForm();
     setIsAddOpen(false);
-    toast.success("✅ Propiedad guardada");
+    toast.success(wasEditing ? "✅ Propiedad actualizada" : "✅ Propiedad guardada");
   };
 
   const handleDelete = async (property: PropertyRecord) => {
@@ -566,7 +595,14 @@ export default function Properties() {
                 </div>
               </div>
 
-              <Button className="w-full gap-2 bg-white text-black hover:bg-zinc-200 sm:w-auto" onClick={() => setIsAddOpen(true)}>
+              <Button
+                className="w-full gap-2 bg-white text-black hover:bg-zinc-200 sm:w-auto"
+                onClick={() => {
+                  setEditingProperty(null);
+                  setSavedColegaLink(null);
+                  setIsAddOpen(true);
+                }}
+              >
                 <Plus className="h-4 w-4" />
                 + Agregar propiedad
               </Button>
@@ -733,7 +769,7 @@ export default function Properties() {
                       <p className="text-sm text-zinc-300">{visibleNotes}</p>
                     )}
 
-                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
                       <Button
                         variant="outline"
                         className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
@@ -752,6 +788,10 @@ export default function Properties() {
                         <Copy className="mr-2 h-4 w-4" />
                         Copiar link
                       </Button>
+                      <Button variant="outline" className="w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => openEditDialog(property)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar
+                      </Button>
                       <Button variant="outline" className="w-full border-red-500/30 bg-transparent text-red-200 hover:bg-red-500/10 hover:text-red-100" onClick={() => void handleDelete(property)}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Eliminar
@@ -765,12 +805,22 @@ export default function Properties() {
         )}
       </main>
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+      <Dialog
+        open={isAddOpen}
+        onOpenChange={(open) => {
+          setIsAddOpen(open);
+          if (!open && !saving) {
+            resetForm();
+          }
+        }}
+      >
         <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-y-contain rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-white/10">
           <DialogHeader>
-            <DialogTitle>Agregar propiedad</DialogTitle>
+            <DialogTitle>{editingProperty ? "Editar propiedad" : "Agregar propiedad"}</DialogTitle>
             <DialogDescription className="text-zinc-300">
-              Completá los datos y guardá la propiedad en Supabase. La URL del portal es opcional y tu borrador queda guardado automáticamente.
+              {editingProperty
+                ? "Corregí los datos de la propiedad y guardá los cambios."
+                : "Completá los datos y guardá la propiedad en Supabase. La URL del portal es opcional y tu borrador queda guardado automáticamente."}
             </DialogDescription>
           </DialogHeader>
 
@@ -904,7 +954,7 @@ export default function Properties() {
                 Cancelar
               </Button>
               <Button type="submit" className="flex-1 bg-white text-black hover:bg-zinc-200 sm:flex-none" disabled={saving || !supabaseReady}>
-                {saving ? "Guardando..." : "Guardar"}
+                {saving ? "Guardando..." : editingProperty ? "Guardar cambios" : "Guardar"}
               </Button>
             </DialogFooter>
           </form>
