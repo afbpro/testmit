@@ -828,19 +828,7 @@ export default function Properties() {
                       )}
                     </div>
 
-                    {colegaLink ? (
-                      <div className="flex justify-end rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-3 text-sm text-emerald-50 shadow-inner shadow-emerald-950/10">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className="h-9 border border-white/10 bg-black/30 text-white hover:bg-black/40"
-                          onClick={() => void handleCopyLink(colegaLink)}
-                        >
-                          <Copy className="mr-2 h-4 w-4" />
-                          Copiar link colega
-                        </Button>
-                      </div>
-                    ) : (
+                    {!colegaLink && (
                       <p className="rounded-xl border border-dashed border-white/10 bg-black/20 px-3 py-2 text-xs text-zinc-400">
                         Aplicá la migración de auto_id para generar el link colega automáticamente.
                       </p>
@@ -850,21 +838,40 @@ export default function Properties() {
                       <p className="text-sm text-zinc-300">{visibleNotes}</p>
                     )}
 
-                    <div className="grid gap-2 sm:grid-cols-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      {colegaLink && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-11 w-full justify-center border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20 sm:flex-1 sm:min-w-[210px]"
+                          onClick={() => void handleCopyLink(colegaLink)}
+                        >
+                          <Copy className="mr-2 h-4 w-4" />
+                          Copiar link colega
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
-                        className="h-11 w-full justify-center border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                        className="h-11 w-full justify-center border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20 sm:flex-1 sm:min-w-[210px]"
                         onClick={() => handleShareWhatsApp(property)}
                         disabled={!colegaLink}
                       >
                         <MessageCircle className="mr-2 h-4 w-4" />
                         Compartir por WhatsApp
                       </Button>
-                      <Button variant="outline" className="h-11 w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => openEditDialog(property)}>
+                      <Button
+                        variant="outline"
+                        className="h-11 w-full border-white/10 bg-transparent text-white hover:bg-white/5 sm:flex-1 sm:min-w-[140px]"
+                        onClick={() => openEditDialog(property)}
+                      >
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
                       </Button>
-                      <Button variant="outline" className="h-11 w-full border-red-500/30 bg-transparent text-red-200 hover:bg-red-500/10 hover:text-red-100" onClick={() => void handleDelete(property)}>
+                      <Button
+                        variant="outline"
+                        className="h-11 w-full border-red-500/30 bg-transparent text-red-200 hover:bg-red-500/10 hover:text-red-100 sm:flex-1 sm:min-w-[140px]"
+                        onClick={() => void handleDelete(property)}
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Eliminar
                       </Button>
