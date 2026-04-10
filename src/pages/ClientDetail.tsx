@@ -32,7 +32,6 @@ import {
   createActivityEntry,
   defaultClientStage,
   getDaysSinceLastContact,
-  getLeadTemperature,
   getStageBadgeClass,
   getStageDotClass,
   normalizeActivityLog,
@@ -200,7 +199,6 @@ export default function ClientDetail() {
           </Card>
         ) : client ? (
           (() => {
-            const leadTemperature = getLeadTemperature(client.last_contact);
             const daysSinceContact = getDaysSinceLastContact(client.last_contact);
             const activityHistory = normalizeActivityLog(client.activity_log);
             const lastContactLabel =
@@ -259,11 +257,8 @@ export default function ClientDetail() {
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Etapa</p>
-                    <Badge variant="outline" className={`mt-2 ${getStageBadgeClass(client.stage)}`}>
-                      {client.stage}
-                    </Badge>
-                    <Badge variant="outline" className={`mt-2 ${leadTemperature.className}`} title={leadTemperature.label}>
-                      {leadTemperature.emoji}
+                    <Badge variant="outline" className={`mt-2 ${getStageBadgeClass(client.stage)}`} title={client.stage}>
+                      🔥
                     </Badge>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">

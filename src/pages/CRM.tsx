@@ -62,7 +62,6 @@ import {
   createActivityEntry,
   defaultClientStage,
   getDaysSinceLastContact,
-  getLeadTemperature,
   getStageBadgeClass,
   getStageDotClass,
   type ClientRecord,
@@ -1295,7 +1294,6 @@ export default function CRM() {
               ) : (
                 <div className="space-y-3">
                   {filteredClients.map((client) => {
-                    const leadTemperature = getLeadTemperature(client.last_contact);
                     const daysSinceContact = getDaysSinceLastContact(client.last_contact);
                     const lastContactLabel =
                       daysSinceContact === null
@@ -1342,11 +1340,12 @@ export default function CRM() {
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2">
-                              <Badge variant="outline" className={`border ${leadTemperature.className}`} title={leadTemperature.label}>
-                                {leadTemperature.emoji}
-                              </Badge>
-                              <Badge variant="outline" className={`border ${getStageBadgeClass(client.stage)}`}>
-                                {client.stage}
+                              <Badge
+                                variant="outline"
+                                className={`border ${getStageBadgeClass(client.stage)}`}
+                                title={client.stage}
+                              >
+                                🔥
                               </Badge>
                             </div>
                           </div>
