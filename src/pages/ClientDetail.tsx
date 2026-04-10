@@ -279,7 +279,16 @@ export default function ClientDetail() {
                         <Mail className="h-4 w-4" />
                         <p className="text-xs uppercase tracking-[0.18em]">Email</p>
                       </div>
-                      <p className="text-sm font-medium text-white break-all">{client.email || "-"}</p>
+                      {client.email ? (
+                        <a
+                          href={`mailto:${client.email}`}
+                          className="break-all text-sm font-medium text-white transition hover:text-zinc-200 hover:underline"
+                        >
+                          {client.email}
+                        </a>
+                      ) : (
+                        <p className="text-sm font-medium text-white">-</p>
+                      )}
                     </div>
 
                     <div className="rounded-xl border border-white/10 bg-black/25 p-4">
