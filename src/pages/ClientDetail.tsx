@@ -9,7 +9,6 @@ import {
   Mail,
   MapPin,
   MessageCircle,
-  Phone,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -207,6 +206,7 @@ export default function ClientDetail() {
                 : daysSinceContact === 0
                   ? "Hoy"
                   : `Hace ${daysSinceContact} día${daysSinceContact === 1 ? "" : "s"}`;
+            const primaryContact = client.whatsapp || client.phone;
 
             return <>
             <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
@@ -242,18 +242,10 @@ export default function ClientDetail() {
                   <Button variant="secondary" onClick={() => void handleMarkContactedToday()}>
                     Contactado hoy
                   </Button>
-                  {client.phone && (
-                    <Button variant="secondary" asChild>
-                      <a href={`tel:${client.phone}`} className="gap-2">
-                        <Phone className="h-4 w-4" />
-                        Llamar
-                      </a>
-                    </Button>
-                  )}
-                  {client.whatsapp && (
+                  {primaryContact && (
                     <Button variant="secondary" asChild>
                       <a
-                        href={`https://wa.me/${client.whatsapp.replace(/\D/g, "")}`}
+                        href={`https://wa.me/${primaryContact.replace(/\D/g, "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="gap-2"
@@ -324,18 +316,10 @@ export default function ClientDetail() {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-xl border border-white/10 bg-black/25 p-4">
                       <div className="mb-2 flex items-center gap-2 text-zinc-400">
-                        <Phone className="h-4 w-4" />
-                        <p className="text-xs uppercase tracking-[0.18em]">Teléfono</p>
-                      </div>
-                      <p className="text-sm font-medium text-white">{client.phone || "-"}</p>
-                    </div>
-
-                    <div className="rounded-xl border border-white/10 bg-black/25 p-4">
-                      <div className="mb-2 flex items-center gap-2 text-zinc-400">
-                        <Phone className="h-4 w-4" />
+                        <MessageCircle className="h-4 w-4" />
                         <p className="text-xs uppercase tracking-[0.18em]">WhatsApp</p>
                       </div>
-                      <p className="text-sm font-medium text-white">{client.whatsapp || "-"}</p>
+                      <p className="text-sm font-medium text-white">{primaryContact || "-"}</p>
                     </div>
 
                     <div className="rounded-xl border border-white/10 bg-black/25 p-4">

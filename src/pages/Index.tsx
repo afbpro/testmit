@@ -57,7 +57,7 @@ const initialLeadForm = {
 
 const initialNewClientForm = {
   name: "",
-  phone: "",
+  whatsapp: "",
   propertyType: "Casa" as NewClientPropertyType,
 };
 
@@ -252,7 +252,7 @@ export default function Index() {
     }));
   };
 
-  const handleNewClientFieldChange = (field: "name" | "phone") => (
+  const handleNewClientFieldChange = (field: "name" | "whatsapp") => (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setNewClientForm((current) => ({
@@ -262,8 +262,8 @@ export default function Index() {
   };
 
   const handleCreateClient = async () => {
-    if (!newClientForm.name.trim() || !newClientForm.phone.trim()) {
-      toast.error("Completá nombre y teléfono");
+    if (!newClientForm.name.trim() || !newClientForm.whatsapp.trim()) {
+      toast.error("Completá nombre y WhatsApp");
       return;
     }
 
@@ -277,8 +277,8 @@ export default function Index() {
       .from("clients")
       .insert({
         name: newClientForm.name.trim(),
-        phone: newClientForm.phone.trim(),
-        whatsapp: newClientForm.phone.trim(),
+        phone: newClientForm.whatsapp.trim(),
+        whatsapp: newClientForm.whatsapp.trim(),
         property_type: newClientForm.propertyType,
         stage: defaultClientStage,
         activity_log: appendActivityLog([], createActivityEntry("Cliente creado desde Link Colega", "client")),
@@ -308,7 +308,7 @@ export default function Index() {
     event.preventDefault();
 
     if (!leadForm.fullName || !leadForm.phone || !leadForm.details) {
-      toast.error("Completá nombre, teléfono y detalle del lead");
+      toast.error("Completá nombre, WhatsApp y detalle del lead");
       return;
     }
 
@@ -319,7 +319,7 @@ export default function Index() {
 
     const jiraLead = [
       `Lead: ${leadForm.fullName}`,
-      `Teléfono: ${leadForm.phone}`,
+      `WhatsApp: ${leadForm.phone}`,
       `Email: ${leadForm.email || "No informado"}`,
       `Zona / propiedad: ${leadForm.zone || "No informada"}`,
       `Detalle: ${leadForm.details}`,
@@ -527,7 +527,7 @@ export default function Index() {
                             </PopoverTrigger>
                             <PopoverContent className="w-[min(92vw,360px)] border-white/10 bg-zinc-950 p-0 text-white" align="start">
                               <Command className="bg-transparent text-white">
-                                <CommandInput placeholder="Buscar por nombre o teléfono..." />
+                                <CommandInput placeholder="Buscar por nombre o WhatsApp..." />
                                 <CommandList>
                                   {loadingClients ? (
                                     <div className="px-3 py-6 text-sm text-zinc-300">Cargando clientes...</div>
@@ -538,7 +538,7 @@ export default function Index() {
                                         {clients.map((client) => (
                                           <CommandItem
                                             key={client.id}
-                                            value={`${client.name} ${client.phone ?? ""}`}
+                                            value={`${client.name} ${client.whatsapp ?? client.phone ?? ""}`}
                                             onSelect={() =>
                                               void saveLinkForClient({
                                                 clientId: client.id,
@@ -549,7 +549,7 @@ export default function Index() {
                                           >
                                             <div className="flex flex-col">
                                               <span>{client.name}</span>
-                                              <span className="text-xs text-zinc-400">{client.phone || "Sin teléfono"}</span>
+                                              <span className="text-xs text-zinc-400">{client.whatsapp || client.phone || "Sin WhatsApp"}</span>
                                             </div>
                                           </CommandItem>
                                         ))}
@@ -593,11 +593,11 @@ export default function Index() {
                                 </div>
 
                                 <div className="space-y-2">
-                                  <Label htmlFor="new-client-phone">Teléfono *</Label>
+                                  <Label htmlFor="new-client-whatsapp">WhatsApp *</Label>
                                   <Input
-                                    id="new-client-phone"
-                                    value={newClientForm.phone}
-                                    onChange={handleNewClientFieldChange("phone")}
+                                    id="new-client-whatsapp"
+                                    value={newClientForm.whatsapp}
+                                    onChange={handleNewClientFieldChange("whatsapp")}
                                     placeholder="099 123 456"
                                     className="border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
                                   />
@@ -698,7 +698,7 @@ export default function Index() {
 
                     <div className="space-y-2">
                       <Label htmlFor="lead-phone" className="text-xs uppercase tracking-wider text-zinc-400">
-                        Teléfono
+                        WhatsApp
                       </Label>
                       <Input
                         id="lead-phone"
@@ -770,7 +770,7 @@ export default function Index() {
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-black/25 p-4 text-sm text-zinc-300">
-                  Incluye nombre, teléfono, email, zona, detalle y el usuario que lo cargó.
+                  Incluye nombre, WhatsApp, email, zona, detalle y el usuario que lo cargó.
                 </div>
 
                 <Button variant="outline" className="w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={openExternalJira}>

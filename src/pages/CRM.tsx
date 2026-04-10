@@ -11,7 +11,6 @@ import {
   MapPin,
   MessageCircle,
   Pencil,
-  Phone,
   Plus,
   Search,
   UserPlus,
@@ -342,7 +341,6 @@ function BudgetCombobox({
 
 const initialClientForm = {
   name: "",
-  phone: "",
   whatsapp: "",
   email: "",
   operation_type: "" as OperationType | "",
@@ -357,22 +355,26 @@ const initialClientForm = {
   stage: defaultClientStage as ClientStage,
 };
 
-const buildClientPayload = (values: typeof initialClientForm) => ({
-  name: values.name.trim(),
-  phone: values.phone.trim() || null,
-  whatsapp: values.whatsapp.trim() || null,
-  email: values.email.trim() || null,
-  operation_type: values.operation_type || null,
-  property_type: values.property_type.trim() || null,
-  department: values.department || null,
-  zone: values.zone.trim() || null,
-  zone_specific: values.zone_specific.trim() || null,
-  budget: isBudgetOperation(values.operation_type) ? values.budget.trim() || null : null,
-  period: values.operation_type === "Alquiler temporal" ? values.period.trim() || null : null,
-  budget_notes: values.budget_notes.trim() || null,
-  notes: values.notes.trim() || null,
-  stage: values.stage,
-});
+const buildClientPayload = (values: typeof initialClientForm) => {
+  const contactNumber = values.whatsapp.trim();
+
+  return {
+    name: values.name.trim(),
+    phone: contactNumber || null,
+    whatsapp: contactNumber || null,
+    email: values.email.trim() || null,
+    operation_type: values.operation_type || null,
+    property_type: values.property_type.trim() || null,
+    department: values.department || null,
+    zone: values.zone.trim() || null,
+    zone_specific: values.zone_specific.trim() || null,
+    budget: isBudgetOperation(values.operation_type) ? values.budget.trim() || null : null,
+    period: values.operation_type === "Alquiler temporal" ? values.period.trim() || null : null,
+    budget_notes: values.budget_notes.trim() || null,
+    notes: values.notes.trim() || null,
+    stage: values.stage,
+  };
+};
 
 export default function CRM() {
   const navigate = useNavigate();
@@ -446,6 +448,7 @@ export default function CRM() {
         [
           client.name,
           client.email,
+          client.whatsapp,
           client.phone,
           client.department,
           client.zone,
@@ -529,8 +532,7 @@ export default function CRM() {
     setEditingClient(client);
     setEditForm({
       name: client.name || "",
-      phone: client.phone || "",
-      whatsapp: client.whatsapp || "",
+      whatsapp: client.whatsapp || client.phone || "",
       email: client.email || "",
       operation_type: operationTypeOptions.includes(client.operation_type as OperationType)
         ? (client.operation_type as OperationType)
@@ -975,32 +977,17 @@ export default function CRM() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="client-phone">Teléfono</Label>
-                    <div className="relative">
-                      <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                      <Input
-                        id="client-phone"
-                        placeholder="099 123 456"
-                        value={form.phone}
-                        onChange={handleChange("phone")}
-                        className={inputWithIconClassName}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="client-whatsapp">WhatsApp</Label>
-                    <div className="relative">
-                      <MessageCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                      <Input
-                        id="client-whatsapp"
-                        placeholder="099 123 456"
-                        value={form.whatsapp}
-                        onChange={handleChange("whatsapp")}
-                        className={inputWithIconClassName}
-                      />
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="client-whatsapp">WhatsApp</Label>
+                  <div className="relative">
+                    <MessageCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Input
+                      id="client-whatsapp"
+                      placeholder="099 123 456"
+                      value={form.whatsapp}
+                      onChange={handleChange("whatsapp")}
+                      className={inputWithIconClassName}
+                    />
                   </div>
                 </div>
 
@@ -1222,7 +1209,7 @@ export default function CRM() {
                     <Input
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
-                      placeholder="Buscar por nombre, operación, zona, email o teléfono"
+                      placeholder="Buscar por nombre, operación, zona, email o WhatsApp"
                       className="h-11 border-white/10 bg-black/30 pl-9 text-white placeholder:text-zinc-500"
                     />
                   </div>
@@ -1301,6 +1288,7 @@ export default function CRM() {
                         : daysSinceContact === 0
                           ? "Contactado hoy"
                           : `Hace ${daysSinceContact} día${daysSinceContact === 1 ? "" : "s"}`;
+                    const primaryContact = client.whatsapp || client.phone;
 
                     return (
                       <div
@@ -1311,18 +1299,20 @@ export default function CRM() {
                           <div className="space-y-2 min-w-0">
                             <div className="min-w-0 space-y-1">
                               <p className="text-lg font-semibold leading-tight text-white">{client.name}</p>
-                              {client.phone ? (
+                              {primaryContact ? (
                                 <a
-                                  href={`tel:${client.phone}`}
+                                  href={`https://wa.me/${primaryContact.replace(/\D/g, "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                   className="inline-flex max-w-full items-center gap-1 text-sm text-zinc-200 underline-offset-4 hover:text-white hover:underline"
                                 >
-                                  <Phone className="h-3.5 w-3.5" />
-                                  <span className="truncate">{client.phone}</span>
+                                  <MessageCircle className="h-3.5 w-3.5" />
+                                  <span className="truncate">{primaryContact}</span>
                                 </a>
                               ) : (
-                                <p className="text-sm text-zinc-300">{client.email || "Sin contacto principal"}</p>
+                                <p className="text-sm text-zinc-300">{client.email || "Sin WhatsApp principal"}</p>
                               )}
-                              {client.email && client.phone && (
+                              {client.email && primaryContact && (
                                 <p className="break-all text-xs text-zinc-400">{client.email}</p>
                               )}
                               <p className="mt-1 text-xs text-zinc-400">{lastContactLabel}</p>
@@ -1430,32 +1420,17 @@ export default function CRM() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="mobile-client-phone">Teléfono</Label>
-                <div className="relative">
-                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                  <Input
-                    id="mobile-client-phone"
-                    placeholder="099 123 456"
-                    value={form.phone}
-                    onChange={handleChange("phone")}
-                    className={inputWithIconClassName}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mobile-client-whatsapp">WhatsApp</Label>
-                <div className="relative">
-                  <MessageCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                  <Input
-                    id="mobile-client-whatsapp"
-                    placeholder="099 123 456"
-                    value={form.whatsapp}
-                    onChange={handleChange("whatsapp")}
-                    className={inputWithIconClassName}
-                  />
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="mobile-client-whatsapp">WhatsApp</Label>
+              <div className="relative">
+                <MessageCircle className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <Input
+                  id="mobile-client-whatsapp"
+                  placeholder="099 123 456"
+                  value={form.whatsapp}
+                  onChange={handleChange("whatsapp")}
+                  className={inputWithIconClassName}
+                />
               </div>
             </div>
 
@@ -1676,20 +1651,6 @@ export default function CRM() {
                     value={editForm.name}
                     onChange={handleEditChange("name")}
                     placeholder="Ej: María Pérez"
-                    className={inputWithIconClassName}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-client-phone">Teléfono</Label>
-                <div className="relative">
-                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                  <Input
-                    id="edit-client-phone"
-                    value={editForm.phone}
-                    onChange={handleEditChange("phone")}
-                    placeholder="099 123 456"
                     className={inputWithIconClassName}
                   />
                 </div>
