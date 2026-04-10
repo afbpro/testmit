@@ -57,7 +57,6 @@ import {
 } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
 import AppNavigation from "@/components/AppNavigation";
-import logo from "@/assets/logo.png";
 
 const propertyTypeOptions = [
   "Apartamento",
@@ -830,13 +829,13 @@ export default function CRM() {
   ];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
       <AppNavigation email={session?.email} onLogout={handleLogout} />
 
-      <main className="mx-auto max-w-7xl space-y-5 overflow-x-hidden px-4 py-6 pb-24 md:py-7 md:pb-7">
+      <main className="mx-auto max-w-7xl space-y-5 overflow-x-hidden px-3 py-6 pb-24 sm:px-4 md:py-7 md:pb-7">
         <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
           <CardContent className="p-6 md:p-7">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3">
                 <div className="min-w-0 space-y-2">
                   <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
@@ -848,7 +847,7 @@ export default function CRM() {
                       Gestioná leads, seguimiento comercial y oportunidades desde un solo lugar.
                     </p>
                   </div>
-                  <p className="text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
+                  <p className="break-all text-xs text-zinc-400">Sesión activa: {session?.email ?? "usuario"}</p>
 
                   <div className="flex flex-wrap gap-2 pt-1 md:hidden">
                     <Button
@@ -903,7 +902,7 @@ export default function CRM() {
         </div>
 
         {showMobileStats && (
-          <div className="grid gap-3 xl:hidden">
+          <div className="grid grid-cols-2 gap-3 xl:hidden">
             {metricCards.map(({ title, value, helper, icon: Icon }) => (
               <Card key={title} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
                 <CardContent className="p-4">
@@ -1296,7 +1295,7 @@ export default function CRM() {
                         className="w-full overflow-hidden rounded-2xl border border-white/10 bg-black/30 p-4 shadow-sm transition-colors hover:border-white/20 hover:bg-white/[0.03]"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="space-y-2 min-w-0">
+                          <div className="min-w-0 space-y-2">
                             <div className="min-w-0 space-y-1">
                               <p className="text-lg font-semibold leading-tight text-white">{client.name}</p>
                               {primaryContact ? (
@@ -1331,48 +1330,48 @@ export default function CRM() {
                               {client.period && <span className="max-w-full break-words rounded-full bg-white/5 px-2.5 py-1">{client.period}</span>}
                               {client.budget && <span className="max-w-full break-words rounded-full bg-white/5 px-2.5 py-1">{client.budget}</span>}
                             </div>
-                          </div>
 
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="outline" className={`border ${leadTemperature.className}`}>
-                              {leadTemperature.emoji} {leadTemperature.label}
-                            </Badge>
-                            <Badge variant="outline" className={`border ${getStageBadgeClass(client.stage)}`}>
-                              {client.stage}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3">
-                          <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">Estado del cliente</p>
-
-                          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-                            <div className="min-w-0">
-                              <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
-                                <SelectTrigger className={`${selectTriggerClassName} w-full min-w-0 max-w-full text-left`}>
-                                  <SelectValue placeholder="Estado actual" />
-                                </SelectTrigger>
-                                <SelectContent className={`${selectContentClassName} max-w-[calc(100vw-2rem)]`}>
-                                  {clientStages.map((stage) => (
-                                    <SelectItem key={stage} value={stage}>
-                                      {stage}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant="outline" className={`border ${leadTemperature.className}`}>
+                                {leadTemperature.emoji} {leadTemperature.label}
+                              </Badge>
+                              <Badge variant="outline" className={`border ${getStageBadgeClass(client.stage)}`}>
+                                {client.stage}
+                              </Badge>
                             </div>
+                          </div>
 
-                            <div className="grid gap-2 sm:flex sm:flex-wrap">
-                              <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void markClientContacted(client.id)}>
-                                Contactado hoy
-                              </Button>
-                              <Button variant="outline" className="w-full sm:w-auto" onClick={() => openEditDialog(client)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Editar
-                              </Button>
-                              <Button variant="outline" className="w-full sm:w-auto" onClick={() => navigate(`/crm/client/${client.id}`)}>
-                                Abrir ficha
-                              </Button>
+                          <div className="mt-3 w-full rounded-xl border border-white/10 bg-black/20 p-3 sm:mt-0 sm:w-auto sm:min-w-[260px]">
+                            <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">Estado del cliente</p>
+
+                            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                              <div className="min-w-0">
+                                <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
+                                  <SelectTrigger className={`${selectTriggerClassName} w-full min-w-0 max-w-full text-left`}>
+                                    <SelectValue placeholder="Estado actual" />
+                                  </SelectTrigger>
+                                  <SelectContent className={`${selectContentClassName} max-w-[calc(100vw-2rem)]`}>
+                                    {clientStages.map((stage) => (
+                                      <SelectItem key={stage} value={stage}>
+                                        {stage}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="grid gap-2 sm:flex sm:flex-wrap">
+                                <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void markClientContacted(client.id)}>
+                                  Contactado hoy
+                                </Button>
+                                <Button variant="outline" className="w-full sm:w-auto" onClick={() => openEditDialog(client)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Editar
+                                </Button>
+                                <Button variant="outline" className="w-full sm:w-auto" onClick={() => navigate(`/crm/client/${client.id}`)}>
+                                  Abrir ficha
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
