@@ -1352,10 +1352,10 @@ export default function CRM() {
                             </div>
                           </div>
 
-                          <div className="mt-3 w-full rounded-xl border border-white/10 bg-black/20 p-3 sm:mt-0 sm:w-auto sm:min-w-[260px]">
+                          <div className="mt-3 w-full rounded-xl border border-white/10 bg-black/20 p-3 sm:mt-0 lg:min-w-[320px] xl:min-w-[340px]">
                             <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">Estado del cliente</p>
 
-                            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                            <div className="grid gap-3">
                               <div className="min-w-0">
                                 <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
                                   <SelectTrigger className={`${selectTriggerClassName} w-full min-w-0 max-w-full text-left`}>
@@ -1371,11 +1371,11 @@ export default function CRM() {
                                 </Select>
                               </div>
 
-                              <div className="grid gap-2 sm:flex sm:flex-wrap">
+                              <div className="grid gap-2">
                                 {primaryContact && (
                                   <Button
                                     variant="outline"
-                                    className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20 sm:w-auto"
+                                    className="h-auto w-full justify-center whitespace-normal border-emerald-500/30 bg-emerald-500/10 text-center text-emerald-100 hover:bg-emerald-500/20"
                                     asChild
                                   >
                                     <a
@@ -1388,14 +1388,14 @@ export default function CRM() {
                                     </a>
                                   </Button>
                                 )}
-                                <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void markClientContacted(client.id)}>
+                                <Button variant="secondary" className="w-full justify-center" onClick={() => void markClientContacted(client.id)}>
                                   Contactado hoy
                                 </Button>
-                                <Button variant="outline" className="w-full sm:w-auto" onClick={() => openEditDialog(client)}>
+                                <Button variant="outline" className="w-full justify-center" onClick={() => openEditDialog(client)}>
                                   <Pencil className="mr-2 h-4 w-4" />
                                   Editar
                                 </Button>
-                                <Button variant="outline" className="w-full sm:w-auto" onClick={() => navigate(`/crm/client/${client.id}`)}>
+                                <Button variant="outline" className="w-full justify-center" onClick={() => navigate(`/crm/client/${client.id}`)}>
                                   Abrir ficha
                                 </Button>
                               </div>
