@@ -757,12 +757,6 @@ export default function CRM() {
           <CardContent className="p-6 md:p-7">
             <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3">
-                <img
-                  src={logo}
-                  alt="Cupertino Negocios Inmobiliarios"
-                  className="h-12 w-auto rounded-xl border border-white/10 bg-white/5 p-2 shadow-sm md:h-14"
-                />
-
                 <div className="min-w-0 space-y-2">
                   <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
                     Cupertino CRM
