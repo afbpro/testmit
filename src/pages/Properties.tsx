@@ -603,8 +603,8 @@ export default function Properties() {
                   setIsAddOpen(true);
                 }}
               >
-                <Plus className="h-4 w-4" />
-                + Agregar propiedad
+                <Building2 className="h-4 w-4" />
+                Agregar propiedad
               </Button>
             </div>
           </CardContent>
