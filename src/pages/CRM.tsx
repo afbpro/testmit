@@ -1242,66 +1242,88 @@ export default function CRM() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredClients.map((client) => (
-                    <div
-                      key={client.id}
-                      className="rounded-2xl border border-white/10 bg-black/30 p-4 shadow-sm transition-colors hover:border-white/20 hover:bg-white/[0.03]"
-                    >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-2 min-w-0">
-                          <div>
-                            <p className="font-semibold text-white">{client.name}</p>
-                            <p className="text-sm text-zinc-300">
-                              {client.email || client.phone || "Sin contacto principal"}
-                            </p>
+                  {filteredClients.map((client) => {
+                    const daysSince = client.created_at
+                      ? Math.floor((Date.now() - new Date(client.created_at).getTime()) / 86400000)
+                      : null;
+
+                    return (
+                      <div
+                        key={client.id}
+                        className="min-h-[80px] rounded-2xl border border-white/10 bg-black/30 p-4 shadow-sm transition-colors hover:border-white/20 hover:bg-white/[0.03]"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0 space-y-2">
+                            <div>
+                              <p className="text-base font-semibold text-white md:text-lg">{client.name}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-300">
+                                {client.phone && (
+                                  <span className="flex items-center gap-1">
+                                    <Phone className="h-3.5 w-3.5 text-zinc-500" />
+                                    {client.phone}
+                                  </span>
+                                )}
+                                {!client.phone && client.email && (
+                                  <span className="flex items-center gap-1">
+                                    <Mail className="h-3.5 w-3.5 text-zinc-500" />
+                                    {client.email}
+                                  </span>
+                                )}
+                                {daysSince !== null && (
+                                  <span className="text-xs text-zinc-500">
+                                    hace {daysSince === 0 ? "hoy" : `${daysSince}d`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="hidden flex-wrap gap-2 text-xs text-zinc-300 sm:flex">
+                              {client.operation_type && (
+                                <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-200">{client.operation_type}</span>
+                              )}
+                              {client.department && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.department}</span>}
+                              {client.zone && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone}</span>}
+                              {client.zone_specific && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone_specific}</span>}
+                              {client.property_type && (
+                                <span className="rounded-full bg-white/5 px-2.5 py-1">{client.property_type}</span>
+                              )}
+                              {client.period && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.period}</span>}
+                              {client.budget && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.budget}</span>}
+                            </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-2 text-xs text-zinc-300">
-                            {client.operation_type && (
-                              <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-200">{client.operation_type}</span>
-                            )}
-                            {client.department && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.department}</span>}
-                            {client.zone && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone}</span>}
-                            {client.zone_specific && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone_specific}</span>}
-                            {client.property_type && (
-                              <span className="rounded-full bg-white/5 px-2.5 py-1">{client.property_type}</span>
-                            )}
-                            {client.period && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.period}</span>}
-                            {client.budget && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.budget}</span>}
+                          <Badge variant="outline" className={`shrink-0 self-start border text-sm ${getStageBadgeClass(client.stage)}`}>
+                            {client.stage}
+                          </Badge>
+                        </div>
+
+                        <div className="grid gap-3 pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                          <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
+                            <SelectTrigger className={`${selectTriggerClassName} min-h-[44px]`}>
+                              <SelectValue placeholder="Estado actual" />
+                            </SelectTrigger>
+                            <SelectContent className={selectContentClassName}>
+                              {clientStages.map((stage) => (
+                                <SelectItem key={stage} value={stage}>
+                                  {stage}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            <Button variant="outline" className="min-h-[44px] w-full md:w-auto" onClick={() => openEditDialog(client)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Editar
+                            </Button>
+                            <Button variant="outline" className="min-h-[44px] w-full md:w-auto" onClick={() => navigate(`/crm/client/${client.id}`)}>
+                              Abrir ficha
+                            </Button>
                           </div>
                         </div>
-
-                        <Badge variant="outline" className={`border ${getStageBadgeClass(client.stage)}`}>
-                          {client.stage}
-                        </Badge>
                       </div>
-
-                      <div className="grid gap-3 pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-                        <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
-                          <SelectTrigger className={selectTriggerClassName}>
-                            <SelectValue placeholder="Estado actual" />
-                          </SelectTrigger>
-                          <SelectContent className={selectContentClassName}>
-                            {clientStages.map((stage) => (
-                              <SelectItem key={stage} value={stage}>
-                                {stage}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-
-                        <div className="flex flex-col gap-2 sm:flex-row">
-                          <Button variant="outline" className="w-full md:w-auto" onClick={() => openEditDialog(client)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
-                          </Button>
-                          <Button variant="outline" className="w-full md:w-auto" onClick={() => navigate(`/crm/client/${client.id}`)}>
-                            Abrir ficha
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
