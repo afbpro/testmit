@@ -63,7 +63,6 @@ import {
   defaultClientStage,
   getDaysSinceLastContact,
   getStageBadgeClass,
-  getStageDotClass,
   type ClientRecord,
   type ClientStage,
 } from "@/lib/crm";
