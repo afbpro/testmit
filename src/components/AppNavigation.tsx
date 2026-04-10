@@ -9,11 +9,11 @@ type AppNavigationProps = {
   onLogout: () => void | Promise<void>;
 };
 
-const navItems = [
+const navItems: readonly { to: string; label: string; icon: typeof Link2; end?: boolean }[] = [
   { to: "/", label: "Link", icon: Link2, end: true },
   { to: "/jira", label: "Jira", icon: BriefcaseBusiness },
   { to: "/crm", label: "CRM", icon: Users },
-] as const;
+];
 
 const desktopLinkClass =
   "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/5 hover:text-white";

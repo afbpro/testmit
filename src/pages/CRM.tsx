@@ -4,15 +4,19 @@ import { toast } from "sonner";
 import {
   Building2,
   Check,
+  ChevronDown,
   ChevronsUpDown,
   CircleDollarSign,
   Loader2,
+  LogOut,
   Mail,
   MapPin,
   MessageCircle,
+  MoreVertical,
   Pencil,
   Phone,
   Plus,
+  RefreshCw,
   Search,
   UserPlus,
   Users,
@@ -28,6 +32,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -830,14 +840,14 @@ export default function CRM() {
         )}
 
         <div className="xl:hidden">
-          <Button
+          <button
             type="button"
-            variant="outline"
-            className="w-full border-white/10 bg-white/[0.04] text-white hover:bg-white/10"
+            className="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm text-zinc-400 transition hover:text-zinc-200"
             onClick={() => setShowMobileStats((current) => !current)}
           >
             {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
-          </Button>
+            <ChevronDown className={`h-4 w-4 transition-transform ${showMobileStats ? "rotate-180" : ""}`} />
+          </button>
         </div>
 
         {showMobileStats && (
@@ -1232,66 +1242,88 @@ export default function CRM() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredClients.map((client) => (
-                    <div
-                      key={client.id}
-                      className="rounded-2xl border border-white/10 bg-black/30 p-4 shadow-sm transition-colors hover:border-white/20 hover:bg-white/[0.03]"
-                    >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-2 min-w-0">
-                          <div>
-                            <p className="font-semibold text-white">{client.name}</p>
-                            <p className="text-sm text-zinc-300">
-                              {client.email || client.phone || "Sin contacto principal"}
-                            </p>
+                  {filteredClients.map((client) => {
+                    const daysSince = client.created_at
+                      ? Math.floor((Date.now() - new Date(client.created_at).getTime()) / 86400000)
+                      : null;
+
+                    return (
+                      <div
+                        key={client.id}
+                        className="min-h-[80px] rounded-2xl border border-white/10 bg-black/30 p-4 shadow-sm transition-colors hover:border-white/20 hover:bg-white/[0.03]"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0 space-y-2">
+                            <div>
+                              <p className="text-base font-semibold text-white md:text-lg">{client.name}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-300">
+                                {client.phone && (
+                                  <span className="flex items-center gap-1">
+                                    <Phone className="h-3.5 w-3.5 text-zinc-500" />
+                                    {client.phone}
+                                  </span>
+                                )}
+                                {!client.phone && client.email && (
+                                  <span className="flex items-center gap-1">
+                                    <Mail className="h-3.5 w-3.5 text-zinc-500" />
+                                    {client.email}
+                                  </span>
+                                )}
+                                {daysSince !== null && (
+                                  <span className="text-xs text-zinc-500">
+                                    hace {daysSince === 0 ? "hoy" : `${daysSince}d`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="hidden flex-wrap gap-2 text-xs text-zinc-300 sm:flex">
+                              {client.operation_type && (
+                                <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-200">{client.operation_type}</span>
+                              )}
+                              {client.department && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.department}</span>}
+                              {client.zone && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone}</span>}
+                              {client.zone_specific && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone_specific}</span>}
+                              {client.property_type && (
+                                <span className="rounded-full bg-white/5 px-2.5 py-1">{client.property_type}</span>
+                              )}
+                              {client.period && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.period}</span>}
+                              {client.budget && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.budget}</span>}
+                            </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-2 text-xs text-zinc-300">
-                            {client.operation_type && (
-                              <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-200">{client.operation_type}</span>
-                            )}
-                            {client.department && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.department}</span>}
-                            {client.zone && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone}</span>}
-                            {client.zone_specific && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone_specific}</span>}
-                            {client.property_type && (
-                              <span className="rounded-full bg-white/5 px-2.5 py-1">{client.property_type}</span>
-                            )}
-                            {client.period && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.period}</span>}
-                            {client.budget && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.budget}</span>}
+                          <Badge variant="outline" className={`shrink-0 self-start border text-sm ${getStageBadgeClass(client.stage)}`}>
+                            {client.stage}
+                          </Badge>
+                        </div>
+
+                        <div className="grid gap-3 pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                          <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
+                            <SelectTrigger className={`${selectTriggerClassName} min-h-[44px]`}>
+                              <SelectValue placeholder="Estado actual" />
+                            </SelectTrigger>
+                            <SelectContent className={selectContentClassName}>
+                              {clientStages.map((stage) => (
+                                <SelectItem key={stage} value={stage}>
+                                  {stage}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            <Button variant="outline" className="min-h-[44px] w-full md:w-auto" onClick={() => openEditDialog(client)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Editar
+                            </Button>
+                            <Button variant="outline" className="min-h-[44px] w-full md:w-auto" onClick={() => navigate(`/crm/client/${client.id}`)}>
+                              Abrir ficha
+                            </Button>
                           </div>
                         </div>
-
-                        <Badge variant="outline" className={`border ${getStageBadgeClass(client.stage)}`}>
-                          {client.stage}
-                        </Badge>
                       </div>
-
-                      <div className="grid gap-3 pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-                        <Select value={client.stage} onValueChange={(value) => void updateClientStage(client.id, value)}>
-                          <SelectTrigger className={selectTriggerClassName}>
-                            <SelectValue placeholder="Estado actual" />
-                          </SelectTrigger>
-                          <SelectContent className={selectContentClassName}>
-                            {clientStages.map((stage) => (
-                              <SelectItem key={stage} value={stage}>
-                                {stage}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-
-                        <div className="flex flex-col gap-2 sm:flex-row">
-                          <Button variant="outline" className="w-full md:w-auto" onClick={() => openEditDialog(client)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
-                          </Button>
-                          <Button variant="outline" className="w-full md:w-auto" onClick={() => navigate(`/crm/client/${client.id}`)}>
-                            Abrir ficha
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
@@ -1303,14 +1335,14 @@ export default function CRM() {
         type="button"
         size="icon"
         aria-label="Agregar cliente"
-        className="fixed bottom-5 right-5 z-50 h-14 w-14 rounded-full bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:bg-zinc-200 xl:hidden"
+        className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:bg-zinc-200 md:bottom-5 md:right-5 xl:hidden"
         onClick={() => setIsAddClientOpen(true)}
       >
         <Plus className="h-6 w-6" />
       </Button>
 
       <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto border border-white/10 bg-zinc-950 text-white xl:hidden">
+        <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:border-white/10 xl:hidden">
           <DialogHeader>
             <DialogTitle>Agregar cliente</DialogTitle>
             <DialogDescription className="text-zinc-300">

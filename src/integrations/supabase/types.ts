@@ -24,8 +24,6 @@ export type Database = {
           id: string
           name: string
           notes: string | null
-          operation_type: string | null
-          period: string | null
           phone: string | null
           property_type: string | null
           stage: string | null
@@ -42,8 +40,6 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
-          operation_type?: string | null
-          period?: string | null
           phone?: string | null
           property_type?: string | null
           stage?: string | null
@@ -60,8 +56,6 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
-          operation_type?: string | null
-          period?: string | null
           phone?: string | null
           property_type?: string | null
           stage?: string | null
