@@ -88,7 +88,7 @@ export default function Login() {
             alt="Cupertino Negocios Inmobiliarios"
             className="h-24 md:h-24 w-auto max-w-full object-contain drop-shadow-[0_10px_30px_rgba(255,255,255,0.05)]"
           />
-          <p className="text-[10px] uppercase tracking-[0.34em] text-zinc-500">Negocios Inmobiliarios</p>
+          
         </div>
       </header>
 
