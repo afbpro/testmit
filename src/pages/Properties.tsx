@@ -33,11 +33,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -60,27 +55,6 @@ type PropertyTypeOption = (typeof propertyTypeOptions)[number];
 type OperationOption = (typeof operationOptions)[number];
 type DepartmentOption = (typeof departmentOptions)[number];
 type PropertyFilterOption = "all" | OperationOption;
-
-const salePriceOptions = [
-  "Hasta 100K",
-  "100K - 150K",
-  "150K - 200K",
-  "200K - 300K",
-  "300K - 500K",
-  "500K - 750K",
-  "750K - 1M",
-  "+1M",
-] as const;
-
-const rentPriceOptions = [
-  "Hasta 500",
-  "500 - 1K",
-  "1K - 1.5K",
-  "1.5K - 2K",
-  "2K - 3K",
-  "3K - 5K",
-  "+5K",
-] as const;
 
 const zoneOptionsByDepartment: Record<DepartmentOption, readonly string[]> = {
   Maldonado: [
@@ -123,100 +97,6 @@ const initialPropertyForm = {
   photos_link: "",
   notes: "",
 };
-
-function PriceCombobox({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  options: readonly string[];
-}) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState(value);
-
-  const normalizedQuery = query.trim().toLowerCase();
-  const filteredOptions = normalizedQuery
-    ? options.filter((option) => option.toLowerCase().includes(normalizedQuery))
-    : options;
-  const showCustomValue = query.trim() && !options.some((option) => option.toLowerCase() === normalizedQuery);
-
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen);
-        if (nextOpen) {
-          setQuery(value);
-        }
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={`${selectWithIconClassName} w-full justify-between font-normal hover:bg-black/40`}
-        >
-          <span className={`truncate ${value ? "text-white" : "text-zinc-500"}`}>
-            {value || "Seleccioná o escribí un precio"}
-          </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-zinc-400" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] border-white/10 bg-zinc-950 p-0 text-white">
-        <div className="border-b border-white/10 p-2">
-          <Input
-            value={query}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              setQuery(nextValue);
-              onChange(nextValue);
-            }}
-            placeholder="Seleccioná o escribí un precio"
-            className={fieldClassName}
-          />
-        </div>
-
-        <div className="max-h-60 overflow-y-auto p-1">
-          {showCustomValue && (
-            <button
-              type="button"
-              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-zinc-200 transition hover:bg-white/5"
-              onClick={() => {
-                const customValue = query.trim();
-                onChange(customValue);
-                setQuery(customValue);
-                setOpen(false);
-              }}
-            >
-              <span>Usar “{query.trim()}”</span>
-              <Check className="h-4 w-4 text-zinc-500" />
-            </button>
-          )}
-
-          {filteredOptions.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-zinc-200 transition hover:bg-white/5"
-              onClick={() => {
-                onChange(option);
-                setQuery(option);
-                setOpen(false);
-              }}
-            >
-              <span>{option}</span>
-              <Check className={`h-4 w-4 ${value === option ? "text-emerald-400" : "text-transparent"}`} />
-            </button>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
 
 function normalizePortalUrl(value: string) {
   const trimmed = value.trim();
@@ -391,14 +271,6 @@ export default function Properties() {
   const [searchQuery, setSearchQuery] = useState("");
   const [operationFilter, setOperationFilter] = useState<PropertyFilterOption>("all");
   const [importingFromUrl, setImportingFromUrl] = useState(false);
-
-  const priceOptions = useMemo(() => {
-    if (form.operation === "Venta") {
-      return salePriceOptions;
-    }
-
-    return rentPriceOptions;
-  }, [form.operation]);
 
   const availableZones = form.department ? zoneOptionsByDepartment[form.department] : [];
   const propertyCountLabel = loading
@@ -1102,7 +974,13 @@ export default function Properties() {
               <Label htmlFor="property-price">Precio (USD)</Label>
               <div className="relative">
                 <CircleDollarSign className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                <PriceCombobox value={form.price} onChange={(value) => setForm((current) => ({ ...current, price: value }))} options={priceOptions} />
+                <Input
+                  id="property-price"
+                  value={form.price}
+                  onChange={handleChange("price")}
+                  placeholder="Ej: 250000 o 1200"
+                  className={inputWithIconClassName}
+                />
               </div>
             </div>
 
