@@ -58,7 +58,7 @@ const COLEGA_AGENCY_ID = 584;
 type PropertyTypeOption = (typeof propertyTypeOptions)[number];
 type OperationOption = (typeof operationOptions)[number];
 type DepartmentOption = (typeof departmentOptions)[number];
-type PropertyFilterOption = "all" | "sale" | "rent";
+type PropertyFilterOption = "all" | OperationOption;
 
 const salePriceOptions = [
   "Hasta 100K",
@@ -315,15 +315,19 @@ export default function Properties() {
     ? "Cargando propiedades..."
     : `${properties.length} ${properties.length === 1 ? "propiedad cargada" : "propiedades cargadas"}`;
 
+  const operationCountMap = useMemo(
+    () =>
+      Object.fromEntries(
+        operationOptions.map((option) => [option, properties.filter((property) => property.operation === option).length]),
+      ) as Record<OperationOption, number>,
+    [properties],
+  );
+
   const filteredProperties = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
     return properties.filter((property) => {
-      const isRental = property.operation?.toLowerCase().includes("alquiler") ?? false;
-      const matchesOperation =
-        operationFilter === "all" ||
-        (operationFilter === "sale" && property.operation === "Venta") ||
-        (operationFilter === "rent" && isRental);
+      const matchesOperation = operationFilter === "all" || property.operation === operationFilter;
 
       if (!matchesOperation) {
         return false;
@@ -337,7 +341,6 @@ export default function Properties() {
         property.title,
         property.type,
         property.operation,
-        isRental ? "alquiler renta" : property.operation === "Venta" ? "venta" : "",
         property.price,
         property.department,
         property.zone,
@@ -666,9 +669,12 @@ export default function Properties() {
                     <SelectValue placeholder="Filtrar por operación" />
                   </SelectTrigger>
                   <SelectContent className={selectContentClassName}>
-                    <SelectItem value="all">Todas</SelectItem>
-                    <SelectItem value="sale">En venta</SelectItem>
-                    <SelectItem value="rent">En alquiler</SelectItem>
+                    <SelectItem value="all">Todas ({properties.length})</SelectItem>
+                    {operationOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option} ({operationCountMap[option]})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
