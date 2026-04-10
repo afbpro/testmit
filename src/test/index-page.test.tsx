@@ -119,7 +119,13 @@ describe("Index login flow", () => {
 
     expect(await screen.findByText(/precio de venta \(usd\)/i)).toBeInTheDocument();
     expect(screen.getByText(/seleccioná o escribí el precio/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/dirección \/ descripción de la propiedad/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/departamento/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/zona específica/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("combobox", { name: /departamento/i }));
+    fireEvent.click(await screen.findByRole("option", { name: "Maldonado" }));
+    fireEvent.click(screen.getByRole("combobox", { name: /zona \/ ciudad/i }));
+    fireEvent.click(await screen.findByRole("option", { name: "Punta del Este" }));
 
     fireEvent.click(screen.getByRole("combobox", { name: /tipo de operación/i }));
     fireEvent.click(await screen.findByRole("option", { name: "Alquiler temporal" }));

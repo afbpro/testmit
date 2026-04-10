@@ -30,10 +30,12 @@ export interface ClientRecord {
   email: string | null;
   operation_type: string | null;
   property_type: string | null;
+  department: string | null;
+  zone: string | null;
+  zone_specific: string | null;
   budget: string | null;
   period: string | null;
   budget_notes: string | null;
-  zone: string | null;
   notes: string | null;
   stage: string;
   created_at: string;

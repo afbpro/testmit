@@ -200,7 +200,7 @@ export default function ClientDetail() {
                   )}
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Etapa</p>
                     <Badge variant="outline" className={`mt-2 ${getStageBadgeClass(client.stage)}`}>
@@ -216,12 +216,16 @@ export default function ClientDetail() {
                     <p className="mt-2 text-sm font-medium text-white">{client.property_type || "No definido"}</p>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Zona</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Departamento</p>
+                    <p className="mt-2 text-sm font-medium text-white">{client.department || "No definido"}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Zona / Ciudad</p>
                     <p className="mt-2 text-sm font-medium text-white">{client.zone || "No definida"}</p>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-zinc-300">Presupuesto</p>
-                    <p className="mt-2 text-sm font-medium text-white">{client.budget || "Sin dato"}</p>
+                    <p className="mt-2 text-sm font-medium text-white">{client.budget || client.period || "Sin dato"}</p>
                   </div>
                 </div>
               </CardContent>
@@ -265,9 +269,10 @@ export default function ClientDetail() {
                     <div className="rounded-xl border border-white/10 bg-black/25 p-4">
                       <div className="mb-2 flex items-center gap-2 text-zinc-400">
                         <MapPin className="h-4 w-4" />
-                        <p className="text-xs uppercase tracking-[0.18em]">Zona</p>
+                        <p className="text-xs uppercase tracking-[0.18em]">Ubicación</p>
                       </div>
-                      <p className="text-sm font-medium text-white">{client.zone || "-"}</p>
+                      <p className="text-sm font-medium text-white">{[client.department, client.zone].filter(Boolean).join(" · ") || "-"}</p>
+                      <p className="mt-1 text-xs text-zinc-400">{client.zone_specific || "Sin detalle extra"}</p>
                     </div>
 
                     <div className="rounded-xl border border-white/10 bg-black/25 p-4">

@@ -19,6 +19,7 @@ export type Database = {
           budget: string | null
           budget_notes: string | null
           created_at: string | null
+          department: string | null
           email: string | null
           id: string
           name: string
@@ -30,11 +31,13 @@ export type Database = {
           stage: string | null
           whatsapp: string | null
           zone: string | null
+          zone_specific: string | null
         }
         Insert: {
           budget?: string | null
           budget_notes?: string | null
           created_at?: string | null
+          department?: string | null
           email?: string | null
           id?: string
           name: string
@@ -46,11 +49,13 @@ export type Database = {
           stage?: string | null
           whatsapp?: string | null
           zone?: string | null
+          zone_specific?: string | null
         }
         Update: {
           budget?: string | null
           budget_notes?: string | null
           created_at?: string | null
+          department?: string | null
           email?: string | null
           id?: string
           name?: string
@@ -62,6 +67,7 @@ export type Database = {
           stage?: string | null
           whatsapp?: string | null
           zone?: string | null
+          zone_specific?: string | null
         }
         Relationships: []
       }

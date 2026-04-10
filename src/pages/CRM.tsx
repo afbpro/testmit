@@ -84,6 +84,10 @@ const operationTypeOptions = [
 type OperationType = (typeof operationTypeOptions)[number];
 type BudgetOperationType = Exclude<OperationType, "Alquiler temporal">;
 
+const departmentOptions = ["Maldonado", "Rocha", "Piriápolis (Maldonado)"] as const;
+
+type DepartmentOption = (typeof departmentOptions)[number];
+
 const purchaseBudgetOptions = [
   "Hasta 100K",
   "100K - 150K",
@@ -153,6 +157,64 @@ const budgetOptionsByOperation: Record<BudgetOperationType, readonly string[]> =
   "Alquiler invernal": winterBudgetOptions,
 };
 
+const zoneOptionsByDepartment: Record<DepartmentOption, readonly string[]> = {
+  Maldonado: [
+    "Punta del Este",
+    "Maldonado ciudad",
+    "San Carlos",
+    "Piriápolis",
+    "Pan de Azúcar",
+    "Solís",
+    "Gregorio Aznárez",
+    "Balneario Buenos Aires",
+    "El Tesoro",
+    "El Chorro",
+    "La Barra",
+    "Manantiales",
+    "José Ignacio",
+    "Laguna del Sauce",
+    "Punta Ballena",
+    "Portezuelo",
+    "Cantegril",
+    "Pinares",
+    "Beverly Hills",
+    "Roosevelt",
+    "Rincón del Indio",
+    "Lugano",
+    "El Paraíso",
+    "Chihuahua",
+    "Sauce de Portezuelo",
+    "Cerro Pelado",
+    "Aiguá",
+  ],
+  "Piriápolis (Maldonado)": [
+    "Piriápolis centro",
+    "Punta Colorada",
+    "Punta Negra",
+    "Solís",
+    "Punta Fría",
+    "La Paloma (Maldonado)",
+    "San Francisco",
+    "Kiyú",
+    "Bella Vista",
+  ],
+  Rocha: [
+    "La Paloma",
+    "La Pedrera",
+    "Punta del Diablo",
+    "Aguas Dulces",
+    "Cabo Polonio",
+    "Valizas",
+    "Rocha ciudad",
+    "Lascano",
+    "Chuy",
+    "La Coronilla",
+    "Castillos",
+    "18 de Julio",
+    "Velázquez",
+  ],
+};
+
 const fieldClassName = "h-11 border-white/10 bg-black/30 text-white placeholder:text-zinc-500";
 const inputWithIconClassName = `${fieldClassName} pl-10`;
 const selectTriggerClassName = "h-11 border-white/10 bg-black/30 text-white";
@@ -172,14 +234,13 @@ function getBudgetFieldPlaceholder(operationType: OperationType | "") {
   return operationType === "Venta" ? "Seleccioná o escribí el precio" : "Seleccioná o escribí un monto";
 }
 
-function getZoneFieldLabel(operationType: OperationType | "") {
-  return operationType === "Venta" ? "Dirección / descripción de la propiedad" : "Zona de interés";
-}
+function inferDepartmentFromZone(zone: string | null | undefined): DepartmentOption | "" {
+  if (!zone) {
+    return "";
+  }
 
-function getZoneFieldPlaceholder(operationType: OperationType | "") {
-  return operationType === "Venta"
-    ? "Ej: Av. Roosevelt 1234, 3 dorm, vista al mar"
-    : "Punta del Este, Maldonado...";
+  const match = departmentOptions.find((department) => zoneOptionsByDepartment[department].includes(zone));
+  return match ?? "";
 }
 
 function BudgetCombobox({
@@ -290,10 +351,12 @@ const initialClientForm = {
   email: "",
   operation_type: "" as OperationType | "",
   property_type: "",
+  department: "" as DepartmentOption | "",
+  zone: "",
+  zone_specific: "",
   budget: "",
   period: "",
   budget_notes: "",
-  zone: "",
   notes: "",
   stage: defaultClientStage as ClientStage,
 };
@@ -305,10 +368,12 @@ const buildClientPayload = (values: typeof initialClientForm) => ({
   email: values.email.trim() || null,
   operation_type: values.operation_type || null,
   property_type: values.property_type.trim() || null,
+  department: values.department || null,
+  zone: values.zone.trim() || null,
+  zone_specific: values.zone_specific.trim() || null,
   budget: isBudgetOperation(values.operation_type) ? values.budget.trim() || null : null,
   period: values.operation_type === "Alquiler temporal" ? values.period.trim() || null : null,
   budget_notes: values.budget_notes.trim() || null,
-  zone: values.zone.trim() || null,
   notes: values.notes.trim() || null,
   stage: values.stage,
 });
@@ -385,7 +450,9 @@ export default function CRM() {
           client.name,
           client.email,
           client.phone,
+          client.department,
           client.zone,
+          client.zone_specific,
           client.property_type,
           client.operation_type,
           client.period,
@@ -425,10 +492,18 @@ export default function CRM() {
     }));
   };
 
-  const handleSelectFieldChange = (field: "property_type" | "budget") => (value: string) => {
+  const handleSelectFieldChange = (field: "property_type" | "budget" | "zone") => (value: string) => {
     setForm((current) => ({
       ...current,
       [field]: value,
+    }));
+  };
+
+  const handleDepartmentChange = (value: string) => {
+    setForm((current) => ({
+      ...current,
+      department: value as DepartmentOption,
+      zone: "",
     }));
   };
 
@@ -464,10 +539,14 @@ export default function CRM() {
         ? (client.operation_type as OperationType)
         : "",
       property_type: client.property_type || "",
+      department: departmentOptions.includes(client.department as DepartmentOption)
+        ? (client.department as DepartmentOption)
+        : inferDepartmentFromZone(client.zone),
+      zone: client.zone || "",
+      zone_specific: client.zone_specific || "",
       budget: client.budget || "",
       period: client.period || "",
       budget_notes: client.budget_notes || "",
-      zone: client.zone || "",
       notes: client.notes || "",
       stage: clientStages.includes(client.stage as ClientStage)
         ? (client.stage as ClientStage)
@@ -491,10 +570,18 @@ export default function CRM() {
     }));
   };
 
-  const handleEditSelectFieldChange = (field: "property_type" | "budget") => (value: string) => {
+  const handleEditSelectFieldChange = (field: "property_type" | "budget" | "zone") => (value: string) => {
     setEditForm((current) => ({
       ...current,
       [field]: value,
+    }));
+  };
+
+  const handleEditDepartmentChange = (value: string) => {
+    setEditForm((current) => ({
+      ...current,
+      department: value as DepartmentOption,
+      zone: "",
     }));
   };
 
@@ -636,12 +723,10 @@ export default function CRM() {
 
   const budgetLabel = getBudgetFieldLabel(form.operation_type);
   const budgetPlaceholder = getBudgetFieldPlaceholder(form.operation_type);
-  const zoneLabel = getZoneFieldLabel(form.operation_type);
-  const zonePlaceholder = getZoneFieldPlaceholder(form.operation_type);
+  const availableZones = form.department ? zoneOptionsByDepartment[form.department] : [];
   const editBudgetLabel = getBudgetFieldLabel(editForm.operation_type);
   const editBudgetPlaceholder = getBudgetFieldPlaceholder(editForm.operation_type);
-  const editZoneLabel = getZoneFieldLabel(editForm.operation_type);
-  const editZonePlaceholder = getZoneFieldPlaceholder(editForm.operation_type);
+  const editAvailableZones = editForm.department ? zoneOptionsByDepartment[editForm.department] : [];
 
   const metricCards = [
     {
@@ -937,15 +1022,52 @@ export default function CRM() {
                   </div>
                 )}
 
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="client-department">Departamento</Label>
+                    <Select value={form.department} onValueChange={handleDepartmentChange}>
+                      <SelectTrigger id="client-department" className={selectTriggerClassName}>
+                        <SelectValue placeholder="Seleccioná un departamento" />
+                      </SelectTrigger>
+                      <SelectContent className={selectContentClassName}>
+                        {departmentOptions.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="client-zone">Zona / Ciudad</Label>
+                    <div className="relative">
+                      <MapPin className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                      <Select value={form.zone} onValueChange={handleSelectFieldChange("zone")} disabled={!form.department}>
+                        <SelectTrigger id="client-zone" className={selectWithIconClassName}>
+                          <SelectValue placeholder={form.department ? "Seleccioná una zona o ciudad" : "Primero elegí un departamento"} />
+                        </SelectTrigger>
+                        <SelectContent className={selectContentClassName}>
+                          {availableZones.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="client-zone">{zoneLabel}</Label>
+                  <Label htmlFor="client-zone-specific">Zona específica</Label>
                   <div className="relative">
                     <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                     <Input
-                      id="client-zone"
-                      placeholder={zonePlaceholder}
-                      value={form.zone}
-                      onChange={handleChange("zone")}
+                      id="client-zone-specific"
+                      placeholder="Ej: Barrio privado, padrón específico..."
+                      value={form.zone_specific}
+                      onChange={handleChange("zone_specific")}
                       className={inputWithIconClassName}
                     />
                   </div>
@@ -1102,7 +1224,9 @@ export default function CRM() {
                             {client.operation_type && (
                               <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-emerald-200">{client.operation_type}</span>
                             )}
+                            {client.department && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.department}</span>}
                             {client.zone && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone}</span>}
+                            {client.zone_specific && <span className="rounded-full bg-white/5 px-2.5 py-1">{client.zone_specific}</span>}
                             {client.property_type && (
                               <span className="rounded-full bg-white/5 px-2.5 py-1">{client.property_type}</span>
                             )}
@@ -1316,15 +1440,52 @@ export default function CRM() {
               </div>
             )}
 
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="mobile-client-department">Departamento</Label>
+                <Select value={form.department} onValueChange={handleDepartmentChange}>
+                  <SelectTrigger id="mobile-client-department" className={selectTriggerClassName}>
+                    <SelectValue placeholder="Seleccioná un departamento" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClassName}>
+                    {departmentOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mobile-client-zone">Zona / Ciudad</Label>
+                <div className="relative">
+                  <MapPin className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Select value={form.zone} onValueChange={handleSelectFieldChange("zone")} disabled={!form.department}>
+                    <SelectTrigger id="mobile-client-zone" className={selectWithIconClassName}>
+                      <SelectValue placeholder={form.department ? "Seleccioná una zona o ciudad" : "Primero elegí un departamento"} />
+                    </SelectTrigger>
+                    <SelectContent className={selectContentClassName}>
+                      {availableZones.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="mobile-client-zone">{zoneLabel}</Label>
+              <Label htmlFor="mobile-client-zone-specific">Zona específica</Label>
               <div className="relative">
                 <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                 <Input
-                  id="mobile-client-zone"
-                  placeholder={zonePlaceholder}
-                  value={form.zone}
-                  onChange={handleChange("zone")}
+                  id="mobile-client-zone-specific"
+                  placeholder="Ej: Barrio privado, padrón específico..."
+                  value={form.zone_specific}
+                  onChange={handleChange("zone_specific")}
                   className={inputWithIconClassName}
                 />
               </div>
@@ -1524,14 +1685,49 @@ export default function CRM() {
               ) : null}
 
               <div className="space-y-2">
-                <Label htmlFor="edit-client-zone">{editZoneLabel}</Label>
+                <Label htmlFor="edit-client-department">Departamento</Label>
+                <Select value={editForm.department} onValueChange={handleEditDepartmentChange}>
+                  <SelectTrigger id="edit-client-department" className={selectTriggerClassName}>
+                    <SelectValue placeholder="Seleccioná un departamento" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClassName}>
+                    {departmentOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-zone">Zona / Ciudad</Label>
+                <div className="relative">
+                  <MapPin className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                  <Select value={editForm.zone} onValueChange={handleEditSelectFieldChange("zone")} disabled={!editForm.department}>
+                    <SelectTrigger id="edit-client-zone" className={selectWithIconClassName}>
+                      <SelectValue placeholder={editForm.department ? "Seleccioná una zona o ciudad" : "Primero elegí un departamento"} />
+                    </SelectTrigger>
+                    <SelectContent className={selectContentClassName}>
+                      {editAvailableZones.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="edit-client-zone-specific">Zona específica</Label>
                 <div className="relative">
                   <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                   <Input
-                    id="edit-client-zone"
-                    value={editForm.zone}
-                    onChange={handleEditChange("zone")}
-                    placeholder={editZonePlaceholder}
+                    id="edit-client-zone-specific"
+                    value={editForm.zone_specific}
+                    onChange={handleEditChange("zone_specific")}
+                    placeholder="Ej: Barrio privado, padrón específico..."
                     className={inputWithIconClassName}
                   />
                 </div>
