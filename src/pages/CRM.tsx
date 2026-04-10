@@ -238,14 +238,13 @@ export default function CRM() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
-      <header className="border-b border-white/10 bg-black/75 py-5 md:py-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-2 px-4 text-center">
+      <header className="border-b border-white/10 bg-black/75 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-7xl items-center px-4">
           <img
             src={logo}
-            alt="Cupertino Negocios Inmobiliarios"
-            className="h-20 md:h-24 w-auto max-w-full object-contain drop-shadow-[0_10px_30px_rgba(255,255,255,0.05)]"
+            alt="Cupertino"
+            className="h-8 w-auto object-contain"
           />
-          <p className="text-[10px] uppercase tracking-[0.34em] text-zinc-500">Negocios Inmobiliarios</p>
         </div>
       </header>
 
