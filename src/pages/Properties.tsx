@@ -51,6 +51,7 @@ const propertyTypeOptions = ["Apartamento", "Casa", "Local", "Terreno", "Campo"]
 const operationOptions = ["Venta", "Alquiler temporal", "Alquiler anual", "Alquiler invernal"] as const;
 const departmentOptions = ["Maldonado", "Rocha"] as const;
 const PROPERTY_DRAFT_STORAGE_KEY = "colega-linker-property-draft";
+const COLEGA_AGENCY_ID = 584;
 
 type PropertyTypeOption = (typeof propertyTypeOptions)[number];
 type OperationOption = (typeof operationOptions)[number];
@@ -235,28 +236,26 @@ function normalizeImageUrls(value: unknown) {
   return value.filter((item): item is string => typeof item === "string" && item.length > 0);
 }
 
-function extractPortalId(url: string | null | undefined) {
-  if (!url) {
+function mapPropertyTypeToColega(type: string | null | undefined) {
+  switch (type) {
+    case "Apartamento":
+      return "Apartamentos" as const;
+    case "Casa":
+      return "Casas" as const;
+    default:
+      return "Casas" as const;
+  }
+}
+
+function buildPropertyColegaLink(property: Pick<PropertyRecord, "auto_id" | "type">) {
+  if (!property.auto_id) {
     return "";
   }
 
-  const match = url.match(/(\d+)(?!.*\d)/);
-  return match?.[1] ?? "";
-}
+  const result = property.auto_id * COLEGA_AGENCY_ID + 9876;
+  const propertyType = mapPropertyTypeToColega(property.type);
 
-function mapPropertyTypeToColega(type: string | null | undefined) {
-  switch (type) {
-    case "Casa":
-      return "Casas" as const;
-    case "Terreno":
-      return "Terrenos" as const;
-    case "Campo":
-      return "Campos" as const;
-    case "Local":
-      return "Locales" as const;
-    default:
-      return "Apartamentos" as const;
-  }
+  return `https://www.inmobiliaria.link/c/inmobiliaria_${COLEGA_AGENCY_ID}/${propertyType}/${result}`;
 }
 
 export default function Properties() {
@@ -270,6 +269,7 @@ export default function Properties() {
   const [form, setForm] = useState(initialPropertyForm);
   const [errorMessage, setErrorMessage] = useState("");
   const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
+  const [savedColegaLink, setSavedColegaLink] = useState<{ title: string; url: string } | null>(null);
 
   const priceOptions = useMemo(() => {
     if (form.operation === "Venta") {
@@ -419,11 +419,6 @@ export default function Properties() {
       return;
     }
 
-    if (!form.url.trim()) {
-      toast.error("La URL del portal es obligatoria");
-      return;
-    }
-
     if (!supabase) {
       toast.error("Configurá Supabase para guardar propiedades");
       return;
@@ -437,7 +432,7 @@ export default function Properties() {
       price: form.price.trim() || null,
       department: form.department || null,
       zone: form.zone || null,
-      url: normalizePortalUrl(form.url),
+      url: form.url.trim() ? normalizePortalUrl(form.url) : null,
       image_urls: form.photos_link.trim() ? [normalizePortalUrl(form.photos_link)] : [],
       notes: form.notes.trim() || null,
     };
@@ -450,10 +445,21 @@ export default function Properties() {
       return;
     }
 
-    setProperties((current) => [data as PropertyRecord, ...current]);
+    const savedProperty = data as PropertyRecord;
+    const colegaLink = buildPropertyColegaLink(savedProperty);
+
+    setProperties((current) => [savedProperty, ...current]);
+    setSavedColegaLink(
+      colegaLink
+        ? {
+            title: savedProperty.title,
+            url: colegaLink,
+          }
+        : null,
+    );
     resetForm();
     setIsAddOpen(false);
-    toast.success("Propiedad guardada");
+    toast.success("✅ Propiedad guardada");
   };
 
   const handleDelete = async (property: PropertyRecord) => {
@@ -477,44 +483,36 @@ export default function Properties() {
     toast.success("Propiedad eliminada");
   };
 
-  const handleCopyLink = async (url: string | null) => {
+  const handleCopyLink = async (url: string) => {
     if (!url) {
-      toast.error("Esta propiedad no tiene link cargado");
+      toast.error("Esta propiedad todavía no tiene link colega disponible.");
       return;
     }
 
     await navigator.clipboard.writeText(url);
-    toast.success("Link copiado");
+    toast.success("Link colega copiado");
   };
 
   const handleShareWhatsApp = (property: PropertyRecord) => {
+    const colegaLink = buildPropertyColegaLink(property);
+
+    if (!colegaLink) {
+      toast.error("Todavía no se pudo generar el link colega para esta propiedad.");
+      return;
+    }
+
     const text = [
+      "Hola! Te comparto esta propiedad:",
       property.title,
       property.operation,
       property.price ? `Precio: ${property.price} USD` : null,
       [property.department, property.zone].filter(Boolean).join(" · ") || null,
-      property.url,
+      `Link colega: ${colegaLink}`,
     ]
       .filter(Boolean)
       .join("\n");
 
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
-  };
-
-  const handleLinkColega = (property: PropertyRecord) => {
-    const portalId = extractPortalId(property.url);
-
-    navigate("/", {
-      state: {
-        prefillPropertyId: portalId,
-        prefillPropertyType: mapPropertyTypeToColega(property.type),
-        fromPropertyTitle: property.title,
-      },
-    });
-
-    if (!portalId) {
-      toast.error("No pude detectar el ID automáticamente. Te dejé la propiedad cargada para completar el Link Colega.");
-    }
   };
 
   return (
@@ -573,6 +571,47 @@ export default function Properties() {
           </Card>
         </div>
 
+        {savedColegaLink && (
+          <Card className="border border-emerald-500/30 bg-emerald-500/10 text-white shadow-sm backdrop-blur-xl">
+            <CardContent className="space-y-3 p-4 sm:p-5">
+              <div className="flex items-center gap-2 text-emerald-100">
+                <Sparkles className="h-4 w-4" />
+                <p className="font-medium">✅ Propiedad guardada</p>
+              </div>
+              <div>
+                <p className="text-sm text-emerald-50">Tu link colega:</p>
+                <p className="mt-1 break-all rounded-xl border border-emerald-400/20 bg-black/20 p-3 font-mono text-sm text-white">
+                  {savedColegaLink.url}
+                </p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button
+                  variant="outline"
+                  className="w-full border-emerald-400/30 bg-emerald-500/10 text-emerald-50 hover:bg-emerald-500/20"
+                  onClick={() =>
+                    window.open(
+                      `https://wa.me/?text=${encodeURIComponent(`Hola! Te comparto esta propiedad: ${savedColegaLink.url}`)}`,
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Compartir por WhatsApp
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-white/10 bg-transparent text-white hover:bg-white/5"
+                  onClick={() => void handleCopyLink(savedColegaLink.url)}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copiar link
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {errorMessage && (
           <Card className="border-amber-500/40 bg-amber-50 shadow-sm">
             <CardContent className="p-4 text-sm text-amber-900">{errorMessage}</CardContent>
@@ -599,6 +638,7 @@ export default function Properties() {
             {properties.map((property) => {
               const locationLabel = [property.department, property.zone].filter(Boolean).join(" · ") || "Sin zona";
               const propertyImages = normalizeImageUrls(property.image_urls);
+              const colegaLink = buildPropertyColegaLink(property);
 
               return (
                 <Card key={property.id} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
@@ -614,7 +654,7 @@ export default function Properties() {
                           )}
                           {propertyImages.length > 0 && (
                             <Badge variant="outline" className="border-white/15 bg-white/10 text-white">
-                              {propertyImages.length} foto{propertyImages.length === 1 ? "" : "s"}
+                              Link de fotos
                             </Badge>
                           )}
                         </div>
@@ -646,24 +686,46 @@ export default function Properties() {
                           <span>{property.url}</span>
                         </div>
                       )}
+                      {propertyImages[0] && (
+                        <div className="flex items-center gap-2 break-all text-zinc-400">
+                          <Link2 className="h-4 w-4 text-zinc-500" />
+                          <span>Fotos: {propertyImages[0]}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-sm text-zinc-100">
+                      <div className="flex items-center gap-2 text-emerald-100">
+                        <Sparkles className="h-4 w-4" />
+                        <p className="text-xs uppercase tracking-[0.18em]">Tu link colega</p>
+                      </div>
+                      <p className="break-all font-mono text-sm text-white">
+                        {colegaLink || "Aplicá la migración de auto_id para generar el link automáticamente."}
+                      </p>
                     </div>
 
                     {property.notes && (
                       <p className="text-sm text-zinc-300">{property.notes}</p>
                     )}
 
-                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                      <Button variant="outline" className="w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => handleShareWhatsApp(property)}>
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                      <Button
+                        variant="outline"
+                        className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                        onClick={() => handleShareWhatsApp(property)}
+                        disabled={!colegaLink}
+                      >
                         <MessageCircle className="mr-2 h-4 w-4" />
-                        WhatsApp
+                        Compartir por WhatsApp
                       </Button>
-                      <Button variant="outline" className="w-full border-white/10 bg-transparent text-white hover:bg-white/5" onClick={() => void handleCopyLink(property.url)}>
+                      <Button
+                        variant="outline"
+                        className="w-full border-white/10 bg-transparent text-white hover:bg-white/5"
+                        onClick={() => void handleCopyLink(colegaLink)}
+                        disabled={!colegaLink}
+                      >
                         <Copy className="mr-2 h-4 w-4" />
                         Copiar link
-                      </Button>
-                      <Button variant="outline" className="w-full border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20" onClick={() => handleLinkColega(property)}>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Link colega
                       </Button>
                       <Button variant="outline" className="w-full border-red-500/30 bg-transparent text-red-200 hover:bg-red-500/10 hover:text-red-100" onClick={() => void handleDelete(property)}>
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -683,7 +745,7 @@ export default function Properties() {
           <DialogHeader>
             <DialogTitle>Agregar propiedad</DialogTitle>
             <DialogDescription className="text-zinc-300">
-              Completá los datos y guardá la propiedad en Supabase. Tu borrador queda guardado automáticamente.
+              Completá los datos y guardá la propiedad en Supabase. La URL del portal es opcional y tu borrador queda guardado automáticamente.
             </DialogDescription>
           </DialogHeader>
 
@@ -774,7 +836,7 @@ export default function Properties() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="property-url">URL del portal *</Label>
+              <Label htmlFor="property-url">URL del portal (opcional)</Label>
               <div className="relative">
                 <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                 <Input

@@ -202,6 +202,7 @@ export interface ClientRecord {
 
 export interface PropertyRecord {
   id: string;
+  auto_id: number | null;
   title: string;
   type: string | null;
   operation: string | null;

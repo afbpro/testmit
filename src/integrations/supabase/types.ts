@@ -73,6 +73,7 @@ export type Database = {
       }
       properties: {
         Row: {
+          auto_id: number | null
           created_at: string | null
           department: string | null
           id: string
@@ -87,6 +88,7 @@ export type Database = {
           zone_specific: string | null
         }
         Insert: {
+          auto_id?: number | null
           created_at?: string | null
           department?: string | null
           id?: string
@@ -101,6 +103,7 @@ export type Database = {
           zone_specific?: string | null
         }
         Update: {
+          auto_id?: number | null
           created_at?: string | null
           department?: string | null
           id?: string
