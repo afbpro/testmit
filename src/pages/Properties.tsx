@@ -7,7 +7,6 @@ import {
   ChevronsUpDown,
   CircleDollarSign,
   Copy,
-  ImagePlus,
   Link2,
   Loader2,
   MapPin,
@@ -15,7 +14,6 @@ import {
   Plus,
   Sparkles,
   Trash2,
-  X,
 } from "lucide-react";
 
 import AppNavigation from "@/components/AppNavigation";
@@ -52,7 +50,6 @@ import { supabase } from "@/lib/supabaseClient";
 const propertyTypeOptions = ["Apartamento", "Casa", "Local", "Terreno", "Campo"] as const;
 const operationOptions = ["Venta", "Alquiler temporal", "Alquiler anual", "Alquiler invernal"] as const;
 const departmentOptions = ["Maldonado", "Rocha"] as const;
-const MAX_PROPERTY_IMAGES = 10;
 const PROPERTY_DRAFT_STORAGE_KEY = "colega-linker-property-draft";
 
 type PropertyTypeOption = (typeof propertyTypeOptions)[number];
@@ -118,6 +115,7 @@ const initialPropertyForm = {
   department: "" as DepartmentOption | "",
   zone: "",
   url: "",
+  photos_link: "",
   notes: "",
 };
 
@@ -229,15 +227,6 @@ function normalizePortalUrl(value: string) {
   return `https://${trimmed}`;
 }
 
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
-    reader.readAsDataURL(file);
-  });
-}
-
 function normalizeImageUrls(value: unknown) {
   if (!Array.isArray(value)) {
     return [] as string[];
@@ -279,7 +268,6 @@ export default function Properties() {
   const [saving, setSaving] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [form, setForm] = useState(initialPropertyForm);
-  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
 
@@ -301,7 +289,6 @@ export default function Properties() {
 
   const resetForm = () => {
     setForm(initialPropertyForm);
-    setPhotoUrls([]);
 
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(PROPERTY_DRAFT_STORAGE_KEY);
@@ -320,7 +307,6 @@ export default function Properties() {
       if (storedDraft) {
         const parsedDraft = JSON.parse(storedDraft) as {
           form?: Partial<typeof initialPropertyForm>;
-          photoUrls?: string[];
         };
 
         if (parsedDraft.form && typeof parsedDraft.form === "object") {
@@ -330,10 +316,6 @@ export default function Properties() {
               Object.entries(parsedDraft.form).filter(([, value]) => typeof value === "string"),
             ),
           }));
-        }
-
-        if (Array.isArray(parsedDraft.photoUrls)) {
-          setPhotoUrls(parsedDraft.photoUrls.filter((value): value is string => typeof value === "string").slice(0, MAX_PROPERTY_IMAGES));
         }
       }
     } catch {
@@ -348,7 +330,7 @@ export default function Properties() {
       return;
     }
 
-    const hasDraftContent = Object.values(form).some((value) => value.trim() !== "") || photoUrls.length > 0;
+    const hasDraftContent = Object.values(form).some((value) => value.trim() !== "");
 
     if (!hasDraftContent) {
       window.localStorage.removeItem(PROPERTY_DRAFT_STORAGE_KEY);
@@ -359,10 +341,9 @@ export default function Properties() {
       PROPERTY_DRAFT_STORAGE_KEY,
       JSON.stringify({
         form,
-        photoUrls,
       }),
     );
-  }, [form, photoUrls, hasRestoredDraft]);
+  }, [form, hasRestoredDraft]);
 
   const loadProperties = useCallback(async () => {
     if (!supabase) {
@@ -430,41 +411,6 @@ export default function Properties() {
     }));
   };
 
-  const handlePhotoSelection = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-
-    if (files.length === 0) {
-      return;
-    }
-
-    const availableSlots = MAX_PROPERTY_IMAGES - photoUrls.length;
-
-    if (availableSlots <= 0) {
-      toast.error("Podés cargar hasta 10 fotos por propiedad.");
-      event.target.value = "";
-      return;
-    }
-
-    const selectedFiles = files.slice(0, availableSlots);
-
-    if (files.length > availableSlots) {
-      toast.error(`Solo se agregaron ${availableSlots} foto(s) para completar el máximo de 10.`);
-    }
-
-    try {
-      const nextImages = await Promise.all(selectedFiles.map((file) => readFileAsDataUrl(file)));
-      setPhotoUrls((current) => [...current, ...nextImages]);
-    } catch {
-      toast.error("No se pudieron procesar las fotos seleccionadas.");
-    }
-
-    event.target.value = "";
-  };
-
-  const handleRemovePhoto = (index: number) => {
-    setPhotoUrls((current) => current.filter((_, currentIndex) => currentIndex !== index));
-  };
-
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -492,7 +438,7 @@ export default function Properties() {
       department: form.department || null,
       zone: form.zone || null,
       url: normalizePortalUrl(form.url),
-      image_urls: photoUrls,
+      image_urls: form.photos_link.trim() ? [normalizePortalUrl(form.photos_link)] : [],
       notes: form.notes.trim() || null,
     };
 
@@ -657,23 +603,6 @@ export default function Properties() {
               return (
                 <Card key={property.id} className="border border-white/10 bg-white/[0.04] text-white shadow-sm backdrop-blur-xl">
                   <CardContent className="p-5 space-y-4">
-                    {propertyImages.length > 0 && (
-                      <div className="space-y-2">
-                        <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
-                          <img src={propertyImages[0]} alt={property.title} className="h-48 w-full object-cover" />
-                        </div>
-                        {propertyImages.length > 1 && (
-                          <div className="grid grid-cols-4 gap-2">
-                            {propertyImages.slice(1, 5).map((image, index) => (
-                              <div key={`${property.id}-thumb-${index}`} className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
-                                <img src={image} alt={`${property.title} ${index + 2}`} className="h-16 w-full object-cover" />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <h2 className="text-lg font-semibold text-white">{property.title}</h2>
@@ -754,7 +683,7 @@ export default function Properties() {
           <DialogHeader>
             <DialogTitle>Agregar propiedad</DialogTitle>
             <DialogDescription className="text-zinc-300">
-              Completá los datos, sumá hasta 10 fotos y guardá la propiedad en Supabase. Tu borrador queda guardado automáticamente.
+              Completá los datos y guardá la propiedad en Supabase. Tu borrador queda guardado automáticamente.
             </DialogDescription>
           </DialogHeader>
 
@@ -859,43 +788,16 @@ export default function Properties() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <Label htmlFor="property-photos">Fotos</Label>
-                <span className="text-[11px] text-zinc-500">Hasta 10 imágenes</span>
-              </div>
-              <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-3">
-                <label htmlFor="property-photos" className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-200 transition hover:bg-white/10">
-                  <ImagePlus className="h-4 w-4" />
-                  Agregar fotos
-                </label>
+              <Label htmlFor="property-photos-link">Link de fotos (opcional)</Label>
+              <div className="relative">
+                <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                 <Input
-                  id="property-photos"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handlePhotoSelection}
-                  className="hidden"
+                  id="property-photos-link"
+                  value={form.photos_link}
+                  onChange={handleChange("photos_link")}
+                  placeholder="Ej: link de Google Drive, Dropbox o galería del portal"
+                  className={inputWithIconClassName}
                 />
-
-                {photoUrls.length > 0 ? (
-                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {photoUrls.map((photoUrl, index) => (
-                      <div key={`${photoUrl.slice(0, 20)}-${index}`} className="relative overflow-hidden rounded-xl border border-white/10 bg-black/30">
-                        <img src={photoUrl} alt={`Foto ${index + 1}`} className="h-24 w-full object-cover" />
-                        <button
-                          type="button"
-                          className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white transition hover:bg-black"
-                          onClick={() => handleRemovePhoto(index)}
-                          aria-label={`Eliminar foto ${index + 1}`}
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-3 text-sm text-zinc-400">Todavía no agregaste fotos para esta propiedad.</p>
-                )}
               </div>
             </div>
 

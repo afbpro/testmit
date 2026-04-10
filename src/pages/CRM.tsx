@@ -19,6 +19,7 @@ import {
   Search,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1221,8 +1222,18 @@ export default function CRM() {
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
                       placeholder="Buscar por nombre, operación, zona, email o WhatsApp"
-                      className="h-11 border-0 bg-transparent pl-10 text-white placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-white/20"
+                      className="h-11 border-0 bg-transparent pl-10 pr-10 text-white placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-white/20"
                     />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-zinc-400 transition hover:bg-white/5 hover:text-white"
+                        aria-label="Limpiar búsqueda"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
 
                   <div className="hidden md:block">
@@ -1242,12 +1253,12 @@ export default function CRM() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 md:hidden">
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden">
                   <Button
                     type="button"
                     size="sm"
                     variant={stageFilter === "all" ? "secondary" : "outline"}
-                    className="h-auto min-h-9 whitespace-normal rounded-2xl border-white/10 bg-black/30 text-white"
+                    className="h-9 shrink-0 rounded-full border-white/10 bg-black/30 px-4 text-white"
                     onClick={() => setStageFilter("all")}
                   >
                     Todas
@@ -1258,7 +1269,7 @@ export default function CRM() {
                       type="button"
                       size="sm"
                       variant={stageFilter === stage ? "secondary" : "outline"}
-                      className="h-auto min-h-9 whitespace-normal rounded-2xl border-white/10 bg-black/30 text-white"
+                      className="h-9 shrink-0 rounded-full border-white/10 bg-black/30 px-4 whitespace-nowrap text-white"
                       onClick={() => setStageFilter(stage)}
                     >
                       {stage}
@@ -1438,7 +1449,7 @@ export default function CRM() {
       </Button>
 
       <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
-        <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:border-white/10 xl:hidden">
+        <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-y-contain rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:border-white/10 xl:hidden">
           <DialogHeader>
             <DialogTitle>Agregar cliente</DialogTitle>
             <DialogDescription className="text-zinc-300">
@@ -1660,11 +1671,11 @@ export default function CRM() {
               />
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="secondary" onClick={() => setIsAddClientOpen(false)}>
+            <DialogFooter className="sticky bottom-0 z-10 -mx-6 flex-row gap-2 border-t border-white/10 bg-zinc-950/95 px-6 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-4 backdrop-blur sm:-mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0">
+              <Button type="button" variant="secondary" className="flex-1 sm:flex-none" onClick={() => setIsAddClientOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-white text-black hover:bg-zinc-200" disabled={saving || !supabaseReady}>
+              <Button type="submit" className="flex-1 bg-white text-black hover:bg-zinc-200 sm:flex-none" disabled={saving || !supabaseReady}>
                 {saving ? "Guardando..." : "Guardar cliente"}
               </Button>
             </DialogFooter>
@@ -1673,7 +1684,7 @@ export default function CRM() {
       </Dialog>
 
       <Dialog open={Boolean(editingClient)} onOpenChange={(open) => !open && resetEditState()}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto border border-white/10 bg-zinc-950 text-white sm:max-w-2xl">
+        <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-y-contain rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border sm:border-white/10">
           <DialogHeader>
             <DialogTitle>Editar cliente</DialogTitle>
             <DialogDescription className="text-zinc-300">
@@ -1889,11 +1900,11 @@ export default function CRM() {
               </div>
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="secondary" onClick={resetEditState}>
+            <DialogFooter className="sticky bottom-0 z-10 -mx-6 flex-row gap-2 border-t border-white/10 bg-zinc-950/95 px-6 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-4 backdrop-blur sm:-mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0">
+              <Button type="button" variant="secondary" className="flex-1 sm:flex-none" onClick={resetEditState}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-white text-black hover:bg-zinc-200" disabled={savingEdit || !supabaseReady}>
+              <Button type="submit" className="flex-1 bg-white text-black hover:bg-zinc-200 sm:flex-none" disabled={savingEdit || !supabaseReady}>
                 {savingEdit ? "Guardando..." : "Guardar cambios"}
               </Button>
             </DialogFooter>
