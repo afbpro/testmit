@@ -1323,26 +1323,7 @@ export default function CRM() {
                             <div className="min-w-0 space-y-1">
                               <p className="text-lg font-semibold leading-tight text-white">{client.name}</p>
                               {primaryContact ? (
-                                <div className="flex max-w-full flex-wrap items-center gap-2">
-                                  <p className="truncate text-sm text-zinc-100">{primaryContact}</p>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-8 border-emerald-500/30 bg-emerald-500/10 px-2.5 text-emerald-100 hover:bg-emerald-500/20"
-                                    asChild
-                                  >
-                                    <a
-                                      href={whatsappUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      aria-label={`Enviar WhatsApp a ${client.name}`}
-                                    >
-                                      <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
-                                      WhatsApp
-                                    </a>
-                                  </Button>
-                                </div>
+                                <p className="truncate text-sm text-zinc-100">{primaryContact}</p>
                               ) : (
                                 <p className="text-sm text-zinc-300">{client.email || "Sin WhatsApp principal"}</p>
                               )}
@@ -1396,6 +1377,23 @@ export default function CRM() {
                               </div>
 
                               <div className="grid gap-2">
+                                {primaryContact && (
+                                  <Button
+                                    variant="outline"
+                                    className="h-auto w-full justify-center whitespace-normal border-emerald-500/30 bg-emerald-500/10 text-center text-emerald-100 hover:bg-emerald-500/20"
+                                    asChild
+                                  >
+                                    <a
+                                      href={whatsappUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      aria-label={`Enviar WhatsApp a ${client.name}`}
+                                    >
+                                      <MessageCircle className="mr-2 h-4 w-4" />
+                                      Contactar por WhatsApp
+                                    </a>
+                                  </Button>
+                                )}
                                 <Button variant="secondary" className="w-full justify-center" onClick={() => void markClientContacted(client.id)}>
                                   Contactado hoy
                                 </Button>
