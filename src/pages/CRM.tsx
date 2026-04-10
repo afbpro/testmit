@@ -14,7 +14,6 @@ import {
   MessageCircle,
   MoreVertical,
   Pencil,
-  Plus,
   RefreshCw,
   Search,
   UserPlus,
@@ -883,16 +882,25 @@ export default function CRM() {
               </div>
             </div>
 
-            <div className="mt-4 xl:hidden">
+            <div className="mt-4 grid grid-cols-2 gap-2 xl:hidden">
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-white hover:bg-white/10"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-white hover:bg-white/10"
                 onClick={() => setShowMobileStats((current) => !current)}
               >
-                📊 {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
+                {showMobileStats ? "Ocultar estadísticas" : "Ver estadísticas"}
                 <ChevronDown className={`h-4 w-4 transition-transform ${showMobileStats ? "rotate-180" : ""}`} />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                className="h-10 gap-2 bg-white text-black hover:bg-zinc-200"
+                onClick={() => setIsAddClientOpen(true)}
+              >
+                <UserPlus className="h-4 w-4" />
+                Agregar cliente
               </Button>
             </div>
           </CardContent>
@@ -1406,16 +1414,6 @@ export default function CRM() {
           </Card>
         </div>
       </main>
-
-      <Button
-        type="button"
-        size="icon"
-        aria-label="Agregar cliente"
-        className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-white text-black shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:bg-zinc-200 md:bottom-5 md:right-5 xl:hidden"
-        onClick={() => setIsAddClientOpen(true)}
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
 
       <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
         <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-y-contain rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:border-white/10 xl:hidden">
