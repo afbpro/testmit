@@ -34,6 +34,7 @@ import {
   getDaysSinceLastContact,
   getLeadTemperature,
   getStageBadgeClass,
+  getStageDotClass,
   normalizeActivityLog,
   type ClientRecord,
   type PropertyLinkRecord,
@@ -381,13 +382,23 @@ export default function ClientDetail() {
                   <div className="space-y-2">
                     <Label>Estado actual</Label>
                     <Select value={stage} onValueChange={(value) => setStage(value as typeof defaultClientStage)}>
-                      <SelectTrigger className="border-white/10 bg-black/30 text-white">
-                        <SelectValue placeholder="Seleccioná una etapa" />
+                      <SelectTrigger className={`h-11 border-white/10 bg-black/30 font-medium text-white ${getStageBadgeClass(stage)}`}>
+                        <div className="flex items-center gap-2">
+                          <span className={`h-2.5 w-2.5 rounded-full ${getStageDotClass(stage)}`} />
+                          <SelectValue placeholder="Seleccioná una etapa" />
+                        </div>
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="border-white/10 bg-zinc-950 text-white">
                         {clientStages.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
+                          <SelectItem
+                            key={item}
+                            value={item}
+                            className="py-2 text-white focus:bg-white/10 focus:text-white"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`h-2.5 w-2.5 rounded-full ${getStageDotClass(item)}`} />
+                              <span>{item}</span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>

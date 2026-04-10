@@ -18,8 +18,20 @@ const stageBadgeClasses: Record<ClientStage, string> = {
   Descartado: "border-red-400/40 bg-red-500/20 text-red-300",
 };
 
+const stageDotClasses: Record<ClientStage, string> = {
+  Interesado: "bg-yellow-300",
+  "Visita agendada": "bg-blue-300",
+  Negociando: "bg-orange-300",
+  Cerrado: "bg-emerald-300",
+  Descartado: "bg-red-300",
+};
+
 export function getStageBadgeClass(stage: string) {
   return stageBadgeClasses[stage as ClientStage] || "border-border bg-muted text-muted-foreground";
+}
+
+export function getStageDotClass(stage: string) {
+  return stageDotClasses[stage as ClientStage] || "bg-zinc-300";
 }
 
 export type ClientActivityType = "client" | "contact" | "stage" | "link" | "note";

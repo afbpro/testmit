@@ -843,7 +843,7 @@ export default function Properties() {
                         <Button
                           type="button"
                           variant="outline"
-                          className="h-11 w-full justify-center border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20 sm:flex-1 sm:min-w-[210px]"
+                          className="h-11 w-full justify-center border-white bg-white text-black hover:bg-zinc-200 sm:flex-1 sm:min-w-[210px]"
                           onClick={() => void handleCopyLink(colegaLink)}
                         >
                           <Copy className="mr-2 h-4 w-4" />
