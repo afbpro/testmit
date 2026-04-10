@@ -1,5 +1,5 @@
 import { Home, Link2, LogOut, Users, type LucideIcon } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
@@ -23,17 +23,15 @@ const mobileLinkClass =
 const mobileActiveClass = "bg-white/[0.06] text-white";
 
 export default function AppNavigation({ email, onLogout }: AppNavigationProps) {
-  useLocation();
-
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/60 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
           <Link to="/" aria-label="Ir al inicio" className="flex shrink-0 items-center">
             <img
-              src="/ISOTIPO__2_.png"
+              src="/isotipocup.png"
               alt="Cupertino"
-              className="h-[35px] w-auto object-contain md:h-10"
+              className="h-[38px] w-auto object-contain md:h-[44px]"
             />
           </Link>
 
