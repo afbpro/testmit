@@ -90,7 +90,7 @@ export default function Login() {
             <img
               src={logo}
               alt="Cupertino"
-              className="mx-auto h-16 w-auto object-contain"
+              className="mx-auto h-24 w-auto object-contain"
             />
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold tracking-tight text-white">Iniciar sesión</h1>
