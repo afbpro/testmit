@@ -8,6 +8,7 @@ import CRM from "./pages/CRM.tsx";
 import ClientDetail from "./pages/ClientDetail.tsx";
 import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
+import NewProperty from "./pages/NewProperty.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Properties from "./pages/Properties.tsx";
 
@@ -31,6 +32,12 @@ const protectedProperties = (
   </ProtectedRoute>
 );
 
+const protectedNewProperty = (
+  <ProtectedRoute>
+    <NewProperty />
+  </ProtectedRoute>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -42,6 +49,10 @@ const App = () => (
           <Route path="/" element={protectedDashboard} />
           <Route path="/jira" element={protectedDashboard} />
           <Route path="/propiedades" element={protectedProperties} />
+          <Route path="/propiedades/nueva" element={protectedNewProperty} />
+          <Route path="/propiedades/nueva/detalles" element={protectedNewProperty} />
+          <Route path="/propiedades/nueva/precios" element={protectedNewProperty} />
+          <Route path="/propiedades/nueva/extras" element={protectedNewProperty} />
           <Route path="/crm" element={protectedCRM} />
           <Route
             path="/crm/client/:id"

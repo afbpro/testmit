@@ -929,8 +929,7 @@ export default function Properties() {
               <Button
                 className="w-full gap-2 bg-white text-black hover:bg-zinc-200 sm:w-auto"
                 onClick={() => {
-                  setEditingProperty(null);
-                  setIsAddOpen(true);
+                  navigate("/propiedades/nueva");
                 }}
               >
                 <Building2 className="h-4 w-4" />
