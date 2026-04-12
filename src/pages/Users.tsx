@@ -224,7 +224,7 @@ export default function Users() {
     <div className="min-h-screen bg-background pb-24 md:pb-8">
       <AppNavigation
         email={session?.email}
-        isAdmin={session?.role === "administrador"}
+        isAdmin={(session?.role || "").toLowerCase() === "administrador"}
         onLogout={handleLogout}
       />
 

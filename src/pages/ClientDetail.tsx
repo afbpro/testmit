@@ -150,7 +150,7 @@ export default function ClientDetail() {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
-      <AppNavigation email={session?.email} isAdmin={session?.role === "administrador"} onLogout={handleLogout} />
+      <AppNavigation email={session?.email} isAdmin={session?.role === "Administrador"} onLogout={handleLogout} />
 
       <main className="mx-auto max-w-6xl space-y-5 px-3 py-6 pb-24 sm:px-4 md:py-7 md:pb-7">
         {loading ? (

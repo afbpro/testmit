@@ -63,6 +63,10 @@ function parseErrorMessage(payload: unknown, fallback: string) {
   return typeof message === "string" && message.trim() ? message : fallback;
 }
 
+function normalizeRole(role: unknown) {
+  return typeof role === "string" ? role.trim().toLowerCase() : "";
+}
+
 export function clearLegacyLinkHistory() {
   try {
     localStorage.removeItem(LEGACY_HISTORY_KEY);
@@ -110,7 +114,7 @@ export function getStoredSession(): AuthSession | null {
       id: parsedSession.id ? Number(parsedSession.id) : undefined,
       username: parsedSession.username ? String(parsedSession.username) : undefined,
       email: String(parsedSession.email),
-      role: parsedSession.role ? String(parsedSession.role) : undefined,
+      role: normalizeRole(parsedSession.role) || undefined,
       loggedAt: String(parsedSession.loggedAt || ""),
     };
   } catch {
@@ -168,7 +172,7 @@ export async function signIn(email: string, password: string) {
       id: payload.user?.id ? Number(payload.user.id) : undefined,
       username: payload.user?.username ? String(payload.user.username) : undefined,
       email: sessionEmail,
-      role: payload.user?.role ? String(payload.user.role) : undefined,
+      role: normalizeRole(payload.user?.role) || undefined,
       loggedAt: new Date().toISOString(),
     };
 

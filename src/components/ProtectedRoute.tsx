@@ -41,7 +41,9 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (requireAdmin && session.role !== "administrador") {
+  const normalizedRole = (session.role || "").trim().toLowerCase();
+
+  if (requireAdmin && normalizedRole !== "administrador") {
     return <Navigate to="/crm" replace />;
   }
 
