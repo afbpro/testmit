@@ -7,8 +7,8 @@ function loadDatabaseConfig(): array
         'host' => '127.0.0.1',
         'port' => 3306,
         'name' => 'n8cupertino_db',
-        'user' => 'root',
-        'pass' => '',
+        'user' => 'n8cupertino_app',
+        'pass' => '#h*gnp]_Bk#Et!OC',
     ];
 
     $envCandidates = [
