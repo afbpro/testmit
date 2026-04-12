@@ -1164,7 +1164,10 @@ export default function Properties() {
 
           <form onSubmit={handleSave} className="space-y-5">
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <p className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-300">Datos Básicos</p>
+              <div className="mb-4 space-y-1">
+                <p className="text-sm font-semibold tracking-tight text-white">Datos básicos</p>
+                <p className="text-xs text-zinc-400">Formato compatible para sincronización entre CRMs.</p>
+              </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
@@ -1456,7 +1459,7 @@ export default function Properties() {
 
             <Accordion type="multiple" className="w-full space-y-3">
               <AccordionItem value="caracteristicas" className="rounded-xl border border-white/10 bg-black/20 px-4">
-                <AccordionTrigger className="py-4 text-sm font-medium">🏠 Características</AccordionTrigger>
+                <AccordionTrigger className="py-4 text-sm font-medium">Características</AccordionTrigger>
                 <AccordionContent className="space-y-4 pb-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
@@ -1533,7 +1536,7 @@ export default function Properties() {
               </AccordionItem>
 
               <AccordionItem value="fiscal" className="rounded-xl border border-white/10 bg-black/20 px-4">
-                <AccordionTrigger className="py-4 text-sm font-medium">💰 Fiscal y Precios</AccordionTrigger>
+                <AccordionTrigger className="py-4 text-sm font-medium">Fiscal y precios</AccordionTrigger>
                 <AccordionContent className="space-y-4 pb-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2"><Label htmlFor="precio-escritura">Precio Compra/Escritura (USD)</Label><Input id="precio-escritura" value={form.precio_escritura} onChange={handleChange("precio_escritura")} className="h-12 border-white/10 bg-black/30 text-white" /></div>
@@ -1552,7 +1555,7 @@ export default function Properties() {
               </AccordionItem>
 
               <AccordionItem value="descripcion" className="rounded-xl border border-white/10 bg-black/20 px-4">
-                <AccordionTrigger className="py-4 text-sm font-medium">📝 Descripción</AccordionTrigger>
+                <AccordionTrigger className="py-4 text-sm font-medium">Descripción</AccordionTrigger>
                 <AccordionContent className="space-y-4 pb-4">
                   <div className="space-y-2">
                     <Label htmlFor="descripcion">Descripción</Label>
