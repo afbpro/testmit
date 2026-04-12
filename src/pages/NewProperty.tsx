@@ -451,7 +451,7 @@ export default function NewProperty() {
               type="button"
               variant="outline"
               onClick={() => setForm((current) => ({ ...current, operation: option }))}
-              className={`h-16 w-full justify-start rounded-xl border-white/10 px-5 text-base font-semibold ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}
+              className={`h-16 w-full justify-center rounded-xl border-white/10 px-5 text-base font-semibold ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}
             >
               {option}
             </Button>
