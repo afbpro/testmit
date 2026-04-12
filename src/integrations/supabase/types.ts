@@ -73,26 +73,43 @@ export type Database = {
       }
       properties: {
         Row: {
+          address: string | null
           ambientes: number | null
           auto_id: number | null
+          barrio_zona: string | null
           banos: string | null
           bano_servicio: string | null
+          cartel: string | null
+          city: string | null
           cochera: string | null
+          comentario: string | null
+          country: string | null
           created_at: string | null
           descripcion: string | null
           department: string | null
+          disposicion: string | null
+          distancia_mar_mts: number | null
+          door_number: string | null
           dormitorios: string | null
           en_alquiler: string | null
           en_venta: string | null
           estado_prop: string | null
+          frente_mar: string | null
           garage: string | null
+          house_type: string | null
           id: string
           image_urls: Json | null
+          manzana: string | null
+          matterport_url: string | null
           notes: string | null
           nota_alquiler: string | null
           operation: string | null
+          orientacion: string | null
+          padron: string | null
+          parada: string | null
           permuta: string | null
           plantas: number | null
+          phone_number: string | null
           precio_alquiler: string | null
           precio_escritura: string | null
           precio_libre: string | null
@@ -103,6 +120,7 @@ export type Database = {
           propiedad_horizontal: string | null
           property_type_detail: string | null
           piscina: string | null
+          solar: string | null
           sup_cubierta: number | null
           sup_semi_cubierta: number | null
           sup_terreno: number | null
@@ -111,32 +129,50 @@ export type Database = {
           type: string | null
           url: string | null
           video_url: string | null
+          vista: string | null
           vigencia_alquiler: string | null
           vigencia_venta: string | null
           zone: string | null
           zone_specific: string | null
         }
         Insert: {
+          address?: string | null
           ambientes?: number | null
           auto_id?: number | null
+          barrio_zona?: string | null
           banos?: string | null
           bano_servicio?: string | null
+          cartel?: string | null
+          city?: string | null
           cochera?: string | null
+          comentario?: string | null
+          country?: string | null
           created_at?: string | null
           descripcion?: string | null
           department?: string | null
+          disposicion?: string | null
+          distancia_mar_mts?: number | null
+          door_number?: string | null
           dormitorios?: string | null
           en_alquiler?: string | null
           en_venta?: string | null
           estado_prop?: string | null
+          frente_mar?: string | null
           garage?: string | null
+          house_type?: string | null
           id?: string
           image_urls?: Json | null
+          manzana?: string | null
+          matterport_url?: string | null
           notes?: string | null
           nota_alquiler?: string | null
           operation?: string | null
+          orientacion?: string | null
+          padron?: string | null
+          parada?: string | null
           permuta?: string | null
           plantas?: number | null
+          phone_number?: string | null
           precio_alquiler?: string | null
           precio_escritura?: string | null
           precio_libre?: string | null
@@ -147,6 +183,7 @@ export type Database = {
           propiedad_horizontal?: string | null
           property_type_detail?: string | null
           piscina?: string | null
+          solar?: string | null
           sup_cubierta?: number | null
           sup_semi_cubierta?: number | null
           sup_terreno?: number | null
@@ -155,32 +192,50 @@ export type Database = {
           type?: string | null
           url?: string | null
           video_url?: string | null
+          vista?: string | null
           vigencia_alquiler?: string | null
           vigencia_venta?: string | null
           zone?: string | null
           zone_specific?: string | null
         }
         Update: {
+          address?: string | null
           ambientes?: number | null
           auto_id?: number | null
+          barrio_zona?: string | null
           banos?: string | null
           bano_servicio?: string | null
+          cartel?: string | null
+          city?: string | null
           cochera?: string | null
+          comentario?: string | null
+          country?: string | null
           created_at?: string | null
           descripcion?: string | null
           department?: string | null
+          disposicion?: string | null
+          distancia_mar_mts?: number | null
+          door_number?: string | null
           dormitorios?: string | null
           en_alquiler?: string | null
           en_venta?: string | null
           estado_prop?: string | null
+          frente_mar?: string | null
           garage?: string | null
+          house_type?: string | null
           id?: string
           image_urls?: Json | null
+          manzana?: string | null
+          matterport_url?: string | null
           notes?: string | null
           nota_alquiler?: string | null
           operation?: string | null
+          orientacion?: string | null
+          padron?: string | null
+          parada?: string | null
           permuta?: string | null
           plantas?: number | null
+          phone_number?: string | null
           precio_alquiler?: string | null
           precio_escritura?: string | null
           precio_libre?: string | null
@@ -191,6 +246,7 @@ export type Database = {
           propiedad_horizontal?: string | null
           property_type_detail?: string | null
           piscina?: string | null
+          solar?: string | null
           sup_cubierta?: number | null
           sup_semi_cubierta?: number | null
           sup_terreno?: number | null
@@ -199,6 +255,7 @@ export type Database = {
           type?: string | null
           url?: string | null
           video_url?: string | null
+          vista?: string | null
           vigencia_alquiler?: string | null
           vigencia_venta?: string | null
           zone?: string | null
