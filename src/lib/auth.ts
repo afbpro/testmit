@@ -41,11 +41,7 @@ function isAllowedLocalHost(hostname: string) {
 }
 
 export function canUseLocalDevCredentials() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  return isAllowedLocalHost(window.location.hostname);
+  return false;
 }
 
 function getAuthEndpoint(action: "login" | "logout") {
@@ -136,25 +132,6 @@ export function subscribeToAuthChanges(onChange: (session: AuthSession | null) =
 
 export async function signIn(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase();
-
-  if (canUseLocalDevCredentials() && normalizedEmail === "dev" && password === "dev") {
-    const session: AuthSession = {
-      id: 0,
-      username: "dev",
-      email: "dev",
-      role: "administrador",
-      loggedAt: new Date().toISOString(),
-    };
-
-    persistSession(session);
-    setStoredSessionId("");
-    clearLegacyLinkHistory();
-
-    return {
-      ok: true as const,
-      session,
-    };
-  }
 
   try {
     const response = await fetch(getAuthEndpoint("login"), {

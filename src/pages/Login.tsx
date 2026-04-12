@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import logo from "@/assets/logo.png";
-import { canUseLocalDevCredentials, getSession, getStoredSession, signIn } from "@/lib/auth";
+import { getSession, getStoredSession, signIn } from "@/lib/auth";
 
 interface LocationState {
   from?: string;
@@ -52,14 +52,13 @@ export default function Login() {
     event.preventDefault();
 
     const normalizedEmail = email.trim().toLowerCase();
-    const isLocalDevLogin = canUseLocalDevCredentials() && normalizedEmail === "dev" && password === "dev";
 
-    if (!isLocalDevLogin && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       toast.error("Ingresá un email válido");
       return;
     }
 
-    if (!isLocalDevLogin && password.trim().length < 6) {
+    if (password.trim().length < 6) {
       toast.error("La contraseña debe tener al menos 6 caracteres");
       return;
     }
@@ -105,13 +104,13 @@ export default function Login() {
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-muted-foreground text-xs uppercase tracking-wider">
-                    Email o usuario
+                    Email
                   </Label>
                   <Input
                     id="email"
                     type="text"
                     autoComplete="username"
-                    placeholder="nombre@empresa.com o dev"
+                    placeholder="nombre@empresa.com"
                     className="border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
@@ -148,8 +147,7 @@ export default function Login() {
             <CardContent className="p-4">
               <p className="text-xs text-zinc-300">
                 Usá un usuario creado en la tabla <span className="font-mono">user</span> de la base
-                <span className="font-mono"> n8cupertino_db</span>. En local (localhost o 192.168.1.x), también
-                podés usar <span className="font-mono">dev / dev</span>.
+                <span className="font-mono"> n8cupertino_db</span>.
               </p>
             </CardContent>
           </Card>
