@@ -1,3 +1,9 @@
+import Colegas from "./pages/Colegas.tsx";
+const protectedColegas = (
+  <ProtectedRoute>
+    <Colegas />
+  </ProtectedRoute>
+);
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -56,6 +62,10 @@ const App = () => (
           <Route path="/propiedades/nueva/precios" element={protectedNewProperty} />
           <Route path="/propiedades/nueva/extras" element={protectedNewProperty} />
           <Route path="/crm" element={protectedCRM} />
+          <Route
+            path="/colegas"
+            element={protectedColegas}
+          />
           <Route
             path="/usuarios"
             element={(

@@ -4,7 +4,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/http.php';
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+
 require_once __DIR__ . '/users.php';
+require_once __DIR__ . '/companies.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -84,6 +86,10 @@ switch ($action) {
 
     case 'users-update':
         handleUsersUpdate($pdo);
+        break;
+
+    case 'companies-list':
+        handleCompaniesList($pdo);
         break;
 
     default:

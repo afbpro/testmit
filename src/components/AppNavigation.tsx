@@ -14,6 +14,7 @@ const baseNavItems: Array<{ to: string; label: string; icon: LucideIcon; end?: b
   { to: "/", label: "Links", icon: Link2, end: true },
   { to: "/propiedades", label: "Propiedades", icon: Home },
   { to: "/crm", label: "CRM", icon: Users },
+  { to: "/colegas", label: "Colegas", icon: Users },
   { to: "/usuarios", label: "Usuarios", icon: Users },
 ];
 
@@ -29,7 +30,7 @@ export default function AppNavigation({ email, isAdmin = false, onLogout }: AppN
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/60 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/100 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
           <Link to="/" aria-label="Ir al inicio" className="flex shrink-0 items-center">
             <img
@@ -71,7 +72,7 @@ export default function AppNavigation({ email, isAdmin = false, onLogout }: AppN
       </header>
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#09090b]/95 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1.5 shadow-[0_-10px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl md:hidden">
-        <div className={`mx-auto grid w-full max-w-7xl ${navItems.length === 4 ? "grid-cols-4" : "grid-cols-3"} gap-1 px-2`}>
+        <div className={`mx-auto grid w-full max-w-7xl grid-cols-${navItems.length} gap-1 px-2`}>
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
