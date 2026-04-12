@@ -5,8 +5,10 @@ function applyCorsHeaders(string $origin): void
 {
     header('Access-Control-Allow-Origin: ' . $origin);
     header('Vary: Origin');
+    header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Methods: POST, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type');
+    header('Access-Control-Max-Age: 600');
 }
 
 function resolveAction(): string
