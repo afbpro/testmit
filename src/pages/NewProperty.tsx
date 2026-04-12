@@ -108,9 +108,9 @@ const neighborhoodOptionsByCity: Record<string, readonly string[]> = {
 const steps = [
   "/propiedades/nueva",
   "/propiedades/nueva/basicos",
-  "/propiedades/nueva/detalles",
-  "/propiedades/nueva/precios",
   "/propiedades/nueva/extras",
+  "/propiedades/nueva/precios",
+  "/propiedades/nueva/detalles",
 ] as const;
 
 const initialForm = {
@@ -666,7 +666,7 @@ export default function NewProperty() {
     </div>
   );
 
-  const stepContent = [step1, step2, step3, step4, step5][stepIndex] ?? step1;
+  const stepContent = [step1, step2, step5, step4, step3][stepIndex] ?? step1;
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
