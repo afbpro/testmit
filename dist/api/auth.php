@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+
+
 function handleLogin(PDO $pdo): void
 {
     $data = requireJsonBody();
@@ -85,6 +87,37 @@ function handleLogout(): void
         'ok' => true,
         'message' => 'Logout correcto.'
     ]);
+}
+
+function requireLogin(PDO $pdo): array
+{
+    $userId = (int) ($_SESSION['user_id'] ?? 0);
+    $loggedIn = (bool) ($_SESSION['logged_in'] ?? false);
+
+    if ($userId <= 0 || !$loggedIn) {
+        jsonResponse(401, [
+            'ok' => false,
+            'message' => 'Sesion no valida.'
+        ]);
+    }
+
+     $stmt = $pdo->prepare(
+        'SELECT u.id, u.is_active, u.rol_id
+         FROM `user` u
+         WHERE u.id = :id
+         LIMIT 1'
+    );
+    $stmt->execute(['id' => $userId]);
+    $current = $stmt->fetch();
+
+    if (!$current || (int) $current['is_active'] !== 1) {
+        jsonResponse(401, [
+            'ok' => false,
+            'message' => 'Sesion no valida.'
+        ]);
+    }
+
+    return $current;
 }
 
 function requireAdmin(PDO $pdo): array
