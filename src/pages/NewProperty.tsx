@@ -451,7 +451,7 @@ export default function NewProperty() {
               type="button"
               variant="outline"
               onClick={() => setForm((current) => ({ ...current, operation: option }))}
-              className={`h-16 w-full justify-center rounded-xl border-white/10 px-5 text-base font-semibold ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}
+              className={`w-full justify-center rounded-xl border-white/10 px-5 font-semibold ${isMobile ? "h-20 text-lg" : "h-16 text-base"} ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}
             >
               {option}
             </Button>
@@ -645,9 +645,9 @@ export default function NewProperty() {
   );
 
   const operationScreen = (
-    <div className="mx-auto w-full max-w-3xl space-y-4">
-      <Card className="border border-white/10 bg-white/[0.04] text-white">
-        <CardContent className="space-y-4 p-5">
+    <div className={`mx-auto w-full space-y-4 ${isMobile ? "max-w-none" : "max-w-3xl"}`}>
+      <Card className={`border border-white/10 bg-white/[0.04] text-white ${isMobile ? "min-h-[72vh]" : ""}`}>
+        <CardContent className={`space-y-4 ${isMobile ? "p-4" : "p-5"}`}>
           <div>
             <h1 className="text-lg font-semibold text-white">Nueva propiedad</h1>
             <p className="text-sm text-zinc-400">Primero elegí la operación.</p>
