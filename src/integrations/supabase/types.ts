@@ -73,47 +73,134 @@ export type Database = {
       }
       properties: {
         Row: {
+          ambientes: number | null
           auto_id: number | null
+          banos: string | null
+          bano_servicio: string | null
+          cochera: string | null
           created_at: string | null
+          descripcion: string | null
           department: string | null
+          dormitorios: string | null
+          en_alquiler: string | null
+          en_venta: string | null
+          estado_prop: string | null
+          garage: string | null
           id: string
           image_urls: Json | null
           notes: string | null
+          nota_alquiler: string | null
           operation: string | null
+          permuta: string | null
+          plantas: number | null
+          precio_alquiler: string | null
+          precio_escritura: string | null
+          precio_libre: string | null
+          precio_portales: string | null
+          precio_tasacion: string | null
+          precio_venta: string | null
           price: string | null
+          propiedad_horizontal: string | null
+          property_type_detail: string | null
+          piscina: string | null
+          sup_cubierta: number | null
+          sup_semi_cubierta: number | null
+          sup_terreno: number | null
+          terraza: string | null
           title: string
           type: string | null
           url: string | null
+          video_url: string | null
+          vigencia_alquiler: string | null
+          vigencia_venta: string | null
           zone: string | null
           zone_specific: string | null
         }
         Insert: {
+          ambientes?: number | null
           auto_id?: number | null
+          banos?: string | null
+          bano_servicio?: string | null
+          cochera?: string | null
           created_at?: string | null
+          descripcion?: string | null
           department?: string | null
+          dormitorios?: string | null
+          en_alquiler?: string | null
+          en_venta?: string | null
+          estado_prop?: string | null
+          garage?: string | null
           id?: string
           image_urls?: Json | null
           notes?: string | null
+          nota_alquiler?: string | null
           operation?: string | null
+          permuta?: string | null
+          plantas?: number | null
+          precio_alquiler?: string | null
+          precio_escritura?: string | null
+          precio_libre?: string | null
+          precio_portales?: string | null
+          precio_tasacion?: string | null
+          precio_venta?: string | null
           price?: string | null
+          propiedad_horizontal?: string | null
+          property_type_detail?: string | null
+          piscina?: string | null
+          sup_cubierta?: number | null
+          sup_semi_cubierta?: number | null
+          sup_terreno?: number | null
+          terraza?: string | null
           title: string
           type?: string | null
           url?: string | null
+          video_url?: string | null
+          vigencia_alquiler?: string | null
+          vigencia_venta?: string | null
           zone?: string | null
           zone_specific?: string | null
         }
         Update: {
+          ambientes?: number | null
           auto_id?: number | null
+          banos?: string | null
+          bano_servicio?: string | null
+          cochera?: string | null
           created_at?: string | null
+          descripcion?: string | null
           department?: string | null
+          dormitorios?: string | null
+          en_alquiler?: string | null
+          en_venta?: string | null
+          estado_prop?: string | null
+          garage?: string | null
           id?: string
           image_urls?: Json | null
           notes?: string | null
+          nota_alquiler?: string | null
           operation?: string | null
+          permuta?: string | null
+          plantas?: number | null
+          precio_alquiler?: string | null
+          precio_escritura?: string | null
+          precio_libre?: string | null
+          precio_portales?: string | null
+          precio_tasacion?: string | null
+          precio_venta?: string | null
           price?: string | null
+          propiedad_horizontal?: string | null
+          property_type_detail?: string | null
+          piscina?: string | null
+          sup_cubierta?: number | null
+          sup_semi_cubierta?: number | null
+          sup_terreno?: number | null
+          terraza?: string | null
           title?: string
           type?: string | null
           url?: string | null
+          video_url?: string | null
+          vigencia_alquiler?: string | null
+          vigencia_venta?: string | null
           zone?: string | null
           zone_specific?: string | null
         }
