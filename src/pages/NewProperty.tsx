@@ -453,8 +453,8 @@ export default function NewProperty() {
               onClick={() => setForm((current) => ({ ...current, operation: option }))}
               className={`w-full justify-center rounded-xl px-5 font-semibold transition-all ${isMobile ? "h-20 text-lg" : "h-16 text-base"} ${
                 form.operation === option
-                  ? "!border-emerald-400/70 !bg-emerald-500/20 !text-emerald-100 hover:!bg-emerald-500/30"
-                  : "border-white/10 bg-black/30 text-white hover:bg-white/10"
+                  ? "!border-emerald-400/70 !bg-emerald-500/20 !text-emerald-100 md:hover:!bg-emerald-500/30"
+                  : "border-white/10 bg-black/30 text-white md:hover:bg-white/10"
               }`}
             >
               {option}
