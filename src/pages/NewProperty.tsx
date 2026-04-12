@@ -113,6 +113,14 @@ const steps = [
   "/propiedades/nueva/detalles",
 ] as const;
 
+const stepMeta = [
+  { title: "Operación", description: "Elegí si la propiedad va para venta, alquiler o ambas." },
+  { title: "Datos básicos", description: "Completá la información principal y ubicación de la propiedad." },
+  { title: "Comodidades y extras", description: "Indicá ambientes, servicios y características generales." },
+  { title: "Precios", description: "Cargá valores, monedas y condiciones comerciales." },
+  { title: "Estado y detalle", description: "Completá estado, referencias catastrales y observaciones." },
+] as const;
+
 const initialForm = {
   title: "",
   property_type_detail: "",
@@ -261,6 +269,7 @@ export default function NewProperty() {
   const availableNeighborhoods = form.city ? neighborhoodOptionsByCity[form.city] ?? [] : [];
   const includesVenta = form.operation === "Venta" || form.operation === "Ambas";
   const includesAlquiler = form.operation === "Alquiler" || form.operation === "Ambas";
+  const currentStepMeta = stepMeta[stepIndex] ?? stepMeta[0];
 
   const handleLogout = async () => {
     const result = await signOut();
@@ -654,7 +663,7 @@ export default function NewProperty() {
         <CardContent className={`space-y-5 ${isMobile ? "p-4" : "p-5"}`}>
           <div>
             <h1 className="text-lg font-semibold text-white">Nueva propiedad</h1>
-            <p className="text-sm text-zinc-400">Elegí el tipo de operación para continuar.</p>
+            <p className="text-sm text-zinc-400">{stepMeta[0].description}</p>
           </div>
           {step1}
           <div className="grid grid-cols-2 gap-2 pt-1">
@@ -680,6 +689,10 @@ export default function NewProperty() {
                 <Badge variant="outline" className="border-white/20 bg-white/10 text-white">Nueva propiedad</Badge>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-white/10"><div className="h-full bg-white" style={{ width: `${((stepIndex + 1) / 5) * 100}%` }} /></div>
+              <div className="mt-3">
+                <p className="text-sm font-semibold text-white">{currentStepMeta.title}</p>
+                <p className="text-xs text-zinc-400">{currentStepMeta.description}</p>
+              </div>
             </div>
             <Card className="border border-white/10 bg-white/[0.04] text-white"><CardContent className="space-y-4 p-4">{stepContent}</CardContent></Card>
             <div className="sticky bottom-0 z-20 grid grid-cols-2 gap-2 border-t border-white/10 bg-zinc-950/95 px-1 py-3 backdrop-blur">
