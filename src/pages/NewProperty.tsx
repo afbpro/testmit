@@ -107,6 +107,7 @@ const neighborhoodOptionsByCity: Record<string, readonly string[]> = {
 
 const steps = [
   "/propiedades/nueva",
+  "/propiedades/nueva/basicos",
   "/propiedades/nueva/detalles",
   "/propiedades/nueva/precios",
   "/propiedades/nueva/extras",
@@ -278,6 +279,11 @@ export default function NewProperty() {
   };
 
   const nextStep = () => {
+    if (stepIndex === 0 && !form.operation) {
+      toast.error("Seleccioná una operación para continuar.");
+      return;
+    }
+
     const next = Math.min(stepIndex + 1, steps.length - 1);
     navigate(steps[next]);
   };
@@ -436,6 +442,15 @@ export default function NewProperty() {
 
   const step1 = (
     <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Operación *</Label>
+        <div className="grid grid-cols-3 gap-2">{operationOptions.map((option) => <Button key={option} type="button" variant="outline" onClick={() => setForm((current) => ({ ...current, operation: option }))} className={`h-11 border-white/10 ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}>{option}</Button>)}</div>
+      </div>
+    </div>
+  );
+
+  const step2 = (
+    <div className="space-y-4">
       <div className="space-y-2"><Label>Nombre / Referencia *</Label><Input value={form.title} onChange={handleChange("title")} className="h-11 border-white/10 bg-black/30 text-white" /></div>
       <div className="space-y-2">
         <Label>Tipo de Propiedad *</Label>
@@ -443,10 +458,6 @@ export default function NewProperty() {
           <SelectTrigger className="h-11 border-white/10 bg-black/30 text-white"><SelectValue placeholder="Seleccioná tipo" /></SelectTrigger>
           <SelectContent className="border-white/10 bg-zinc-950 text-white">{propertyTypeOptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>Operación *</Label>
-        <div className="grid grid-cols-3 gap-2">{operationOptions.map((option) => <Button key={option} type="button" variant="outline" onClick={() => setForm((current) => ({ ...current, operation: option }))} className={`h-11 border-white/10 ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}>{option}</Button>)}</div>
       </div>
       <div className="space-y-2">
         <Label>País</Label>
@@ -487,7 +498,7 @@ export default function NewProperty() {
     </div>
   );
 
-  const step2 = (
+  const step3 = (
     <div className="space-y-4">
       <div className="space-y-2"><Label>Vista</Label><Select value={form.vista} onValueChange={handleSelect("vista")}><SelectTrigger className="h-11 border-white/10 bg-black/30 text-white"><SelectValue /></SelectTrigger><SelectContent className="border-white/10 bg-zinc-950 text-white">{viewOptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>
       <div className="space-y-2"><Label>Tipo de Casa</Label><Select value={form.house_type} onValueChange={handleSelect("house_type")}><SelectTrigger className="h-11 border-white/10 bg-black/30 text-white"><SelectValue placeholder="Seleccioná" /></SelectTrigger><SelectContent className="border-white/10 bg-zinc-950 text-white">{houseTypeOptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>
@@ -511,7 +522,7 @@ export default function NewProperty() {
     </div>
   );
 
-  const step3 = (
+  const step4 = (
     <div className="space-y-6">
       {includesVenta && (
         <div className="space-y-4 rounded-xl border border-white/10 p-4">
@@ -547,7 +558,7 @@ export default function NewProperty() {
     </div>
   );
 
-  const step4 = (
+  const step5 = (
     <div className="space-y-6">
       <div className="space-y-4 rounded-xl border border-white/10 p-4">
         <p className="text-sm font-medium text-white">Comodidades</p>
@@ -612,16 +623,21 @@ export default function NewProperty() {
       </div>
 
       <Card className="border border-white/10 bg-white/[0.04] text-white"><CardContent className="space-y-5 p-5">{step1}
+        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+          <Label>Operación *</Label>
+          <div className="mt-2 grid grid-cols-3 gap-2">{operationOptions.map((option) => <Button key={`desktop-${option}`} type="button" variant="outline" onClick={() => setForm((current) => ({ ...current, operation: option }))} className={`h-11 border-white/10 ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}>{option}</Button>)}</div>
+        </div>
+        {step2}
         <Accordion type="multiple" className="space-y-3">
-          <AccordionItem value="precios" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Precios</AccordionTrigger><AccordionContent className="pt-3">{step3}</AccordionContent></AccordionItem>
-          <AccordionItem value="detalles" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Estado y detalle</AccordionTrigger><AccordionContent className="pt-3">{step2}</AccordionContent></AccordionItem>
-          <AccordionItem value="extras" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Comodidades y extras</AccordionTrigger><AccordionContent className="pt-3">{step4}</AccordionContent></AccordionItem>
+          <AccordionItem value="precios" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Precios</AccordionTrigger><AccordionContent className="pt-3">{step4}</AccordionContent></AccordionItem>
+          <AccordionItem value="detalles" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Estado y detalle</AccordionTrigger><AccordionContent className="pt-3">{step3}</AccordionContent></AccordionItem>
+          <AccordionItem value="extras" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Comodidades y extras</AccordionTrigger><AccordionContent className="pt-3">{step5}</AccordionContent></AccordionItem>
         </Accordion>
       </CardContent></Card>
     </div>
   );
 
-  const stepContent = [step1, step2, step3, step4][stepIndex] ?? step1;
+  const stepContent = [step1, step2, step3, step4, step5][stepIndex] ?? step1;
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
@@ -631,15 +647,15 @@ export default function NewProperty() {
           <div className="space-y-4">
             <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
               <div className="mb-2 flex items-center justify-between text-sm text-zinc-300">
-                <span>Paso {stepIndex + 1} de 4</span>
+                <span>Paso {stepIndex + 1} de 5</span>
                 <Badge variant="outline" className="border-white/20 bg-white/10 text-white">Nueva propiedad</Badge>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/10"><div className="h-full bg-white" style={{ width: `${((stepIndex + 1) / 4) * 100}%` }} /></div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white/10"><div className="h-full bg-white" style={{ width: `${((stepIndex + 1) / 5) * 100}%` }} /></div>
             </div>
             <Card className="border border-white/10 bg-white/[0.04] text-white"><CardContent className="space-y-4 p-4">{stepContent}</CardContent></Card>
             <div className="sticky bottom-0 z-20 grid grid-cols-2 gap-2 border-t border-white/10 bg-zinc-950/95 px-1 py-3 backdrop-blur">
               <Button type="button" variant="outline" className="h-11 border-white/10 bg-transparent text-white" onClick={stepIndex === 0 ? () => navigate("/propiedades") : prevStep}>← Volver</Button>
-              {stepIndex === 3 ? (
+              {stepIndex === 4 ? (
                 <Button type="button" className="h-11 bg-white text-black hover:bg-zinc-200" onClick={() => void handleSave()} disabled={saving}>{saving ? "Guardando..." : "Guardar"}</Button>
               ) : (
                 <Button type="button" className="h-11 bg-white text-black hover:bg-zinc-200" onClick={nextStep}>Siguiente →</Button>

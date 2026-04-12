@@ -50,6 +50,7 @@ const App = () => (
           <Route path="/jira" element={protectedDashboard} />
           <Route path="/propiedades" element={protectedProperties} />
           <Route path="/propiedades/nueva" element={protectedNewProperty} />
+          <Route path="/propiedades/nueva/basicos" element={protectedNewProperty} />
           <Route path="/propiedades/nueva/detalles" element={protectedNewProperty} />
           <Route path="/propiedades/nueva/precios" element={protectedNewProperty} />
           <Route path="/propiedades/nueva/extras" element={protectedNewProperty} />
