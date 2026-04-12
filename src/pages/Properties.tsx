@@ -903,9 +903,14 @@ export default function Properties() {
           <CardContent className="p-6 md:p-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-3">
-                <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
-                  Cupertino
-                </Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
+                    Cupertino
+                  </Badge>
+                  <Badge variant="outline" className="border-emerald-400/35 bg-emerald-500/10 text-emerald-200">
+                    Sync formato v2
+                  </Badge>
+                </div>
                 <div>
                   <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mis Propiedades</h1>
                   <p className="mt-1 text-sm text-zinc-300">
