@@ -4,9 +4,10 @@ import { getSession, type AuthSession } from "@/lib/auth";
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  requireAdmin?: boolean;
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const location = useLocation();
   const [session, setSession] = useState<AuthSession | null | undefined>(undefined);
 
@@ -38,6 +39,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!session) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (requireAdmin && session.role !== "administrador") {
+    return <Navigate to="/crm" replace />;
   }
 
   return <>{children}</>;

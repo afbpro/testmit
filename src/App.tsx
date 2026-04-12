@@ -11,6 +11,7 @@ import Login from "./pages/Login.tsx";
 import NewProperty from "./pages/NewProperty.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Properties from "./pages/Properties.tsx";
+import Users from "./pages/Users.tsx";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,14 @@ const App = () => (
           <Route path="/propiedades/nueva/precios" element={protectedNewProperty} />
           <Route path="/propiedades/nueva/extras" element={protectedNewProperty} />
           <Route path="/crm" element={protectedCRM} />
+          <Route
+            path="/usuarios"
+            element={(
+              <ProtectedRoute requireAdmin>
+                <Users />
+              </ProtectedRoute>
+            )}
+          />
           <Route
             path="/crm/client/:id"
             element={(

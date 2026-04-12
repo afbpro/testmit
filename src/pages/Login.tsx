@@ -7,8 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import logo from "@/assets/logo.png";
-import { getSession, getStoredSession, signIn } from "@/lib/auth";
-import { isSupabaseConfigured } from "@/lib/supabaseClient";
+import { canUseLocalDevCredentials, getSession, getStoredSession, signIn } from "@/lib/auth";
 
 interface LocationState {
   from?: string;
@@ -53,13 +52,14 @@ export default function Login() {
     event.preventDefault();
 
     const normalizedEmail = email.trim().toLowerCase();
+    const isLocalDevLogin = canUseLocalDevCredentials() && normalizedEmail === "dev" && password === "dev";
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    if (!isLocalDevLogin && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       toast.error("Ingresá un email válido");
       return;
     }
 
-    if (password.trim().length < 6) {
+    if (!isLocalDevLogin && password.trim().length < 6) {
       toast.error("La contraseña debe tener al menos 6 caracteres");
       return;
     }
@@ -102,16 +102,16 @@ export default function Login() {
 
           <Card className="border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
             <CardContent className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} noValidate className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-muted-foreground text-xs uppercase tracking-wider">
-                    Email
+                    Email o usuario
                   </Label>
                   <Input
                     id="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="nombre@empresa.com"
+                    type="text"
+                    autoComplete="username"
+                    placeholder="nombre@empresa.com o dev"
                     className="border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
@@ -136,7 +136,7 @@ export default function Login() {
                 <Button
                   type="submit"
                   className="w-full bg-white text-black hover:bg-zinc-200"
-                  disabled={submitting || !isSupabaseConfigured}
+                  disabled={submitting}
                 >
                   {submitting ? "Ingresando..." : "Ingresar"}
                 </Button>
@@ -147,9 +147,9 @@ export default function Login() {
           <Card className="border border-white/10 bg-white/[0.03] backdrop-blur-xl">
             <CardContent className="p-4">
               <p className="text-xs text-zinc-300">
-                Usá un usuario creado en <span className="font-mono">Supabase Auth</span>. Si no podés entrar,
-                revisá las variables <span className="font-mono">VITE_SUPABASE_URL</span> y{" "}
-                <span className="font-mono">VITE_SUPABASE_ANON_KEY</span>.
+                Usá un usuario creado en la tabla <span className="font-mono">user</span> de la base
+                <span className="font-mono"> n8cupertino_db</span>. En local (localhost o 192.168.1.x), también
+                podés usar <span className="font-mono">dev / dev</span>.
               </p>
             </CardContent>
           </Card>

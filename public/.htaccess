@@ -2,6 +2,9 @@ Options -MultiViews
 RewriteEngine On
 RewriteBase /
 
+# Pretty API routes mapped to PHP entrypoint.
+RewriteRule ^api/(.*)$ api/index.php/$1 [QSA,L]
+
 # Keep existing files and directories accessible.
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
