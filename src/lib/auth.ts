@@ -8,7 +8,7 @@ export interface AuthSession {
 
 const AUTH_SESSION_KEY = "cupertino-auth-session";
 const LEGACY_HISTORY_KEY = "cupertino-link-history";
-const AUTH_API_BASE = (import.meta.env.VITE_AUTH_API_BASE || "/api").trim();
+const AUTH_API_BASE = "https://app.cupertino.uy/api";
 
 function persistSession(session: AuthSession | null) {
   try {
@@ -49,11 +49,11 @@ export function canUseLocalDevCredentials() {
 
 function getAuthEndpoint(action: "login" | "logout") {
   try {
-    const normalizedBase = AUTH_API_BASE.replace(/\/+$/, "") || "/api";
-    const url = new URL(`${normalizedBase}/${action}`, window.location.origin);
+    const normalizedBase = AUTH_API_BASE.replace(/\/+$/, "") || "https://app.cupertino.uy/api";
+    const url = new URL(`${normalizedBase}/${action}`);
     return url.toString();
   } catch {
-    return `/api/${action}`;
+    return `https://app.cupertino.uy/api/${action}`;
   }
 }
 
@@ -220,7 +220,7 @@ export async function signOut() {
 }
 
 export async function authApiRequest<T>(path: string, body: unknown): Promise<T> {
-  const normalizedBase = AUTH_API_BASE.replace(/\/+$/, "") || "/api";
+  const normalizedBase = AUTH_API_BASE.replace(/\/+$/, "") || "https://app.cupertino.uy/api";
   const normalizedPath = path.replace(/^\/+/, "");
   const url = `${normalizedBase}/${normalizedPath}`;
 
