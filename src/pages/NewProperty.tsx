@@ -613,8 +613,8 @@ export default function NewProperty() {
 
       <Card className="border border-white/10 bg-white/[0.04] text-white"><CardContent className="space-y-5 p-5">{step1}
         <Accordion type="multiple" className="space-y-3">
-          <AccordionItem value="detalles" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Detalles</AccordionTrigger><AccordionContent className="pt-3">{step2}</AccordionContent></AccordionItem>
           <AccordionItem value="precios" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Precios</AccordionTrigger><AccordionContent className="pt-3">{step3}</AccordionContent></AccordionItem>
+          <AccordionItem value="detalles" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Estado y detalle</AccordionTrigger><AccordionContent className="pt-3">{step2}</AccordionContent></AccordionItem>
           <AccordionItem value="extras" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Comodidades y extras</AccordionTrigger><AccordionContent className="pt-3">{step4}</AccordionContent></AccordionItem>
         </Accordion>
       </CardContent></Card>
