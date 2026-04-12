@@ -622,12 +622,7 @@ export default function NewProperty() {
         </div>
       </div>
 
-      <Card className="border border-white/10 bg-white/[0.04] text-white"><CardContent className="space-y-5 p-5">{step1}
-        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-          <Label>Operación *</Label>
-          <div className="mt-2 grid grid-cols-3 gap-2">{operationOptions.map((option) => <Button key={`desktop-${option}`} type="button" variant="outline" onClick={() => setForm((current) => ({ ...current, operation: option }))} className={`h-11 border-white/10 ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}>{option}</Button>)}</div>
-        </div>
-        {step2}
+      <Card className="border border-white/10 bg-white/[0.04] text-white"><CardContent className="space-y-5 p-5">{step2}
         <Accordion type="multiple" className="space-y-3">
           <AccordionItem value="precios" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Precios</AccordionTrigger><AccordionContent className="pt-3">{step4}</AccordionContent></AccordionItem>
           <AccordionItem value="detalles" className="rounded-xl border border-white/10 bg-black/20 px-4"><AccordionTrigger>Estado y detalle</AccordionTrigger><AccordionContent className="pt-3">{step3}</AccordionContent></AccordionItem>
@@ -637,13 +632,31 @@ export default function NewProperty() {
     </div>
   );
 
+  const operationScreen = (
+    <div className="mx-auto w-full max-w-2xl space-y-4">
+      <Card className="border border-white/10 bg-white/[0.04] text-white">
+        <CardContent className="space-y-4 p-5">
+          <div>
+            <h1 className="text-lg font-semibold text-white">Nueva propiedad</h1>
+            <p className="text-sm text-zinc-400">Primero elegí la operación.</p>
+          </div>
+          {step1}
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <Button type="button" variant="outline" className="h-11 border-white/10 bg-transparent text-white" onClick={() => navigate("/propiedades")}>← Volver</Button>
+            <Button type="button" className="h-11 bg-white text-black hover:bg-zinc-200" onClick={nextStep}>Siguiente →</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   const stepContent = [step1, step2, step3, step4, step5][stepIndex] ?? step1;
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
       <AppNavigation email={session?.email} onLogout={handleLogout} />
       <main className="mx-auto w-full max-w-5xl px-3 py-6 pb-24 sm:px-4">
-        {isMobile ? (
+        {stepIndex === 0 ? operationScreen : isMobile ? (
           <div className="space-y-4">
             <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
               <div className="mb-2 flex items-center justify-between text-sm text-zinc-300">
