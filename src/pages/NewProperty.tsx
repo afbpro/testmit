@@ -444,7 +444,19 @@ export default function NewProperty() {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Operación *</Label>
-        <div className="grid grid-cols-3 gap-2">{operationOptions.map((option) => <Button key={option} type="button" variant="outline" onClick={() => setForm((current) => ({ ...current, operation: option }))} className={`h-11 border-white/10 ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}>{option}</Button>)}</div>
+        <div className="flex flex-col gap-3">
+          {operationOptions.map((option) => (
+            <Button
+              key={option}
+              type="button"
+              variant="outline"
+              onClick={() => setForm((current) => ({ ...current, operation: option }))}
+              className={`h-16 w-full justify-start rounded-xl border-white/10 px-5 text-base font-semibold ${form.operation === option ? "bg-white text-black hover:bg-zinc-200" : "bg-transparent text-white"}`}
+            >
+              {option}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -633,7 +645,7 @@ export default function NewProperty() {
   );
 
   const operationScreen = (
-    <div className="mx-auto w-full max-w-2xl space-y-4">
+    <div className="mx-auto w-full max-w-3xl space-y-4">
       <Card className="border border-white/10 bg-white/[0.04] text-white">
         <CardContent className="space-y-4 p-5">
           <div>
