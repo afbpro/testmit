@@ -9,6 +9,19 @@ require_once __DIR__ . '/users.php';
 header('Content-Type: application/json; charset=utf-8');
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
+    $sessionIdFromHeader = resolveSessionIdFromHeader();
+    if ($sessionIdFromHeader !== '') {
+        session_id($sessionIdFromHeader);
+    }
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'None',
+    ]);
+
     session_start();
 }
 

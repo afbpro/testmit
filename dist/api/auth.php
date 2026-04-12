@@ -52,6 +52,7 @@ function handleLogin(PDO $pdo): void
     jsonResponse(200, [
         'ok' => true,
         'message' => 'Login correcto.',
+        'session_id' => session_id(),
         'user' => [
             'id' => (int) $user['id'],
             'username' => (string) $user['username'],
@@ -99,9 +100,8 @@ function requireAdmin(PDO $pdo): array
     }
 
     $stmt = $pdo->prepare(
-        'SELECT u.id, u.is_active, COALESCE(r.nombre, "usuario") AS role_name
+        'SELECT u.id, u.is_active, u.rol_id
          FROM `user` u
-         LEFT JOIN role r ON r.id = u.rol_id
          WHERE u.id = :id
          LIMIT 1'
     );
@@ -115,7 +115,7 @@ function requireAdmin(PDO $pdo): array
         ]);
     }
 
-    if ((string) $current['role_name'] !== 'administrador') {
+    if ((int) $current['rol_id'] !== 1) {
         jsonResponse(403, [
             'ok' => false,
             'message' => 'Solo un administrador puede ejecutar esta accion.'

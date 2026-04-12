@@ -3,46 +3,13 @@ declare(strict_types=1);
 
 function loadDatabaseConfig(): array
 {
-    $defaults = [
+    return  [
         'host' => '127.0.0.1',
         'port' => 3306,
         'name' => 'n8cupertino_db',
         'user' => 'n8cupertino_app',
         'pass' => '#h*gnp]_Bk#Et!OC',
     ];
-
-    $envCandidates = [
-        dirname(__DIR__) . '/../app/colega-linker-db.env',
-        dirname(dirname(__DIR__)) . '/app/colega-linker-db.env',
-    ];
-
-    foreach ($envCandidates as $envPath) {
-        if (!is_readable($envPath)) {
-            continue;
-        }
-
-        $parsed = parse_ini_file($envPath, false, INI_SCANNER_RAW);
-        if (!is_array($parsed)) {
-            continue;
-        }
-
-        $host = trim((string) ($parsed['DB_HOST'] ?? $defaults['host']));
-        $name = trim((string) ($parsed['DB_NAME'] ?? $defaults['name']));
-        $user = trim((string) ($parsed['DB_USER'] ?? $defaults['user']));
-        $pass = (string) ($parsed['DB_PASS'] ?? $defaults['pass']);
-        $portRaw = (string) ($parsed['DB_PORT'] ?? (string) $defaults['port']);
-        $port = ctype_digit($portRaw) ? (int) $portRaw : $defaults['port'];
-
-        return [
-            'host' => $host !== '' ? $host : $defaults['host'],
-            'port' => $port,
-            'name' => $name !== '' ? $name : $defaults['name'],
-            'user' => $user !== '' ? $user : $defaults['user'],
-            'pass' => $pass,
-        ];
-    }
-
-    return $defaults;
 }
 
 function createPdo(array $dbConfig): PDO

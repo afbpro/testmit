@@ -8,6 +8,7 @@ export interface AuthSession {
 
 const AUTH_SESSION_KEY = "cupertino-auth-session";
 const LEGACY_HISTORY_KEY = "cupertino-link-history";
+const AUTH_SESSION_ID_KEY = "cupertino-auth-session-id";
 const AUTH_API_BASE = "https://app.cupertino.uy/api";
 
 function persistSession(session: AuthSession | null) {
@@ -74,6 +75,27 @@ export function clearLegacyLinkHistory() {
   }
 }
 
+function getStoredSessionId(): string {
+  try {
+    return (localStorage.getItem(AUTH_SESSION_ID_KEY) || "").trim();
+  } catch {
+    return "";
+  }
+}
+
+function setStoredSessionId(sessionId: string) {
+  try {
+    if (!sessionId.trim()) {
+      localStorage.removeItem(AUTH_SESSION_ID_KEY);
+      return;
+    }
+
+    localStorage.setItem(AUTH_SESSION_ID_KEY, sessionId.trim());
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
 export function getStoredSession(): AuthSession | null {
   try {
     const rawSession = localStorage.getItem(AUTH_SESSION_KEY);
@@ -125,6 +147,7 @@ export async function signIn(email: string, password: string) {
     };
 
     persistSession(session);
+    setStoredSessionId("");
     clearLegacyLinkHistory();
 
     return {
@@ -150,6 +173,7 @@ export async function signIn(email: string, password: string) {
       | {
           ok?: boolean;
           message?: string;
+          session_id?: string;
           user?: { id?: number; username?: string; email?: string; role?: string };
         }
       | null;
@@ -172,6 +196,7 @@ export async function signIn(email: string, password: string) {
     };
 
     persistSession(session);
+    setStoredSessionId(payload.session_id || "");
     clearLegacyLinkHistory();
 
     return {
@@ -188,8 +213,15 @@ export async function signIn(email: string, password: string) {
 
 export async function signOut() {
   try {
+    const sessionId = getStoredSessionId();
+    const headers: Record<string, string> = {};
+    if (sessionId) {
+      headers["X-Session-Id"] = sessionId;
+    }
+
     const response = await fetch(getAuthEndpoint("logout"), {
       method: "POST",
+      headers,
       credentials: "include",
     });
 
@@ -213,6 +245,7 @@ export async function signOut() {
   }
 
   persistSession(null);
+  setStoredSessionId("");
 
   return {
     ok: true as const,
@@ -224,11 +257,18 @@ export async function authApiRequest<T>(path: string, body: unknown): Promise<T>
   const normalizedPath = path.replace(/^\/+/, "");
   const url = `${normalizedBase}/${normalizedPath}`;
 
+  const sessionId = getStoredSessionId();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (sessionId) {
+    headers["X-Session-Id"] = sessionId;
+  }
+
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     credentials: "include",
     body: JSON.stringify(body),
   });

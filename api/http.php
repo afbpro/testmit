@@ -7,8 +7,24 @@ function applyCorsHeaders(string $origin): void
     header('Vary: Origin');
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Methods: POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
+    header('Access-Control-Allow-Headers: Content-Type, X-Session-Id');
     header('Access-Control-Max-Age: 600');
+}
+
+function resolveSessionIdFromHeader(): string
+{
+    $rawSessionId = trim((string) ($_SERVER['HTTP_X_SESSION_ID'] ?? ''));
+
+    if ($rawSessionId === '') {
+        return '';
+    }
+
+    // Keep strict validation for PHP session id format.
+    if (preg_match('/^[A-Za-z0-9,-]{16,128}$/', $rawSessionId) !== 1) {
+        return '';
+    }
+
+    return $rawSessionId;
 }
 
 function resolveAction(): string
