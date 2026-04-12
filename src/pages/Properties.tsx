@@ -551,7 +551,7 @@ export default function Properties() {
         ? "title"
         : field === "descripcion" || field === "notes" || field === "nota_alquiler"
           ? "sentence"
-          : field === "video_url" || field === "url"
+          : field === "video_url" || field === "matterport_url" || field === "url"
             ? "email"
             : "none";
 
@@ -1557,10 +1557,6 @@ export default function Properties() {
                   <div className="space-y-2">
                     <Label htmlFor="descripcion">Descripción</Label>
                     <Textarea id="descripcion" value={form.descripcion} onChange={handleChange("descripcion")} className="min-h-36 border-white/10 bg-black/30 text-white" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="video-url">Video YouTube</Label>
-                    <Input id="video-url" value={form.video_url} onChange={handleChange("video_url")} placeholder="https://youtube.com/..." className="h-12 border-white/10 bg-black/30 text-white" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="notas-internas">Notas internas</Label>
