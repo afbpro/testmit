@@ -17,7 +17,7 @@ export default function Colegas() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api?action=companies-list", { credentials: "include", method: "POST" })
+    fetch("https://app.cupertino.uy/api?action=companies-list", { credentials: "include", method: "POST" })
       .then(async (res) => {
         const data = await res.json();
         if (!data.ok) throw new Error(data.message || "Error al cargar inmobiliarias");
