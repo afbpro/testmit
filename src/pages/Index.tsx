@@ -88,6 +88,15 @@ const propertyTypeAliases: Record<string, PropertyType> = {
   locales: "Locales",
 };
 
+const agencyPropertyTypePath: Record<PropertyType, string> = {
+  Apartamentos: "Apartamento",
+  Casas: "Casa",
+  Terrenos: "Terreno",
+  Chacras: "Chacra",
+  Campos: "Campo",
+  Locales: "Local",
+};
+
 function normalizeText(value: string) {
   return value
     .trim()
@@ -119,6 +128,22 @@ function buildColegaUrl(agencyId: number, currentPropertyType: PropertyType, cur
   return `https://www.inmobiliaria.link/c/inmobiliaria_${agencyId}/${currentPropertyType}/${calculatedId}`;
 }
 
+function buildAgencyPropertyUrl(agencyWeb: string | null | undefined, currentPropertyType: PropertyType, currentPropertyId: string) {
+  if (!agencyWeb?.trim() || !currentPropertyId.trim()) {
+    return "";
+  }
+
+  try {
+    const normalizedAgencyUrl = new URL(
+      agencyWeb.startsWith("http://") || agencyWeb.startsWith("https://") ? agencyWeb : `https://${agencyWeb}`,
+    );
+    const base = `${normalizedAgencyUrl.protocol}//${normalizedAgencyUrl.host}`.replace(/\/+$/, "");
+    return `${base}/${agencyPropertyTypePath[currentPropertyType]}/${currentPropertyId.trim()}`;
+  } catch {
+    return "";
+  }
+}
+
 function parseLinkInput(link: string, agencies: AgencyRecord[]) {
   const trimmedLink = link.trim();
   if (!trimmedLink) {
@@ -135,7 +160,7 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
   const hostname = normalizeHostname(url.hostname);
   const pathParts = url.pathname.split("/").filter(Boolean);
 
-  if (hostname === "inmobiliaria.link" && pathParts[0] === "c") {
+  if ((hostname === "inmobiliaria.link" || hostname === "inmobiliario.link") && pathParts[0] === "c") {
     const agencyMatch = /^inmobiliaria_(\d+)$/i.exec(pathParts[1] ?? "");
     const parsedAgencyId = agencyMatch ? Number.parseInt(agencyMatch[1], 10) : NaN;
     const parsedPropertyType = parsePropertyType(pathParts[2]);
@@ -150,12 +175,14 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
       parsedAgencyId > 0 && rawPropertyId > 0 && rawPropertyId % parsedAgencyId === 0
         ? String(rawPropertyId / parsedAgencyId)
         : "";
+    const agencyFromId = agencies.find((agency) => agency.id === parsedAgencyId);
+    const reverseAgencyUrl = buildAgencyPropertyUrl(agencyFromId?.web, parsedPropertyType, decodedPropertyId);
 
     return {
       agencyId: parsedAgencyId,
       propertyType: parsedPropertyType,
       propertyId: decodedPropertyId,
-      generatedUrl: buildColegaUrl(parsedAgencyId, parsedPropertyType, decodedPropertyId),
+      generatedUrl: reverseAgencyUrl || buildColegaUrl(parsedAgencyId, parsedPropertyType, decodedPropertyId),
     };
   }
 
