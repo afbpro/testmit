@@ -30,10 +30,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { agencies } from "@/data/agencies";
+
 
 import AppNavigation from "@/components/AppNavigation";
-import { clearLegacyLinkHistory, getStoredSession, signOut } from "@/lib/auth";
+import { clearLegacyLinkHistory, getStoredSession, signOut, authApiRequest } from "@/lib/auth";
 import {
   appendActivityLog,
   createActivityEntry,
@@ -73,7 +73,72 @@ export default function Index() {
   const session = getStoredSession();
   const supabaseReady = Boolean(supabase);
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(null);
+  const [agencies, setAgencies] = useState<{ id: number; name: string }[]>([]);
+  const [loadingAgencies, setLoadingAgencies] = useState(false);
+  const [agenciesError, setAgenciesError] = useState<string | null>(null);
+    // Cargar agencias desde el backend
+    useEffect(() => {
+      setLoadingAgencies(true);
+      setAgenciesError(null);
+      authApiRequest<{ ok: boolean; companies: { id: number; name: string }[]; message?: string }>(
+        "companies/list",
+        {}
+      )
+        .then((data) => {
+          if (!data.ok) throw new Error(data.message || "Error al cargar inmobiliarias");
+          setAgencies(data.companies);
+        })
+        .catch((err) => {
+          setAgenciesError(err instanceof Error ? err.message : "Error al cargar inmobiliarias");
+        })
+        .finally(() => setLoadingAgencies(false));
+    }, []);
   const [propertyType, setPropertyType] = useState<PropertyType>("Apartamentos");
+  const [originalLink, setOriginalLink] = useState("");
+    // Cuando cambia el link original, buscar y seleccionar la compañía correspondiente
+    useEffect(() => {
+      if (!originalLink || agencies.length === 0) return;
+      let url: URL | null = null;
+      try {
+        url = new URL(originalLink);
+      } catch {
+        // No es una URL válida
+        return;
+      }
+      const domain = url.hostname.replace(/^www\./, "").toLowerCase();
+      // Buscar coincidencia en el campo web de la company
+      const found = agencies.find((agency) => {
+        if (!agency.web) return false;
+        try {
+          const agencyUrl = new URL(agency.web.startsWith("http") ? agency.web : `https://${agency.web}`);
+          return agencyUrl.hostname.replace(/^www\./, "").toLowerCase() === domain;
+        } catch {
+          return false;
+        }
+      });
+      if (found) {
+        setSelectedAgencyId(found.id);
+      }
+
+      // Extraer tipo de propiedad y ID del path
+      const pathParts = url.pathname.split("/").filter(Boolean); // quita vacíos
+      if (pathParts.length >= 2) {
+        
+        var translateTypes = {
+          "Apartamento": "Apartamentos",
+          "Casa": "Casas",
+          "Terreno": "Terrenos",
+          "Chacra": "Chacras",
+          "Campo": "Campos",
+          "Local": "Locales"
+        }
+
+        const tipo = translateTypes[pathParts[0]];
+      
+        if (tipo) setPropertyType(tipo);
+        setPropertyId(pathParts[1]);
+      }
+    }, [originalLink, agencies]);
   const [propertyId, setPropertyId] = useState("");
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [open, setOpen] = useState(false);
@@ -151,7 +216,7 @@ export default function Index() {
 
   const selectedAgency = useMemo(
     () => agencies.find((agency) => agency.id === selectedAgencyId),
-    [selectedAgencyId]
+    [selectedAgencyId, agencies]
   );
 
   const whatsappShareUrl = useMemo(() => {
@@ -414,6 +479,16 @@ export default function Index() {
                 </div>
 
                 <div className="space-y-2">
+                                  <div className="space-y-2">
+                                    <Label className="text-xs uppercase tracking-wider text-zinc-400">Link original</Label>
+                                    <Input
+                                      type="url"
+                                      placeholder="https://www.ejemplo.com/propiedad/123"
+                                      className="h-11 border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
+                                      value={originalLink}
+                                      onChange={e => setOriginalLink(e.target.value)}
+                                    />
+                                  </div>
                   <Label className="text-xs uppercase tracking-wider text-zinc-400">Inmobiliaria colega</Label>
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
@@ -429,19 +504,25 @@ export default function Index() {
                         <CommandList>
                           <CommandEmpty>No se encontró.</CommandEmpty>
                           <CommandGroup>
-                            {agencies.map((agency) => (
-                              <CommandItem
-                                key={agency.id}
-                                value={`${agency.id} ${agency.name}`}
-                                onSelect={() => {
-                                  setSelectedAgencyId(agency.id);
-                                  setOpen(false);
-                                }}
-                              >
-                                <span className="mr-2 font-mono text-xs text-zinc-400">{agency.id}</span>
-                                {agency.name}
-                              </CommandItem>
-                            ))}
+                            {loadingAgencies ? (
+                              <div className="px-3 py-6 text-sm text-zinc-300">Cargando inmobiliarias...</div>
+                            ) : agenciesError ? (
+                              <div className="px-3 py-6 text-sm text-red-400">{agenciesError}</div>
+                            ) : (
+                              agencies.map((agency) => (
+                                <CommandItem
+                                  key={agency.id}
+                                  value={`${agency.id} ${agency.name}`}
+                                  onSelect={() => {
+                                    setSelectedAgencyId(agency.id);
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <span className="mr-2 font-mono text-xs text-zinc-400">{agency.id}</span>
+                                  {agency.name}
+                                </CommandItem>
+                              ))
+                            )}
                           </CommandGroup>
                         </CommandList>
                       </Command>
