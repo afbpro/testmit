@@ -69,6 +69,18 @@ const initialEditForm = {
   is_active: "1",
 };
 
+// Invita usuario usando Edge Function
+async function inviteUserByEmail({ email, username, rol_id }: { email: string; username: string; rol_id: string }) {
+  const res = await fetch("/functions/v1/create-user-invite", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, username, rol_id }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Error desconocido");
+  return data;
+}
+
 export default function Users() {
   const navigate = useNavigate();
   const session = getStoredSession();
@@ -131,37 +143,24 @@ export default function Users() {
   const handleCreateUser = async () => {
     const email = createForm.email.trim().toLowerCase();
 
-    if (!createForm.username.trim() || !email || !createForm.password || !createForm.rol_id) {
-      toast.error("Completá username, email, contraseña y rol");
-      return;
-    }
-
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      toast.error("Ingresá un email válido");
-      return;
-    }
-
-    if (createForm.password.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres");
+    if (!createForm.username.trim() || !email || !createForm.rol_id) {
+      toast.error("Completá username, email y rol");
       return;
     }
 
     setSaving(true);
     try {
-      await authApiRequest<{ ok: boolean; message?: string }>("users/create", {
-        username: createForm.username.trim(),
+      await inviteUserByEmail({
         email,
-        password: createForm.password,
-        rol_id: Number(createForm.rol_id),
+        username: createForm.username.trim(),
+        rol_id: createForm.rol_id,
       });
-
-      toast.success("Usuario creado");
+      toast.success("Invitación enviada. El usuario debe revisar su email para activar la cuenta.");
       setCreateOpen(false);
       setCreateForm(initialCreateForm);
       await loadData();
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "No se pudo crear el usuario";
-      toast.error(message);
+    } catch (error: any) {
+      toast.error(error.message || "No se pudo invitar al usuario");
     } finally {
       setSaving(false);
     }

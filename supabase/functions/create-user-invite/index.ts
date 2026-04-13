@@ -6,7 +6,16 @@ serve(async (req) => {
     return new Response(JSON.stringify({ error: "Método no permitido" }), { status: 405 });
   }
 
-  const { email, username, rol_id } = await req.json();
+  let email, username, rol_id;
+  try {
+    const body = await req.json();
+    email = body.email;
+    username = body.username;
+    rol_id = body.rol_id;
+  } catch {
+    return new Response(JSON.stringify({ error: "JSON inválido. Verifica el formato del formulario." }), { status: 400 });
+  }
+
   if (!email || !rol_id) {
     return new Response(JSON.stringify({ error: "Faltan datos obligatorios" }), { status: 400 });
   }
