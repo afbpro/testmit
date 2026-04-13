@@ -3,7 +3,16 @@ declare(strict_types=1);
 
 function applyCorsHeaders(string $origin): void
 {
-    header('Access-Control-Allow-Origin: ' . $origin);
+    // Permitir CORS solo desde localhost (http y http://localhost:8080)
+    $allowedOrigins = [
+        'http://localhost',
+        'http://localhost:8080',
+        'http://127.0.0.1',
+        'http://127.0.0.1:8080',
+    ];
+    if (in_array($origin, $allowedOrigins, true)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+    }
     header('Vary: Origin');
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Methods: POST, OPTIONS');
