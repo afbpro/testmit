@@ -18,15 +18,21 @@ const baseNavItems: Array<{ to: string; label: string; icon: LucideIcon; end?: b
   { to: "/usuarios", label: "Usuarios", icon: Users },
 ];
 
+const mobileNavItems: Array<{ to: string; label: string; icon: LucideIcon; end?: boolean }> = [
+  { to: "/", label: "Links", icon: Link2, end: true },
+  { to: "/propiedades", label: "Propiedades", icon: Home },
+  { to: "/crm", label: "CRM", icon: Users },
+];
+
 const desktopLinkClass =
   "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/5 hover:text-white";
 const desktopActiveClass = "bg-white/10 text-white";
 const mobileLinkClass =
-  "flex min-h-[60px] flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium text-zinc-400 transition-all hover:bg-white/[0.03] hover:text-white";
+  "flex h-[60px] flex-row items-center justify-center gap-2 rounded-lg px-1 py-1 text-[11px] font-medium text-zinc-400 transition-colors hover:text-white";
 const mobileActiveClass = "bg-white/[0.06] text-white";
 
 export default function AppNavigation({ email, isAdmin = false, onLogout }: AppNavigationProps) {
-  const navItems = baseNavItems;
+  const desktopNavItems = baseNavItems;
 
   return (
     <>
@@ -41,7 +47,7 @@ export default function AppNavigation({ email, isAdmin = false, onLogout }: AppN
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex md:flex-wrap">
-            {navItems.map(({ to, label, icon: Icon, end }) => (
+            {desktopNavItems.map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -71,9 +77,9 @@ export default function AppNavigation({ email, isAdmin = false, onLogout }: AppN
         </div>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#09090b]/95 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1.5 shadow-[0_-10px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl md:hidden">
-        <div className={`mx-auto grid w-full max-w-7xl grid-cols-${navItems.length} gap-1 px-2`}>
-          {navItems.map(({ to, label, icon: Icon, end }) => (
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#09090b]/95 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 shadow-[0_-10px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl md:hidden">
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-3 gap-1 px-2">
+          {mobileNavItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -81,8 +87,8 @@ export default function AppNavigation({ email, isAdmin = false, onLogout }: AppN
               className={mobileLinkClass}
               activeClassName={mobileActiveClass}
             >
-              <Icon className="h-5 w-5" />
-              <span>{label}</span>
+              <Icon className="h-6 w-6" />
+              <span className="leading-tight">{label}</span>
             </NavLink>
           ))}
         </div>

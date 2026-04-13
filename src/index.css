@@ -75,6 +75,12 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   }
 
+  @media (max-width: 767px) {
+    body {
+      padding-bottom: calc(60px + max(env(safe-area-inset-bottom), 0.35rem));
+    }
+  }
+
   img,
   video,
   canvas {
