@@ -56,7 +56,7 @@ export default function AppNavigation({ email, isAdmin = false, onLogout }: AppN
                 className={desktopLinkClass}
                 activeClassName={desktopActiveClass}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" />
                 {label}
               </NavLink>
             ))}
