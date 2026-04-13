@@ -1,4 +1,4 @@
-import { Home, Link2, LogOut, Users, type LucideIcon } from "lucide-react";
+import { Building2, Home, Link2, LogOut, Settings, Users, type LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { NavLink } from "@/components/NavLink";
@@ -13,16 +13,16 @@ type AppNavigationProps = {
 const baseNavItems: Array<{ to: string; label: string; icon: LucideIcon; end?: boolean }> = [
   { to: "/", label: "Links", icon: Link2, end: true },
   { to: "/propiedades", label: "Propiedades", icon: Home },
-  { to: "/crm", label: "CRM", icon: Users },
-  { to: "/colegas", label: "Colegas", icon: Users },
+  { to: "/crm", label: "CRM", icon: Settings },
+  { to: "/colegas", label: "Colegas", icon: Building2 },
   { to: "/usuarios", label: "Usuarios", icon: Users },
 ];
 
 const mobileNavItems: Array<{ to: string; label: string; icon: LucideIcon; end?: boolean }> = [
   { to: "/", label: "Links", icon: Link2, end: true },
   { to: "/propiedades", label: "Propiedades", icon: Home },
-  { to: "/crm", label: "CRM", icon: Users },
-  { to: "/colegas", label: "Colegas", icon: Users },
+  { to: "/crm", label: "CRM", icon: Settings },
+  { to: "/colegas", label: "Colegas", icon: Building2 },
 ];
 
 const desktopLinkClass =
