@@ -44,10 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'GET') {
     jsonResponse(405, [
         'ok' => false,
-        'message' => 'Metodo no permitido. Usa POST.'
+        'message' => 'Metodo no permitido. Usa POST o GET.'
     ]);
 }
 

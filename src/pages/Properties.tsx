@@ -389,11 +389,11 @@ const supabaseReady = Boolean(supabase);
   // Obtener propiedades desde la API PHP con filtro remoto por tipo
   useEffect(() => {
     setLoading(true);
-    const body: Record<string, any> = {};
-    if (typeFilter !== "all") body.type = typeFilter;
+    const params: Record<string, any> = {};
+    if (typeFilter !== "all") params.type = typeFilter;
     authApiRequest<{ ok: boolean; properties: PropertyRecord[]; message?: string }>(
       "properties-list",
-      body
+      params
     )
       .then((data) => {
         if (!data.ok) throw new Error(data.message || "Error al cargar propiedades");

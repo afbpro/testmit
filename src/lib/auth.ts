@@ -233,25 +233,25 @@ export async function signOut() {
   };
 }
 
-export async function authApiRequest<T>(path: string, body: unknown): Promise<T> {
-  const normalizedBase = AUTH_API_BASE.replace(/\/+$/, "") || "https://app.cupertino.uy/api";
-  const normalizedPath = path.replace(/^\/+/, "");
-  const url = `${normalizedBase}/${normalizedPath}`;
+export async function authApiRequest<T>(path: string, params?: Record<string, any>): Promise<T> {
+  const normalizedBase = AUTH_API_BASE.replace(/\/+$|/, "") || "https://app.cupertino.uy/api";
+  const normalizedPath = path.replace(/^\/+/,'');
+  let url = `${normalizedBase}/${normalizedPath}`;
+  if (params && Object.keys(params).length > 0) {
+    const search = new URLSearchParams(params).toString();
+    url += `?${search}`;
+  }
 
   const sessionId = getStoredSessionId();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
+  const headers: Record<string, string> = {};
   if (sessionId) {
     headers["X-Session-Id"] = sessionId;
   }
 
   const response = await fetch(url, {
-    method: "POST",
+    method: "GET",
     headers,
     credentials: "include",
-    body: JSON.stringify(body),
   });
 
   const payload = (await response.json().catch(() => null)) as
