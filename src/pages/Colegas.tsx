@@ -78,7 +78,7 @@ export default function Colegas() {
     <div className="min-h-screen bg-background pb-24 md:pb-8">
       <AppNavigation
         email={session?.email}
-        isAdmin={(session?.role || "") === "administrador"}
+        isAdmin={(session?.role || "").trim().toLowerCase() === "administrador"}
         onLogout={handleLogout}
       />
       <main className="mx-auto max-w-6xl space-y-5 px-3 py-5 sm:px-4 md:py-7">
@@ -161,5 +161,4 @@ export default function Colegas() {
     </div>
   );
 }
-
 

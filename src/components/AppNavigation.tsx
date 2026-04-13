@@ -33,7 +33,7 @@ const mobileLinkClass =
 const mobileActiveClass = "bg-white/[0.06] text-white";
 
 export default function AppNavigation({ email, isAdmin = false, onLogout }: AppNavigationProps) {
-  const desktopNavItems = baseNavItems;
+  const desktopNavItems = isAdmin ? baseNavItems : baseNavItems.filter((item) => item.to !== "/usuarios");
 
   return (
     <>

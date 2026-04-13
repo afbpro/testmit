@@ -610,7 +610,11 @@ export default function Index() {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_0),#09090b] text-white">
-      <AppNavigation email={session?.email} isAdmin={session?.role === "Administrador"} onLogout={handleLogout} />
+      <AppNavigation
+        email={session?.email}
+        isAdmin={(session?.role || "").trim().toLowerCase() === "administrador"}
+        onLogout={handleLogout}
+      />
 
       <main className="mx-auto max-w-5xl space-y-5 px-3 py-6 pb-24 sm:px-4 md:py-7 md:pb-7">
         <Card className="premium-fade-up overflow-hidden border border-white/10 bg-white/[0.04] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
