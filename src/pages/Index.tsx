@@ -144,6 +144,24 @@ function buildAgencyPropertyUrl(agencyWeb: string | null | undefined, currentPro
   }
 }
 
+function buildDecodedIdsLink(agencyId: number, propertyId: string, propertyType: PropertyType | null) {
+  const params = new URLSearchParams({
+    inmobiliaria_id: String(agencyId),
+    propiedad_id: propertyId,
+  });
+
+  if (propertyType) {
+    params.set("tipo", propertyType);
+  }
+
+  const base =
+    typeof window !== "undefined" && window.location?.origin
+      ? window.location.origin
+      : "";
+
+  return `${base}/?${params.toString()}`;
+}
+
 function parseLinkInput(link: string, agencies: AgencyRecord[]) {
   const trimmedLink = link.trim();
   if (!trimmedLink) {
@@ -183,14 +201,15 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
     const reverseAgencyUrl = parsedPropertyType
       ? buildAgencyPropertyUrl(agencyFromId?.web, parsedPropertyType, decodedPropertyId)
       : "";
+    const decodedIdsUrl = decodedPropertyId
+      ? buildDecodedIdsLink(parsedAgencyId, decodedPropertyId, parsedPropertyType ?? null)
+      : "";
 
     return {
       agencyId: parsedAgencyId,
       propertyType: parsedPropertyType ?? null,
       propertyId: decodedPropertyId,
-      generatedUrl:
-        reverseAgencyUrl ||
-        (parsedPropertyType ? buildColegaUrl(parsedAgencyId, parsedPropertyType, decodedPropertyId) : ""),
+      generatedUrl: decodedIdsUrl || reverseAgencyUrl,
       isColegaDomain: true,
     };
   }
@@ -287,6 +306,9 @@ export default function Index() {
 
       if (parsedLink.generatedUrl) {
         setGeneratedUrl(parsedLink.generatedUrl);
+      } else if (parsedLink.isColegaDomain) {
+        setGeneratedUrl("");
+        toast.error("No se pudo invertir el enlace: revisá que sea un link colega válido.");
       }
     }, [originalLink, agencies]);
   const [propertyId, setPropertyId] = useState("");
