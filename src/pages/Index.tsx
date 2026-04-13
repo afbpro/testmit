@@ -170,7 +170,7 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
     const encodedSegment = [...pathParts].reverse().find((segment) => /^\d+$/.test(segment));
     const encodedId = Number.parseInt(encodedSegment ?? "", 10);
 
-    if (!Number.isInteger(parsedAgencyId) || !parsedPropertyType || !Number.isInteger(encodedId)) {
+    if (!Number.isInteger(parsedAgencyId) || !Number.isInteger(encodedId)) {
       return null;
     }
 
@@ -180,13 +180,18 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
       ? String(maybeDecodedId)
       : "";
     const agencyFromId = agencies.find((agency) => agency.id === parsedAgencyId);
-    const reverseAgencyUrl = buildAgencyPropertyUrl(agencyFromId?.web, parsedPropertyType, decodedPropertyId);
+    const reverseAgencyUrl = parsedPropertyType
+      ? buildAgencyPropertyUrl(agencyFromId?.web, parsedPropertyType, decodedPropertyId)
+      : "";
 
     return {
       agencyId: parsedAgencyId,
-      propertyType: parsedPropertyType,
+      propertyType: parsedPropertyType ?? null,
       propertyId: decodedPropertyId,
-      generatedUrl: reverseAgencyUrl || buildColegaUrl(parsedAgencyId, parsedPropertyType, decodedPropertyId),
+      generatedUrl:
+        reverseAgencyUrl ||
+        (parsedPropertyType ? buildColegaUrl(parsedAgencyId, parsedPropertyType, decodedPropertyId) : ""),
+      isColegaDomain: true,
     };
   }
 
@@ -215,6 +220,7 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
     propertyType: parsedPropertyType ?? null,
     propertyId: parsedPropertyId ?? "",
     generatedUrl: "",
+    isColegaDomain: false,
   };
 }
 
@@ -227,6 +233,7 @@ export default function Index() {
   const [agencies, setAgencies] = useState<AgencyRecord[]>([]);
   const [loadingAgencies, setLoadingAgencies] = useState(false);
   const [agenciesError, setAgenciesError] = useState<string | null>(null);
+  const [originAgencyLabel, setOriginAgencyLabel] = useState("");
     // Cargar agencias desde el backend
     useEffect(() => {
       setLoadingAgencies(true);
@@ -253,6 +260,10 @@ export default function Index() {
   const [originalLink, setOriginalLink] = useState("");
     // Cuando cambia el link original, buscar y seleccionar la compañía correspondiente
     useEffect(() => {
+      if (!originalLink.trim()) {
+        setOriginAgencyLabel("");
+      }
+
       const parsedLink = parseLinkInput(originalLink, agencies);
       if (!parsedLink) {
         return;
@@ -260,6 +271,10 @@ export default function Index() {
 
       if (parsedLink.agencyId) {
         setSelectedAgencyId(parsedLink.agencyId);
+        const originAgency = agencies.find((agency) => agency.id === parsedLink.agencyId);
+        if (originAgency && parsedLink.isColegaDomain) {
+          setOriginAgencyLabel(`${originAgency.name} (ID ${originAgency.id})`);
+        }
       }
 
       if (parsedLink.propertyType) {
@@ -621,6 +636,11 @@ export default function Index() {
                                       value={originalLink}
                                       onChange={e => setOriginalLink(e.target.value)}
                                     />
+                                    {originAgencyLabel && (
+                                      <p className="text-xs text-emerald-300">
+                                        Inmobiliaria de origen detectada: {originAgencyLabel}
+                                      </p>
+                                    )}
                                   </div>
                   <Label className="text-xs uppercase tracking-wider text-zinc-400">Inmobiliaria colega</Label>
                   <Popover open={open} onOpenChange={setOpen}>
