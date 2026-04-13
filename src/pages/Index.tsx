@@ -33,6 +33,7 @@ import {
 
 
 import AppNavigation from "@/components/AppNavigation";
+import { agencies as fallbackAgencies } from "@/data/agencies";
 import { clearLegacyLinkHistory, getStoredSession, signOut, authApiRequest } from "@/lib/auth";
 import {
   appendActivityLog,
@@ -45,6 +46,11 @@ import { supabase } from "@/lib/supabaseClient";
 const propertyTypes = ["Apartamentos", "Casas", "Terrenos", "Chacras", "Campos", "Locales"] as const;
 type PropertyType = (typeof propertyTypes)[number];
 type DashboardView = "colega" | "jira";
+type AgencyRecord = {
+  id: number;
+  name: string;
+  web?: string | null;
+};
 type ColegaPrefillState = {
   prefillPropertyId?: string;
   prefillPropertyType?: PropertyType;
@@ -67,29 +73,148 @@ const initialNewClientForm = {
   propertyType: "Casa" as NewClientPropertyType,
 };
 
+const propertyTypeAliases: Record<string, PropertyType> = {
+  apartamento: "Apartamentos",
+  apartamentos: "Apartamentos",
+  casa: "Casas",
+  casas: "Casas",
+  terreno: "Terrenos",
+  terrenos: "Terrenos",
+  chacra: "Chacras",
+  chacras: "Chacras",
+  campo: "Campos",
+  campos: "Campos",
+  local: "Locales",
+  locales: "Locales",
+};
+
+function normalizeText(value: string) {
+  return value
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function normalizeHostname(hostname: string) {
+  return hostname.replace(/^www\./i, "").trim().toLowerCase();
+}
+
+function parsePropertyType(value: string | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  return propertyTypeAliases[normalizeText(value)] ?? null;
+}
+
+function buildColegaUrl(agencyId: number, currentPropertyType: PropertyType, currentPropertyId: string) {
+  const pid = Number.parseInt(currentPropertyId, 10);
+
+  if (!Number.isInteger(pid) || pid <= 0) {
+    return "";
+  }
+
+  const calculatedId = pid * agencyId + 9876;
+  return `https://www.inmobiliaria.link/c/inmobiliaria_${agencyId}/${currentPropertyType}/${calculatedId}`;
+}
+
+function parseLinkInput(link: string, agencies: AgencyRecord[]) {
+  const trimmedLink = link.trim();
+  if (!trimmedLink) {
+    return null;
+  }
+
+  let url: URL;
+  try {
+    url = new URL(trimmedLink);
+  } catch {
+    return null;
+  }
+
+  const hostname = normalizeHostname(url.hostname);
+  const pathParts = url.pathname.split("/").filter(Boolean);
+
+  if (hostname === "inmobiliaria.link" && pathParts[0] === "c") {
+    const agencyMatch = /^inmobiliaria_(\d+)$/i.exec(pathParts[1] ?? "");
+    const parsedAgencyId = agencyMatch ? Number.parseInt(agencyMatch[1], 10) : NaN;
+    const parsedPropertyType = parsePropertyType(pathParts[2]);
+    const encodedId = Number.parseInt(pathParts[3] ?? "", 10);
+
+    if (!Number.isInteger(parsedAgencyId) || !parsedPropertyType || !Number.isInteger(encodedId)) {
+      return null;
+    }
+
+    const rawPropertyId = encodedId - 9876;
+    const decodedPropertyId =
+      parsedAgencyId > 0 && rawPropertyId > 0 && rawPropertyId % parsedAgencyId === 0
+        ? String(rawPropertyId / parsedAgencyId)
+        : "";
+
+    return {
+      agencyId: parsedAgencyId,
+      propertyType: parsedPropertyType,
+      propertyId: decodedPropertyId,
+      generatedUrl: buildColegaUrl(parsedAgencyId, parsedPropertyType, decodedPropertyId),
+    };
+  }
+
+  const foundAgency = agencies.find((agency) => {
+    if (!agency.web) {
+      return false;
+    }
+
+    try {
+      const agencyUrl = new URL(agency.web.startsWith("http") ? agency.web : `https://${agency.web}`);
+      return normalizeHostname(agencyUrl.hostname) === hostname;
+    } catch {
+      return false;
+    }
+  });
+
+  const parsedPropertyType = pathParts
+    .map((segment) => parsePropertyType(segment))
+    .find((value): value is PropertyType => Boolean(value));
+  const parsedPropertyId = [...pathParts]
+    .reverse()
+    .find((segment) => /^\d+$/.test(segment));
+
+  return {
+    agencyId: foundAgency?.id ?? null,
+    propertyType: parsedPropertyType ?? null,
+    propertyId: parsedPropertyId ?? "",
+    generatedUrl: "",
+  };
+}
+
 export default function Index() {
   const navigate = useNavigate();
   const location = useLocation();
   const session = getStoredSession();
   const supabaseReady = Boolean(supabase);
   const [selectedAgencyId, setSelectedAgencyId] = useState<number | null>(null);
-  const [agencies, setAgencies] = useState<{ id: number; name: string }[]>([]);
+  const [agencies, setAgencies] = useState<AgencyRecord[]>([]);
   const [loadingAgencies, setLoadingAgencies] = useState(false);
   const [agenciesError, setAgenciesError] = useState<string | null>(null);
     // Cargar agencias desde el backend
     useEffect(() => {
       setLoadingAgencies(true);
       setAgenciesError(null);
-      authApiRequest<{ ok: boolean; companies: { id: number; name: string }[]; message?: string }>(
+      authApiRequest<{ ok: boolean; companies: AgencyRecord[]; message?: string }>(
         "companies/list",
         {}
       )
         .then((data) => {
           if (!data.ok) throw new Error(data.message || "Error al cargar inmobiliarias");
-          setAgencies(data.companies);
+          setAgencies(
+            data.companies?.length
+              ? data.companies
+              : fallbackAgencies.map((agency) => ({ ...agency, web: null })),
+          );
         })
         .catch((err) => {
-          setAgenciesError(err instanceof Error ? err.message : "Error al cargar inmobiliarias");
+          setAgencies(fallbackAgencies.map((agency) => ({ ...agency, web: null })));
+          setAgenciesError(err instanceof Error ? `${err.message}. Usando listado local.` : "Usando listado local.");
         })
         .finally(() => setLoadingAgencies(false));
     }, []);
@@ -97,46 +222,25 @@ export default function Index() {
   const [originalLink, setOriginalLink] = useState("");
     // Cuando cambia el link original, buscar y seleccionar la compañía correspondiente
     useEffect(() => {
-      if (!originalLink || agencies.length === 0) return;
-      let url: URL | null = null;
-      try {
-        url = new URL(originalLink);
-      } catch {
-        // No es una URL válida
+      const parsedLink = parseLinkInput(originalLink, agencies);
+      if (!parsedLink) {
         return;
       }
-      const domain = url.hostname.replace(/^www\./, "").toLowerCase();
-      // Buscar coincidencia en el campo web de la company
-      const found = agencies.find((agency) => {
-        if (!agency.web) return false;
-        try {
-          const agencyUrl = new URL(agency.web.startsWith("http") ? agency.web : `https://${agency.web}`);
-          return agencyUrl.hostname.replace(/^www\./, "").toLowerCase() === domain;
-        } catch {
-          return false;
-        }
-      });
-      if (found) {
-        setSelectedAgencyId(found.id);
+
+      if (parsedLink.agencyId) {
+        setSelectedAgencyId(parsedLink.agencyId);
       }
 
-      // Extraer tipo de propiedad y ID del path
-      const pathParts = url.pathname.split("/").filter(Boolean); // quita vacíos
-      if (pathParts.length >= 2) {
-        
-        var translateTypes = {
-          "Apartamento": "Apartamentos",
-          "Casa": "Casas",
-          "Terreno": "Terrenos",
-          "Chacra": "Chacras",
-          "Campo": "Campos",
-          "Local": "Locales"
-        }
+      if (parsedLink.propertyType) {
+        setPropertyType(parsedLink.propertyType);
+      }
 
-        const tipo = translateTypes[pathParts[0]];
-      
-        if (tipo) setPropertyType(tipo);
-        setPropertyId(pathParts[1]);
+      if (parsedLink.propertyId) {
+        setPropertyId(parsedLink.propertyId);
+      }
+
+      if (parsedLink.generatedUrl) {
+        setGeneratedUrl(parsedLink.generatedUrl);
       }
     }, [originalLink, agencies]);
   const [propertyId, setPropertyId] = useState("");
@@ -234,14 +338,12 @@ export default function Index() {
       return;
     }
 
-    const pid = parseInt(propertyId, 10);
-    if (isNaN(pid)) {
+    const url = buildColegaUrl(selectedAgencyId, propertyType, propertyId);
+    if (!url) {
       toast.error("El ID de propiedad debe ser numérico");
       return;
     }
 
-    const calculatedId = pid * selectedAgencyId + 9876;
-    const url = `https://www.inmobiliaria.link/c/inmobiliaria_${selectedAgencyId}/${propertyType}/${calculatedId}`;
     setGeneratedUrl(url);
     setClientPickerOpen(false);
     setNewClientOpen(false);
@@ -474,16 +576,16 @@ export default function Index() {
                   <p className="text-xs uppercase tracking-[0.18em] text-zinc-400">Paso 1</p>
                   <h2 className="text-lg font-semibold text-white">Generador de Link Colega</h2>
                   <p className="text-sm text-zinc-300">
-                    Elegí la inmobiliaria, el tipo de propiedad y el ID para obtener el link al instante.
+                    Pegá un link colega o el enlace original del portal, y completamos la inmobiliaria, el tipo y el ID para generar el link.
                   </p>
                 </div>
 
                 <div className="space-y-2">
                                   <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider text-zinc-400">Link original</Label>
+                                    <Label className="text-xs uppercase tracking-wider text-zinc-400">Link original o link colega</Label>
                                     <Input
                                       type="url"
-                                      placeholder="https://www.ejemplo.com/propiedad/123"
+                                      placeholder="https://www.inmobiliaria.link/... o https://portal.com/propiedad/123"
                                       className="h-11 border-white/10 bg-black/30 text-white placeholder:text-zinc-500"
                                       value={originalLink}
                                       onChange={e => setOriginalLink(e.target.value)}
