@@ -14,6 +14,7 @@ import CRM from "./pages/CRM.tsx";
 import ClientDetail from "./pages/ClientDetail.tsx";
 import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
+import NewPedido from "./pages/NewPedido.tsx";
 import NewProperty from "./pages/NewProperty.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Properties from "./pages/Properties.tsx";
@@ -30,6 +31,12 @@ const protectedDashboard = (
 const protectedCRM = (
   <ProtectedRoute>
     <CRM />
+  </ProtectedRoute>
+);
+
+const protectedNewPedido = (
+  <ProtectedRoute>
+    <NewPedido />
   </ProtectedRoute>
 );
 
@@ -62,6 +69,7 @@ const App = () => (
           <Route path="/propiedades/nueva/precios" element={protectedNewProperty} />
           <Route path="/propiedades/nueva/extras" element={protectedNewProperty} />
           <Route path="/crm" element={protectedCRM} />
+          <Route path="/crm/nuevo-pedido" element={protectedNewPedido} />
           <Route
             path="/colegas"
             element={protectedColegas}

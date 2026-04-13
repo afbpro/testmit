@@ -109,6 +109,18 @@ function normalizeHostname(hostname: string) {
   return hostname.replace(/^www\./i, "").trim().toLowerCase();
 }
 
+function normalizeAgencyId(value: number | string | null | undefined) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function normalizeAgencyRecord(agency: AgencyRecord | (Omit<AgencyRecord, "id"> & { id: number | string })) {
+  return {
+    ...agency,
+    id: normalizeAgencyId(agency.id) ?? 0,
+  };
+}
+
 function parsePropertyType(value: string | undefined) {
   if (!value) {
     return null;
@@ -186,7 +198,7 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
     const decodedPropertyId = Number.isInteger(maybeDecodedId) && maybeDecodedId > 0
       ? String(maybeDecodedId)
       : "";
-    const agencyFromId = agencies.find((agency) => agency.id === parsedAgencyId);
+    const agencyFromId = agencies.find((agency) => normalizeAgencyId(agency.id) === parsedAgencyId);
     const reverseAgencyUrl = buildAgencyPropertyUrl(agencyFromId?.web, parsedPropertyType, decodedPropertyId);
     const decodedColegaUrl = decodedPropertyId
       ? buildColegaDecodedPathUrl(parsedAgencyId, parsedPropertyType, decodedPropertyId)
@@ -253,12 +265,12 @@ export default function Index() {
           if (!data.ok) throw new Error(data.message || "Error al cargar inmobiliarias");
           setAgencies(
             data.companies?.length
-              ? data.companies
-              : fallbackAgencies.map((agency) => ({ ...agency, web: null })),
+              ? data.companies.map((agency) => normalizeAgencyRecord(agency))
+              : fallbackAgencies.map((agency) => normalizeAgencyRecord({ ...agency, web: null })),
           );
         })
         .catch((err) => {
-          setAgencies(fallbackAgencies.map((agency) => ({ ...agency, web: null })));
+          setAgencies(fallbackAgencies.map((agency) => normalizeAgencyRecord({ ...agency, web: null })));
           setAgenciesError(err instanceof Error ? `${err.message}. Usando listado local.` : "Usando listado local.");
         })
         .finally(() => setLoadingAgencies(false));
@@ -284,9 +296,9 @@ export default function Index() {
         setOriginPropertyIdLabel("");
       }
 
-      if (parsedLink.agencyId) {
+      if (parsedLink.agencyId !== null) {
         setSelectedAgencyId(parsedLink.agencyId);
-        const originAgency = agencies.find((agency) => agency.id === parsedLink.agencyId);
+        const originAgency = agencies.find((agency) => normalizeAgencyId(agency.id) === parsedLink.agencyId);
         if (originAgency && parsedLink.isColegaDomain) {
           setOriginAgencyLabel(`${originAgency.name} (ID ${originAgency.id})`);
         }
@@ -307,7 +319,6 @@ export default function Index() {
         setGeneratedUrl(parsedLink.generatedUrl);
       } else if (parsedLink.isColegaDomain) {
         setGeneratedUrl("");
-        toast.error("No se pudo invertir el enlace: revisá que sea un link colega válido.");
       }
     }, [originalLink, agencies]);
   const [propertyId, setPropertyId] = useState("");
@@ -386,7 +397,7 @@ export default function Index() {
   }, [generatedUrl]);
 
   const selectedAgency = useMemo(
-    () => agencies.find((agency) => agency.id === selectedAgencyId),
+    () => agencies.find((agency) => normalizeAgencyId(agency.id) === selectedAgencyId),
     [selectedAgencyId, agencies]
   );
 

@@ -203,6 +203,7 @@ export interface ClientRecord {
   zone: string | null;
   zone_specific: string | null;
   budget: string | null;
+  dormitorios: string | null;
   period: string | null;
   budget_notes: string | null;
   notes: string | null;

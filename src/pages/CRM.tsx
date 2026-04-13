@@ -6,6 +6,7 @@ import {
   Check,
   ChevronDown,
   ChevronsUpDown,
+  ClipboardPenLine,
   CircleDollarSign,
   Loader2,
   LogOut,
@@ -1418,6 +1419,15 @@ export default function CRM() {
           </Card>
         </div>
       </main>
+
+      <Button
+        type="button"
+        className="fixed bottom-24 right-4 z-40 h-14 rounded-full bg-emerald-500 px-5 text-white shadow-[0_16px_35px_rgba(16,185,129,0.35)] hover:bg-emerald-600 md:bottom-6"
+        onClick={() => navigate("/crm/nuevo-pedido")}
+      >
+        <ClipboardPenLine className="mr-2 h-5 w-5" />
+        📥 Agregar pedido
+      </Button>
 
       <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
         <DialogContent className="fixed inset-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-y-contain rounded-none border-0 bg-zinc-950 text-white sm:inset-auto sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:border-white/10 xl:hidden">

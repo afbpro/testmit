@@ -21,11 +21,14 @@ export type Database = {
           budget_notes: string | null
           created_at: string | null
           department: string | null
+          dormitorios: string | null
           email: string | null
           id: string
           last_contact: string | null
           name: string
           notes: string | null
+          operation_type: string | null
+          period: string | null
           phone: string | null
           property_type: string | null
           stage: string | null
@@ -39,11 +42,14 @@ export type Database = {
           budget_notes?: string | null
           created_at?: string | null
           department?: string | null
+          dormitorios?: string | null
           email?: string | null
           id?: string
           last_contact?: string | null
           name: string
           notes?: string | null
+          operation_type?: string | null
+          period?: string | null
           phone?: string | null
           property_type?: string | null
           stage?: string | null
@@ -57,11 +63,14 @@ export type Database = {
           budget_notes?: string | null
           created_at?: string | null
           department?: string | null
+          dormitorios?: string | null
           email?: string | null
           id?: string
           last_contact?: string | null
           name?: string
           notes?: string | null
+          operation_type?: string | null
+          period?: string | null
           phone?: string | null
           property_type?: string | null
           stage?: string | null
