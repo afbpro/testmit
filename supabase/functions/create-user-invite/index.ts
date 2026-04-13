@@ -8,10 +8,22 @@ serve(async (req) => {
 
   // Robust Content-Type and JSON parsing
   const contentType = req.headers.get('content-type') || '';
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json',
+  };
+
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (!contentType.toLowerCase().includes('application/json')) {
     return new Response(
       JSON.stringify({ error: 'Content-Type must be application/json', received: contentType }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: corsHeaders }
     );
   }
 
@@ -25,18 +37,18 @@ serve(async (req) => {
     // If JSON parsing fails, get the raw body for diagnostics
     return new Response(
       JSON.stringify({ error: 'JSON inválido', details: String(err), rawBody }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: corsHeaders }
     );
   }
 
   if (!body.email || !body.rol_id) {
-    return new Response(JSON.stringify({ error: "Faltan datos obligatorios" }), { status: 400 });
+    return new Response(JSON.stringify({ error: "Faltan datos obligatorios" }), { status: 400, headers: corsHeaders });
   }
   
   const service_role = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   if (!service_role || !supabaseUrl) {
-    return new Response(JSON.stringify({ error: "Faltan variables de entorno" }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Faltan variables de entorno" }), { status: 500, headers: corsHeaders });
   }
   
   const adminClient = (await import("https://esm.sh/@supabase/supabase-js@2.39.7")).createClient(
@@ -50,8 +62,8 @@ serve(async (req) => {
   });
   
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+    return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: corsHeaders });
   }
   
-  return new Response(JSON.stringify({ ok: true, data }), { status: 200 });
+  return new Response(JSON.stringify({ ok: true, data }), { status: 200, headers: corsHeaders });
 });
