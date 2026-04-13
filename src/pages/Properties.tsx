@@ -372,7 +372,7 @@ function buildPropertyColegaLink(property: Pick<PropertyRecord, "auto_id" | "typ
 export default function Properties() {
   const navigate = useNavigate();
   const session = getStoredSession();
-  const supabaseReady = Boolean(supabase);
+const supabaseReady = Boolean(supabase);
   const [properties, setProperties] = useState<PropertyRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -383,14 +383,17 @@ export default function Properties() {
   const [editingProperty, setEditingProperty] = useState<PropertyRecord | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [operationFilter, setOperationFilter] = useState<PropertyFilterOption>("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [importingFromUrl, setImportingFromUrl] = useState(false);
 
-  // Obtener propiedades desde la API PHP
+  // Obtener propiedades desde la API PHP con filtro remoto por tipo
   useEffect(() => {
     setLoading(true);
+    const body: Record<string, any> = {};
+    if (typeFilter !== "all") body.type = typeFilter;
     authApiRequest<{ ok: boolean; properties: PropertyRecord[]; message?: string }>(
       "properties-list",
-      {}
+      body
     )
       .then((data) => {
         if (!data.ok) throw new Error(data.message || "Error al cargar propiedades");
@@ -401,7 +404,7 @@ export default function Properties() {
         setErrorMessage(err instanceof Error ? err.message : "Error al cargar propiedades");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [typeFilter]);
 
   const availableCities = form.department ? cityOptionsByDepartment[form.department] : [];
   const availableNeighborhoods = form.city ? neighborhoodOptionsByCity[form.city] ?? [] : [];
@@ -420,20 +423,13 @@ export default function Properties() {
   );
   const hasActiveFilters = searchQuery.trim().length > 0 || operationFilter !== "all";
 
+  // El filtrado local ahora solo aplica búsqueda y operación, el tipo se filtra en el backend
   const filteredProperties = useMemo(() => {
     const normalizedQuery = normalizeSearchText(searchQuery.trim());
-
     return properties.filter((property) => {
       const matchesOperation = operationFilter === "all" || property.operation === operationFilter;
-
-      if (!matchesOperation) {
-        return false;
-      }
-
-      if (!normalizedQuery) {
-        return true;
-      }
-
+      if (!matchesOperation) return false;
+      if (!normalizedQuery) return true;
       const searchableText = normalizeSearchText(
         [
           property.title,
@@ -455,7 +451,6 @@ export default function Properties() {
           .filter(Boolean)
           .join(" "),
       );
-
       return searchableText.includes(normalizedQuery);
     });
   }, [properties, searchQuery, operationFilter]);
@@ -986,7 +981,22 @@ export default function Properties() {
                     </SelectContent>
                   </Select>
                 </div>
-
+                <div className="min-w-0 flex-1 md:w-[220px] md:flex-none">
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className={selectTriggerClassName}>
+                      <SelectValue placeholder="Filtrar por tipo" />
+                    </SelectTrigger>
+                    <SelectContent className={selectContentClassName}>
+                      <SelectItem value="all">Todos los tipos</SelectItem>
+                      <SelectItem value="1">Casas</SelectItem>
+                      <SelectItem value="0">Apartamentos</SelectItem>
+                      <SelectItem value="2">Chacras</SelectItem>
+                      <SelectItem value="3">Campos</SelectItem>
+                      <SelectItem value="4">Locales</SelectItem>
+                      <SelectItem value="5">Terrenos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 {hasActiveFilters && (
                   <Button
                     type="button"
@@ -995,6 +1005,7 @@ export default function Properties() {
                     onClick={() => {
                       setSearchQuery("");
                       setOperationFilter("all");
+                      setTypeFilter("all");
                     }}
                   >
                     Limpiar
