@@ -22,6 +22,7 @@ const mobileNavItems: Array<{ to: string; label: string; icon: LucideIcon; end?:
   { to: "/", label: "Links", icon: Link2, end: true },
   { to: "/propiedades", label: "Propiedades", icon: Home },
   { to: "/crm", label: "CRM", icon: Users },
+  { to: "/colegas", label: "Colegas", icon: Users },
 ];
 
 const desktopLinkClass =
@@ -78,7 +79,7 @@ export default function AppNavigation({ email, isAdmin = false, onLogout }: AppN
       </header>
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#09090b]/95 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 shadow-[0_-10px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl md:hidden">
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-3 gap-1 px-2">
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-4 gap-1 px-2">
           {mobileNavItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
