@@ -69,15 +69,18 @@ const initialEditForm = {
   is_active: "1",
 };
 
-// Invita usuario usando Edge Function
-async function inviteUserByEmail({ email, username, rol_id }: { email: string; username: string; rol_id: string }) {
-  const res = await fetch("https://kjbobfvswafuzhojhpqg.functions.supabase.co/create-user-invite", {
+
+// Crea usuario usando el endpoint PHP
+async function createUserPHP({ email, username, password, rol_id }: { email: string; username: string; password: string; rol_id: string }) {
+  // Asume que el endpoint es /api/user.php?action=handleUsersCreate
+  const res = await fetch("https://app.cupertino.uy/api/user.php?action=handleUsersCreate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, username, rol_id }),
+    credentials: "include",
+    body: JSON.stringify({ email, username, password, rol_id }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Error desconocido");
+  if (!res.ok || !data.ok) throw new Error(data.message || "No se pudo crear el usuario");
   return data;
 }
 
@@ -142,25 +145,24 @@ export default function Users() {
 
   const handleCreateUser = async () => {
     const email = createForm.email.trim().toLowerCase();
+    const username = createForm.username.trim();
+    const password = createForm.password;
+    const rol_id = createForm.rol_id;
 
-    if (!createForm.username.trim() || !email || !createForm.rol_id) {
-      toast.error("Completá username, email y rol");
+    if (!username || !email || !rol_id || !password) {
+      toast.error("Completá username, email, contraseña y rol");
       return;
     }
 
     setSaving(true);
     try {
-      await inviteUserByEmail({
-        email,
-        username: createForm.username.trim(),
-        rol_id: createForm.rol_id,
-      });
-      toast.success("Invitación enviada. El usuario debe revisar su email para activar la cuenta.");
+      await createUserPHP({ email, username, password, rol_id });
+      toast.success("Usuario creado correctamente.");
       setCreateOpen(false);
       setCreateForm(initialCreateForm);
       await loadData();
     } catch (error: any) {
-      toast.error(error.message || "No se pudo invitar al usuario");
+      toast.error(error.message || "No se pudo crear el usuario");
     } finally {
       setSaving(false);
     }
