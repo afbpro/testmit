@@ -178,10 +178,10 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
   const hostname = normalizeHostname(url.hostname);
   const pathParts = url.pathname.split("/").filter(Boolean);
 
-  if ((hostname === "inmobiliaria.link" || hostname === "inmobiliario.link") && pathParts[0] === "c") {
-    const agencySegmentIndex = pathParts.findIndex((segment) => /^inmobiliari[ao]_(\d+)$/i.test(segment));
+  if (hostname === "inmobiliaria.link" || hostname === "inmobiliario.link") {
+    const agencySegmentIndex = pathParts.findIndex((segment) => /^inmobiliari[ao][_-](\d+)$/i.test(segment));
     const agencyMatch =
-      agencySegmentIndex >= 0 ? /^inmobiliari[ao]_(\d+)$/i.exec(pathParts[agencySegmentIndex] ?? "") : null;
+      agencySegmentIndex >= 0 ? /^inmobiliari[ao][_-](\d+)$/i.exec(pathParts[agencySegmentIndex] ?? "") : null;
     const parsedAgencyId = agencyMatch ? Number.parseInt(agencyMatch[1], 10) : NaN;
     const typeSegment = agencySegmentIndex >= 0 ? pathParts[agencySegmentIndex + 1] : undefined;
     const parsedPropertyType = parsePropertyType(typeSegment);
