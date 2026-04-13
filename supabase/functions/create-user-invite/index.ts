@@ -7,13 +7,18 @@ serve(async (req) => {
   }
 
   let email, username, rol_id;
+  let rawBody = "";
   try {
-    const body = await req.json();
+    rawBody = await req.text();
+    const body = JSON.parse(rawBody);
     email = body.email;
     username = body.username;
     rol_id = body.rol_id;
   } catch {
-    return new Response(JSON.stringify({ error: "JSON inválido. Verifica el formato del formulario." }), { status: 400 });
+    return new Response(
+      JSON.stringify({ error: "JSON inválido. Body recibido: " + rawBody }),
+      { status: 400 }
+    );
   }
 
   if (!email || !rol_id) {
