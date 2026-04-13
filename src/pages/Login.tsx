@@ -146,8 +146,7 @@ export default function Login() {
           <Card className="border border-white/10 bg-white/[0.03] backdrop-blur-xl">
             <CardContent className="p-4">
               <p className="text-xs text-zinc-300">
-                Usá un usuario creado en la tabla <span className="font-mono">user</span> de la base
-                <span className="font-mono"> n8cupertino_db</span>.
+                Power by Código Marketing & Infinite
               </p>
             </CardContent>
           </Card>
