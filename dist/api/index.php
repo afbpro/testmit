@@ -27,8 +27,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
     session_start();
 }
-
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+/*$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 if (!isAllowedOrigin($origin)) {
     jsonResponse(403, [
@@ -37,7 +36,7 @@ if (!isAllowedOrigin($origin)) {
     ]);
 }
 
-applyCorsHeaders($origin);
+applyCorsHeaders($origin);*/
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
