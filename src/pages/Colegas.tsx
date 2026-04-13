@@ -6,8 +6,12 @@ export type Company = {
   id: number;
   nombre: string;
   email: string;
-  telefono: string;
-  direccion: string;
+  phone1: string;
+  phone2: string;
+  mobile1: string;
+  mobile2: string;
+  web: string;
+  address: string;
   created_at: string;
   updated_at: string;
 };
@@ -45,8 +49,10 @@ export default function Colegas() {
         {companies.map((c) => (
           <Card key={c.id} className="p-4 flex flex-col gap-1">
             <div className="font-semibold text-lg">{c.nombre}</div>
-            <div className="text-sm text-zinc-500">{c.email} | {c.telefono}</div>
-            <div className="text-sm text-zinc-400">{c.direccion}</div>
+            <div className="text-sm text-zinc-500">{c.email} | {c.phone1}</div>
+            <div className="text-sm text-zinc-500">{c.phone2} | {c.mobile1} | {c.mobile2}</div>
+            <div className="text-sm text-zinc-500">{c.web}</div>
+            <div className="text-sm text-zinc-400">{c.address}</div>
           </Card>
         ))}
       </div>
