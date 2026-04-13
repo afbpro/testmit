@@ -356,15 +356,14 @@ export default function Users() {
             <div className="space-y-2">
               <Label>Rol</Label>
               <Select value={createForm.rol_id} onValueChange={(value) => setCreateForm((current) => ({ ...current, rol_id: value }))}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 border-white/10 bg-black/30 text-white">
                   <SelectValue placeholder="Seleccioná rol" />
                 </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role.id} value={String(role.id)}>
-                      {role.nombre}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="border-white/10 bg-zinc-950 text-white">
+                  <SelectItem value="1">Administrador</SelectItem>
+                  <SelectItem value="2">Asesor</SelectItem>
+                  <SelectItem value="3">Asistente</SelectItem>
+                  <SelectItem value="4">Solo lectura</SelectItem>
                 </SelectContent>
               </Select>
             </div>
