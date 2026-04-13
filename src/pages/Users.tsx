@@ -72,7 +72,7 @@ const initialEditForm = {
 
 // Crea usuario usando el endpoint PHP (action en la URL, datos en body)
 async function createUserPHP({ email, username, password, rol_id }: { email: string; username: string; password: string; rol_id: string }) {
-  const res = await fetch("https://app.cupertino.uy/api/user.php?action=usersCreate", {
+  const res = await fetch("https://app.cupertino.uy/api/user.php?action=users-create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
