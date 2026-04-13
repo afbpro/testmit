@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { authApiRequest } from "@/lib/auth";
 
 export type Company = {
   id: number;
@@ -17,14 +18,21 @@ export default function Colegas() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("https://app.cupertino.uy/api?action=companies-list", { credentials: "include", method: "POST" })
-      .then(async (res) => {
-        const data = await res.json();
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await authApiRequest<{ ok: boolean; companies: Company[]; message?: string }>(
+          "companies/list",
+          {}
+        );
         if (!data.ok) throw new Error(data.message || "Error al cargar inmobiliarias");
         setCompanies(data.companies);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error al cargar inmobiliarias");
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   if (loading) return <div className="p-6">Cargando inmobiliarias...</div>;
