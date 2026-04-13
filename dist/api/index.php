@@ -7,6 +7,7 @@ require_once __DIR__ . '/auth.php';
 
 require_once __DIR__ . '/users.php';
 require_once __DIR__ . '/companies.php';
+require_once __DIR__ . '/property.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -88,8 +89,13 @@ switch ($action) {
         handleUsersUpdate($pdo);
         break;
 
+
     case 'companies-list':
         handleCompaniesList($pdo);
+        break;
+
+    case 'properties-list':
+        handlePropertyList($pdo);
         break;
 
     default:
