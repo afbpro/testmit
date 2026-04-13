@@ -360,10 +360,11 @@ export default function Users() {
                   <SelectValue placeholder="Seleccioná rol" />
                 </SelectTrigger>
                 <SelectContent className="border-white/10 bg-zinc-950 text-white">
-                  <SelectItem value="1">Administrador</SelectItem>
-                  <SelectItem value="2">Asesor</SelectItem>
-                  <SelectItem value="3">Asistente</SelectItem>
-                  <SelectItem value="4">Solo lectura</SelectItem>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={String(role.id)}>
+                      {role.nombre.charAt(0).toUpperCase() + role.nombre.slice(1)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
