@@ -7,7 +7,7 @@ function handlePropertyList(PDO $pdo): void
 {
     requireLogin($pdo);
 
-    $type = $_POST['type'] ?? null;
+    $type = $_GET['type'] ?? $_POST['type'] ?? null;
     if ($type !== null && $type !== '' && $type !== 'all') {
         $stmt = $pdo->prepare('SELECT * FROM tera WHERE type = :type ORDER BY id DESC');
         $stmt->execute(['type' => $type]);
