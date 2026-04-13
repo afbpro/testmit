@@ -161,20 +161,24 @@ function parseLinkInput(link: string, agencies: AgencyRecord[]) {
   const pathParts = url.pathname.split("/").filter(Boolean);
 
   if ((hostname === "inmobiliaria.link" || hostname === "inmobiliario.link") && pathParts[0] === "c") {
-    const agencyMatch = /^inmobiliaria_(\d+)$/i.exec(pathParts[1] ?? "");
+    const agencySegmentIndex = pathParts.findIndex((segment) => /^inmobiliari[ao]_(\d+)$/i.test(segment));
+    const agencyMatch =
+      agencySegmentIndex >= 0 ? /^inmobiliari[ao]_(\d+)$/i.exec(pathParts[agencySegmentIndex] ?? "") : null;
     const parsedAgencyId = agencyMatch ? Number.parseInt(agencyMatch[1], 10) : NaN;
-    const parsedPropertyType = parsePropertyType(pathParts[2]);
-    const encodedId = Number.parseInt(pathParts[3] ?? "", 10);
+    const typeSegment = agencySegmentIndex >= 0 ? pathParts[agencySegmentIndex + 1] : undefined;
+    const parsedPropertyType = parsePropertyType(typeSegment);
+    const encodedSegment = [...pathParts].reverse().find((segment) => /^\d+$/.test(segment));
+    const encodedId = Number.parseInt(encodedSegment ?? "", 10);
 
     if (!Number.isInteger(parsedAgencyId) || !parsedPropertyType || !Number.isInteger(encodedId)) {
       return null;
     }
 
     const rawPropertyId = encodedId - 9876;
-    const decodedPropertyId =
-      parsedAgencyId > 0 && rawPropertyId > 0 && rawPropertyId % parsedAgencyId === 0
-        ? String(rawPropertyId / parsedAgencyId)
-        : "";
+    const maybeDecodedId = parsedAgencyId > 0 ? rawPropertyId / parsedAgencyId : NaN;
+    const decodedPropertyId = Number.isInteger(maybeDecodedId) && maybeDecodedId > 0
+      ? String(maybeDecodedId)
+      : "";
     const agencyFromId = agencies.find((agency) => agency.id === parsedAgencyId);
     const reverseAgencyUrl = buildAgencyPropertyUrl(agencyFromId?.web, parsedPropertyType, decodedPropertyId);
 
