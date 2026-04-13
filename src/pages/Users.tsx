@@ -71,7 +71,7 @@ const initialEditForm = {
 
 // Invita usuario usando Edge Function
 async function inviteUserByEmail({ email, username, rol_id }: { email: string; username: string; rol_id: string }) {
-  const res = await fetch("/functions/v1/create-user-invite", {
+  const res = await fetch("https://kjbobfvswafuzhojhpqg.functions.supabase.co/create-user-invite", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, username, rol_id }),
