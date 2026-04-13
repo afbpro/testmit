@@ -46,7 +46,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { getStoredSession, signOut } from "@/lib/auth";
+import { getStoredSession, signOut, authApiRequest } from "@/lib/auth";
 import { type PropertyRecord } from "@/lib/crm";
 import { supabase } from "@/lib/supabaseClient";
 import { formatSmartText } from "@/lib/utils";
@@ -384,6 +384,24 @@ export default function Properties() {
   const [searchQuery, setSearchQuery] = useState("");
   const [operationFilter, setOperationFilter] = useState<PropertyFilterOption>("all");
   const [importingFromUrl, setImportingFromUrl] = useState(false);
+
+  // Obtener propiedades desde la API PHP
+  useEffect(() => {
+    setLoading(true);
+    authApiRequest<{ ok: boolean; properties: PropertyRecord[]; message?: string }>(
+      "properties-list",
+      {}
+    )
+      .then((data) => {
+        if (!data.ok) throw new Error(data.message || "Error al cargar propiedades");
+        setProperties(data.properties);
+      })
+      .catch((err) => {
+        setProperties([]);
+        setErrorMessage(err instanceof Error ? err.message : "Error al cargar propiedades");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const availableCities = form.department ? cityOptionsByDepartment[form.department] : [];
   const availableNeighborhoods = form.city ? neighborhoodOptionsByCity[form.city] ?? [] : [];
